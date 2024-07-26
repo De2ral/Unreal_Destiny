@@ -7,7 +7,11 @@
 		{
 			"Name": "Base",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"FPSCore",
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [
