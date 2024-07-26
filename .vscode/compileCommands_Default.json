@@ -1,0 +1,794 @@
+[
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\GLCOnlineManagementSystemEditor.Build.cs",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Private\\GLCOnlineManagementSystemEditor.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Private\\GLCOnlineManagementSystemEditorCommands.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Private\\GLCOnlineManagementSystemEditorStyle.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Private\\Manage\\OnlineSubsystemEditorManage.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Private\\Slate\\SInitPannel.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Public\\GLCOnlineManagementSystemEditor.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Public\\GLCOnlineManagementSystemEditorCommands.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Public\\GLCOnlineManagementSystemEditorStyle.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Public\\Manage\\OnlineSubsystemEditorManage.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystemEditor\\Public\\Slate\\SInitPannel.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystemEditor.23.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\GLCOnlineManagementSystem.Build.cs",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\Common\\Components\\GLCOnlineManageComponent.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\Common\\DataTable\\CommonSettings.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\Common\\GLCGameInstance.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\Common\\GLCOnlineManagementSystem.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\Common\\Type\\GLCCommonType.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Common\\GLCPlatformManageLibrary.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Common\\GLCPlatformObjectBase.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Common\\OnlineSubsystemManage.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Common\\PlatformManageType.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Common\\UI_Base.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\LoadingMap\\GLCAsyncLoadingLibrary.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\LoadingMap\\UI\\UI_LoadingMap.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\Common\\GLCOnlineSessionsExtentsion.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\Common\\GLCOnlineSessionsLibrary.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\Common\\GLCOnlineSessionsType.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\DataTable\\MapSettings.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\OnlineSessionsManage.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\SaveGame\\GLCOnlineSessionsConfig.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\UI\\Core\\UI_MenuBase.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\UI\\Core\\UI_MenuMain.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\UI\\Element\\UI_SingleRusult.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\UI\\UI_ConfigSet.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\UI\\UI_Loading.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\UI\\UI_Password.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\UI\\UI_SearchList.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\OnlineSessions\\UI\\UI_Startup.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\UserCloud\\GLCUserCloundLibrary.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\UserCloud\\UserCloudManage.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\UserCloud\\UserCloundType.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Voice\\Core\\GLCOnlineVoiceObject.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Voice\\Core\\OnlineVoiceManage.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Voice\\Core\\OnlineVoiceType.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Voice\\GLCVoiceLibrary.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Voice\\UI\\Core\\UI_VoiceChatMain.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Voice\\UI\\Elements\\UI_VoiceChatInfo.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Private\\PlatformManage\\Voice\\UI\\UI_VoiceChatWindow.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\Common\\CommonCoreMinimal.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\Common\\Components\\GLCOnlineManageComponent.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\Common\\DataTable\\CommonSettings.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\Common\\GLCGameInstance.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\Common\\GLCOnlineManagementSystem.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\Common\\Type\\GLCCommonType.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Common\\GLCPlatformCoreMinimal.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Common\\GLCPlatformManageLibrary.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Common\\GLCPlatformObjectBase.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Common\\OnlineSubsystemManage.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Common\\PlatformManageType.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Common\\UI_Base.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\LoadingMap\\GLCAsyncLoadingLibrary.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\LoadingMap\\UI\\UI_LoadingMap.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\Common\\GLCOnlineSessionsExtentsion.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\Common\\GLCOnlineSessionsLibrary.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\Common\\GLCOnlineSessionsType.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\DataTable\\MapSettings.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\OnlineSessionsManage.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\SaveGame\\GLCOnlineSessionsConfig.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\UI\\Core\\UI_MenuBase.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\UI\\Core\\UI_MenuMain.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\UI\\Element\\UI_SingleRusult.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\UI\\UI_ConfigSet.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\UI\\UI_Loading.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\UI\\UI_Password.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\OnlineSessions\\UI\\UI_Startup.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\UserClound\\GLCUserCloundLibrary.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\UserClound\\UserCloudManage.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\UserClound\\UserCloundType.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Voice\\Core\\GLCOnlineVoiceObject.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Voice\\Core\\OnlineVoiceManage.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Voice\\Core\\OnlineVoiceType.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Voice\\GLCVoiceLibrary.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Voice\\UI\\Core\\UI_VoiceChatMain.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Voice\\UI\\Elements\\UI_VoiceChatInfo.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCOnlineManagementSystem\\Public\\PlatformManage\\Voice\\UI\\UI_VoiceChatWindow.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCOnlineManagementSystem.21.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\GLCRuntimeGamePrinting.Build.cs",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\Private\\GLCRuntimeGamePrinting.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\Private\\GLCRuntimeGamePrintingLibrary.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\Private\\GLCRuntimeGamePrintingType.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\Private\\UMG\\UI_GamePrintf.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\Public\\GLCRuntimeGamePrinting.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\Public\\GLCRuntimeGamePrintingLibrary.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\Public\\GLCRuntimeGamePrintingType.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Plugins\\OnlineSystemManagementSystem\\Source\\GLCRuntimeGamePrinting\\Public\\UMG\\UI_GamePrintf.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\GLCRuntimeGamePrinting.22.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Source\\Base\\Base.Build.cs",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\Base.266.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Source\\Base\\Base.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\Base.266.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Source\\Base\\Base.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\Base.266.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Source\\Base\\BaseGameModeBase.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\Base.266.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Unreal_Destiny\\Source\\Base\\BaseGameModeBase.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\HostX64\\x64\\cl.exe",
+			"@D:\\Unreal_Destiny\\.vscode\\compileCommands_Default\\Base.266.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.1\\Engine\\Source"
+	}
+]
