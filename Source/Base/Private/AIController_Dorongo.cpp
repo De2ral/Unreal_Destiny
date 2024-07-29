@@ -48,7 +48,7 @@ void AAIController_Dorongo::Tick(float DeltaTime)
 	// // 	GetBlackboardComponent()->ClearValue(TEXT("TargetLocation"));
 	// // }
 
-	if (GetPawn()->GetDistanceTo(PlayerPawn) <= 800)
+	if (GetPawn()->GetDistanceTo(PlayerPawn) <= 1700)
 	{
 		GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), true);
 	}

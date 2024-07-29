@@ -24,14 +24,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	private:
+	//private:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UBoxComponent* SpawnBox;
 
-    UPROPERTY(EditAnywhere, Category = "Spawning")
+    UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Spawning")
     TSubclassOf<AActor> EnemyClass;
 
-	UPROPERTY(EditAnywhere, Category = "Spawning")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Spawning")
     TSubclassOf<class AAIController_Dorongo> AIControllerClass;
 
     UPROPERTY(EditAnywhere, Category = "Spawning")

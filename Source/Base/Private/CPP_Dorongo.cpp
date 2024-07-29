@@ -54,11 +54,11 @@ void ACPP_Dorongo::PerformLineTrace()
         ECC_Visibility,
         Params
     );
-
-    if (bHit)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
-    }
+    
+    // if (bHit)
+    // {
+    //     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Hit: %s"), *HitResult.GetActor()->GetName()));
+    // }
 
     // 디버그 라인 그리기
     DrawDebugLine(
@@ -77,7 +77,7 @@ void ACPP_Dorongo::TakeDamage(float DamageAmount)
 {
     HP -= DamageAmount;
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("HP : %d"), HP));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("HP : %d"), HP));
 
     if(HP <= 0.0f)
     {
