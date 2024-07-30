@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
+#include "InputAction.h"
 
 
 // Sets default values
@@ -19,9 +20,6 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPPMesh"));
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 
-	FppMesh->SetupAttachment(RootComponent);
-	TppMesh->SetupAttachment(RootComponent);
-
 	TppMesh->SetVisibility(false);
 
 	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
@@ -30,9 +28,11 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TPPCamera"));
 
 	TppSpringArm->SetupAttachment(RootComponent);
-
-	FppCamera->SetupAttachment(FppMesh);
 	TppCamera->SetupAttachment(TppSpringArm);
+	TppMesh->SetupAttachment(RootComponent);
+
+	FppCamera->SetupAttachment(GetMesh(), FName("Mesh"));
+	FppMesh->SetupAttachment(FppCamera);
 
 	TppSpringArm->TargetArmLength = 300.0f;
 	TppSpringArm->bUsePawnControlRotation = true;
@@ -51,9 +51,10 @@ void ADestinyFPSBase::BeginPlay()
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if (PlayerController != nullptr)
 	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem< UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		if(Subsystem != nullptr)
 		{
+			Subsystem->ClearAllMappings();
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
@@ -73,13 +74,18 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 void ADestinyFPSBase::Move(const FInputActionValue& Value)
 {
-	const FVector2D MovementVector = Value.Get<FVector2D>();
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(ForwardDirection, MovementVector.Y);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(RightDirection, MovementVector.X);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("입력됨"));
 
-	UE_LOG(LogTemp, Log, TEXT("입력됨"));
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FVector FowardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(FowardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
 }

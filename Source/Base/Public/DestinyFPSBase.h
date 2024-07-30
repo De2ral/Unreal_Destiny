@@ -42,15 +42,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USkeletalMeshComponent* TppMesh;
 
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputMappingContext* DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* MoveAction;
 
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* LookAction;
 
-protected:
 	void Move(const FInputActionValue& Value);
 };
