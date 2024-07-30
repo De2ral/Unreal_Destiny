@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "DestinyFPSBase.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
+class USkeletalMeshComponent;
 
 // class UCameraComponent;
 // class UInputMappingContext;
@@ -31,9 +34,20 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditAnywhere)
+	USpringArmComponent* TppSpringArm;
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadWrite,Category = "Components")
-	class UCameraComponent* Camera;
+	UPROPERTY(EditAnywhere)
+	UCameraComponent* FppCamera;
+
+	UPROPERTY(EditAnywhere)
+	UCameraComponent* TppCamera;
+
+	UPROPERTY(EditAnywhere)
+	USkeletalMeshComponent* FppMesh;
+
+	UPROPERTY(EditAnywhere)
+	USkeletalMeshComponent* TppMesh;
 
 	void MoveForwardBackward(const float Value);
 	void MoveLeftRight(const float Value);
