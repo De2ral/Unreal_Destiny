@@ -4,16 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "NonFPSCoreChar.generated.h"
+#include "DestinyFPSBase.generated.h"
+
+
+// class UCameraComponent;
+// class UInputMappingContext;
+// class UInputAction;
 
 UCLASS()
-class BASE_API ANonFPSCoreChar : public ACharacter
+class BASE_API ADestinyFPSBase : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	ANonFPSCoreChar();
+	ADestinyFPSBase();
 
 protected:
 	// Called when the game starts or when spawned
@@ -21,9 +26,20 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite,Category = "Components")
+	class UCameraComponent* Camera;
+
+	void MoveForwardBackward(const float Value);
+	void MoveLeftRight(const float Value);
+	void LookUp(const float Value);
+	void LookRight(const float Value);
+
+	
 
 };
