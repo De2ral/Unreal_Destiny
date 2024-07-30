@@ -4,15 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 #include "DestinyFPSBase.generated.h"
-
-class UCameraComponent;
-class USpringArmComponent;
-class USkeletalMeshComponent;
-
-// class UCameraComponent;
-// class UInputMappingContext;
-// class UInputAction;
 
 UCLASS()
 class BASE_API ADestinyFPSBase : public ACharacter
@@ -32,28 +25,32 @@ public:
 	//virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere)
-	USpringArmComponent* TppSpringArm;
+	class USpringArmComponent* TppSpringArm;
 
 	UPROPERTY(EditAnywhere)
-	UCameraComponent* FppCamera;
+	class UCameraComponent* FppCamera;
 
 	UPROPERTY(EditAnywhere)
-	UCameraComponent* TppCamera;
+	class UCameraComponent* TppCamera;
 
 	UPROPERTY(EditAnywhere)
-	USkeletalMeshComponent* FppMesh;
+	class USkeletalMeshComponent* FppMesh;
 
 	UPROPERTY(EditAnywhere)
-	USkeletalMeshComponent* TppMesh;
+	class USkeletalMeshComponent* TppMesh;
 
-	void MoveForwardBackward(const float Value);
-	void MoveLeftRight(const float Value);
-	void LookUp(const float Value);
-	void LookRight(const float Value);
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputMappingContext* DefaultMappingContext;
 
-	
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* MoveAction;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* LookAction;
+
+protected:
+	void Move(const FInputActionValue& Value);
 };
