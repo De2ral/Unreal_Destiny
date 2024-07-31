@@ -69,13 +69,12 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	if (Input != nullptr)
 	{
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
+		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
 	}
 }
 
 void ADestinyFPSBase::Move(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("입력됨"));
-
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
@@ -87,5 +86,16 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 
 		AddMovementInput(FowardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
+	}
+}
+
+void ADestinyFPSBase::Look(const FInputActionValue& Value)
+{
+	FVector2D LookVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		AddControllerYawInput(LookVector.X);
+		AddControllerPitchInput(LookVector.Y);
 	}
 }
