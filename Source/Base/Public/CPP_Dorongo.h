@@ -37,8 +37,12 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	float MaxHP = 100;
 
+	//UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	//bool bHit;
+
 public:
     UFUNCTION(BlueprintCallable, Category = "HP")
     void TakeDamage(float DamageAmount);
+
 
 };
