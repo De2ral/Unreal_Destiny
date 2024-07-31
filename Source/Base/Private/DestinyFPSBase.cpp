@@ -120,12 +120,16 @@ void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 	bPlayerSprint = true;
 	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
 
+	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue,TEXT("bPlayerSprint = true"));
+
 }
 
 void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 {
 	bPlayerSprint = false;
 	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+
+	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue,TEXT("bPlayerSprint = false"));
 
 }
 
@@ -138,7 +142,8 @@ void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 
 void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
 {
-	GetCharacterMovement()->Crouch(false);
+	
+	GetCharacterMovement()->UnCrouch(true);
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.0f;
 
 }
