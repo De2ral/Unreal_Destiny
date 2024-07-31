@@ -20,7 +20,8 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPPMesh"));
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 
-	TppMesh->SetVisibility(false);
+	FppMesh->SetOnlyOwnerSee(true);
+	TppMesh->SetOwnerNoSee(true);
 
 	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
 
@@ -48,9 +49,12 @@ void ADestinyFPSBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FInputModeGameOnly GameOnly;
+
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if (PlayerController != nullptr)
 	{
+		PlayerController->SetInputMode(GameOnly);
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		if(Subsystem != nullptr)
 		{
@@ -68,6 +72,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	if (Input != nullptr)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("향상된 입력 감지됨"));
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
 	}
