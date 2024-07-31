@@ -5,8 +5,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-// #include "EnhancedInputComponent.h"
-// #include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
+
 
 // Sets default values
 ADestinyFPSBase::ADestinyFPSBase()
@@ -25,9 +28,11 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TPPCamera"));
 
 	TppSpringArm->SetupAttachment(RootComponent);
-
-	FppCamera->SetupAttachment(FppMesh);
 	TppCamera->SetupAttachment(TppSpringArm);
+	TppMesh->SetupAttachment(RootComponent);
+
+	FppCamera->SetupAttachment(GetMesh(), FName("Mesh"));
+	FppMesh->SetupAttachment(FppCamera);
 
 	TppSpringArm->TargetArmLength = 300.0f;
 	TppSpringArm->bUsePawnControlRotation = true;
@@ -42,40 +47,55 @@ ADestinyFPSBase::ADestinyFPSBase()
 void ADestinyFPSBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
 
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+	if (PlayerController != nullptr)
+	{
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if(Subsystem != nullptr)
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(FName("MoveForwardBackward"),this,&ADestinyFPSBase::MoveForwardBackward);
-	PlayerInputComponent->BindAxis(FName("MoveLeftRight"),this,&ADestinyFPSBase::MoveLeftRight);
-	PlayerInputComponent->BindAxis(FName("LookUp"),this,&ADestinyFPSBase::LookUp);
-	PlayerInputComponent->BindAxis(FName("LookRight"),this,&ADestinyFPSBase::LookRight);
+	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+
+	if (Input != nullptr)
+	{
+		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
+		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
+	}
 }
 
-void ADestinyFPSBase::MoveForwardBackward(const float Value)
+void ADestinyFPSBase::Move(const FInputActionValue& Value)
 {
-	const FVector& Direction = FRotationMatrix(FRotator(0.f,GetControlRotation().Yaw,0.f)).GetUnitAxis(EAxis::X);
-	AddMovementInput(Direction, Value);
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FVector FowardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(FowardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
 }
 
-void ADestinyFPSBase::MoveLeftRight(const float Value)
+void ADestinyFPSBase::Look(const FInputActionValue& Value)
 {
-	const FVector& Direction = FRotationMatrix(FRotator(0.f,GetControlRotation().Yaw,0.f)).GetUnitAxis(EAxis::Y);
-	AddMovementInput(Direction, Value);
+	FVector2D LookVector = Value.Get<FVector2D>();
 
-}
-
-void ADestinyFPSBase::LookUp(const float Value)
-{
-	AddControllerPitchInput(Value);
-
-}
-
-void ADestinyFPSBase::LookRight(const float Value)
-{
-	AddControllerYawInput(Value);
+	if (Controller != nullptr)
+	{
+		AddControllerYawInput(LookVector.X);
+		AddControllerPitchInput(LookVector.Y);
+	}
 }
