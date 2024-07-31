@@ -3,6 +3,7 @@
 
 #include "DestinyFPSBase.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
@@ -58,6 +59,8 @@ void ADestinyFPSBase::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -70,6 +73,11 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
+		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::jump);
+		Input->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Sprint);
+		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
+		Input->BindAction(SlideAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Slide);
+		Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
 	}
 }
 
@@ -87,6 +95,7 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 		AddMovementInput(FowardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
+
 }
 
 void ADestinyFPSBase::Look(const FInputActionValue& Value)
@@ -98,4 +107,38 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookVector.X);
 		AddControllerPitchInput(LookVector.Y);
 	}
+}
+
+void ADestinyFPSBase::jump(const FInputActionValue& Value)
+{
+	ACharacter::Jump();
+
+}
+
+void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
+{
+	bPlayerSprint = true;
+	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
+
+}
+
+void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
+{
+	bPlayerSprint = false;
+	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+
+}
+
+void ADestinyFPSBase::Slide(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->Crouch(true);
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 2500.0f;
+
+}
+
+void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->Crouch(false);
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.0f;
+
 }

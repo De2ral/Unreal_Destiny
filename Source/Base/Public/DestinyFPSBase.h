@@ -7,6 +7,8 @@
 #include "InputActionValue.h"
 #include "DestinyFPSBase.generated.h"
 
+class UCharacterMovementComponent;
+
 UCLASS()
 class BASE_API ADestinyFPSBase : public ACharacter
 {
@@ -51,6 +53,29 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* LookAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* JumpAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* SlideAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* SprintAction;
+
+
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void jump(const FInputActionValue& Value);
+	void Sprint(const FInputActionValue& Value);
+	void SprintEnd(const FInputActionValue& Value);
+	void Slide(const FInputActionValue& Value);
+	void SlideEnd(const FInputActionValue& Value);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bPlayerSprint = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Speed = 1.0f;
+
 };
