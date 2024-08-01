@@ -24,7 +24,7 @@ protected:
 
 public:	
 	// Called every frame
-	//virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -62,6 +62,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* SprintAction;
 
+	
+
 
 
 	void Move(const FInputActionValue& Value);
@@ -77,5 +79,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Speed = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float SlideTime;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsSliding;
 
 };

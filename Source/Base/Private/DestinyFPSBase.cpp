@@ -42,6 +42,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppCamera->bUsePawnControlRotation = true;
 
 	TppCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
+	
 }
 
 // Called when the game starts or when spawned
@@ -60,10 +61,26 @@ void ADestinyFPSBase::BeginPlay()
 		}
 	}
 
+	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
 
 }
 
-void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ADestinyFPSBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// if(bIsSliding)
+	// {
+	// 	SlideTime -= 0.1;
+
+	// }
+
+
+
+}
+
+void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -74,7 +91,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
 		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::jump);
-		Input->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Sprint);
+		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
 		Input->BindAction(SlideAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Slide);
 		Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
@@ -135,15 +152,16 @@ void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 
 void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 {
-	GetCharacterMovement()->Crouch(true);
-	GetCharacterMovement()->MaxWalkSpeedCrouched = 2500.0f;
+	ACharacter::Crouch(false);
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 3000;
+	FppCamera->SetRelativeLocation(FVector(0,0,-20.0f));
 
 }
 
 void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
 {
 	
-	GetCharacterMovement()->UnCrouch(true);
-	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.0f;
-
+	ACharacter::UnCrouch(false);
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 300;
+	FppCamera->SetRelativeLocation(FVector(0,0,20.0f));
 }
