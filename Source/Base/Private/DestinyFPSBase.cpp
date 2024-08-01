@@ -72,9 +72,11 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	if (Input != nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("향상된 입력 감지됨"));
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
+		Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
+		Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
+		Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
 	}
 }
 
@@ -103,4 +105,19 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookVector.X);
 		AddControllerPitchInput(LookVector.Y);
 	}
+}
+
+void ADestinyFPSBase::Skill(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("전용 스킬"));
+}
+
+void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("수류탄 투척"));
+}
+
+void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
 }

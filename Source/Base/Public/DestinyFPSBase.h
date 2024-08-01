@@ -51,6 +51,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* LookAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* SkillAction;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* GrenadeAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* UltimateAction;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Skill(const FInputActionValue& Value);
+	void Grenade(const FInputActionValue& Value);
+	void Ultimate(const FInputActionValue& Value);
 };
