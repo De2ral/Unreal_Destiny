@@ -99,7 +99,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		Input->BindAction(SlideAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Slide);
 		Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
 
-		Input->BindAction(InterAction, ETriggerEvent::Started, this, &ADestinyFPSBase::StartInteract);
+		Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
 		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
 	}
 }
@@ -173,9 +173,12 @@ void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
 
 void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
 {
-	if(bPlayerInteractable)
+	if(bPlayerInteractable && InteractTime <= 50.0f)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = true"));
+		//GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = true"));
+		GEngine->AddOnScreenDebugMessage(-1,1.5f,FColor::Blue,FString::Printf(TEXT("InteractTime = %f"),InteractTime));
+		InteractTime += 1.0f;
+
 	}
 
 }
@@ -186,6 +189,11 @@ void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
 	{
 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = false"));
 
+	}
+	else if(bPlayerInteractable)
+	{
+		InteractTime = 0.0f;
+		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("InteractTime to 0"));
 	}
 
 }
