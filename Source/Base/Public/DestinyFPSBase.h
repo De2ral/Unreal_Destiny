@@ -22,13 +22,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent* TppSpringArm;
 
@@ -62,28 +55,47 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* SprintAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* InterAction;
+
 	
-
-
-
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void jump(const FInputActionValue& Value);
+
 	void Sprint(const FInputActionValue& Value);
 	void SprintEnd(const FInputActionValue& Value);
+
 	void Slide(const FInputActionValue& Value);
 	void SlideEnd(const FInputActionValue& Value);
+
+	void StartInteract(const FInputActionValue& Value);
+	void EndInteract(const FInputActionValue& Value);
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsSliding;
+
+public:	
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bPlayerSprint = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Speed = 1.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float SlideTime;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bIsSliding;
+	float InteractTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bPlayerInteractable = false ;
+	
 
 };

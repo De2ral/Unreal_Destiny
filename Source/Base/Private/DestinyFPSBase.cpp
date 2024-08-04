@@ -39,6 +39,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppSpringArm->bUsePawnControlRotation = true;
 	TppSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 70.f));
 
+	
 	FppCamera->bUsePawnControlRotation = true;
 
 	TppCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
@@ -91,10 +92,15 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
 		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::jump);
+
 		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
+
 		Input->BindAction(SlideAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Slide);
 		Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
+
+		Input->BindAction(InterAction, ETriggerEvent::Started, this, &ADestinyFPSBase::StartInteract);
+		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
 	}
 }
 
@@ -160,8 +166,26 @@ void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 
 void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
 {
-	
 	ACharacter::UnCrouch(false);
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 300;
 	FppCamera->SetRelativeLocation(FVector(0,0,20.0f));
+}
+
+void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
+{
+	if(bPlayerInteractable)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = true"));
+	}
+
+}
+
+void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
+{
+	if(!bPlayerInteractable)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = false"));
+
+	}
+
 }
