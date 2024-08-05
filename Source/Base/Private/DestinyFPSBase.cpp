@@ -65,6 +65,14 @@ void ADestinyFPSBase::BeginPlay()
 	}
 }
 
+void ADestinyFPSBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (SkillCoolTime > 0.f)
+		SkillCoolTime -= DeltaTime;
+}
+
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -114,12 +122,18 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 
 	UWorld* world = GetWorld();
 
-	if(world)
+	if(SkillCoolTime <= 0.f)
 	{
-		FActorSpawnParameters SpawnParams;
-		FVector spawnLocation = this->GetActorLocation();
-		FRotator spawnRotation = this->GetActorForwardVector().Rotation();
-		ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), spawnLocation, spawnRotation, SpawnParams);
+		if(world)
+		{
+			FActorSpawnParameters SpawnParams;
+			FVector spawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 200.f;
+			spawnLocation.Z -= 15.f;
+			FRotator spawnRotation = this->GetActorRotation();
+			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), spawnLocation, spawnRotation, SpawnParams);
+
+			SkillCoolTime = 20.f;
+		}
 	}
 }
 

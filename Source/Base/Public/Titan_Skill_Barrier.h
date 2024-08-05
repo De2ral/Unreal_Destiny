@@ -25,4 +25,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* Mesh;
+
+	void DestroyBarrier();
+
+private:
+	float DestroyDelay = 10.f;
 };

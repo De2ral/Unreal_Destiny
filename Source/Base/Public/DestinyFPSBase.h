@@ -22,7 +22,7 @@ protected:
 
 public:	
 	// Called every frame
-	//virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -65,4 +65,7 @@ public:
 	void Skill(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
+
+private:
+	float SkillCoolTime = 0.f;
 };
