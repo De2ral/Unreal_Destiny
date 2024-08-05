@@ -22,6 +22,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent* TppSpringArm;
 
@@ -47,6 +54,15 @@ protected:
 	class UInputAction* LookAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* SkillAction;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* GrenadeAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* UltimateAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* JumpAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -58,32 +74,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InterAction;
 
-	
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
-	void jump(const FInputActionValue& Value);
-
-	void Sprint(const FInputActionValue& Value);
-	void SprintEnd(const FInputActionValue& Value);
-
-	void Slide(const FInputActionValue& Value);
-	void SlideEnd(const FInputActionValue& Value);
-
-	void StartInteract(const FInputActionValue& Value);
-	void EndInteract(const FInputActionValue& Value);
-
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsSliding;
-
-public:	
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bPlayerSprint = false;
@@ -100,5 +92,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false ;
 	
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+	void Skill(const FInputActionValue& Value);
+	void Grenade(const FInputActionValue& Value);
+	void Ultimate(const FInputActionValue& Value);
+
+	void Sprint(const FInputActionValue& Value);
+	void SprintEnd(const FInputActionValue& Value);
+
+	void Slide(const FInputActionValue& Value);
+	void SlideEnd(const FInputActionValue& Value);
+
+	void StartInteract(const FInputActionValue& Value);
+	void EndInteract(const FInputActionValue& Value);
+	
+private:
+	float SkillCoolTime = 0.f;
 
 };

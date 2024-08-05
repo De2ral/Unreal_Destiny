@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "Titan_Skill_Barrier.h"
 
 
 // Sets default values
@@ -21,7 +22,8 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPPMesh"));
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 
-	TppMesh->SetVisibility(false);
+	FppMesh->SetOnlyOwnerSee(true);
+	TppMesh->SetOwnerNoSee(true);
 
 	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
 
@@ -51,9 +53,12 @@ void ADestinyFPSBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FInputModeGameOnly GameOnly;
+
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if (PlayerController != nullptr)
 	{
+		PlayerController->SetInputMode(GameOnly);
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		if(Subsystem != nullptr)
 		{
@@ -71,7 +76,8 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
+	if (SkillCoolTime > 0.f)
+		SkillCoolTime -= DeltaTime;
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -84,6 +90,9 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 	{
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
+		Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
+		Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
+		Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
 		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::jump);
 
 		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
@@ -125,6 +134,36 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 	}
 }
 
+void ADestinyFPSBase::Skill(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("전용 스킬"));
+
+	UWorld* world = GetWorld();
+
+	if(SkillCoolTime <= 0.f)
+	{
+		if(world)
+		{
+			FActorSpawnParameters SpawnParams;
+			FVector spawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 200.f;
+			spawnLocation.Z -= 15.f;
+			FRotator spawnRotation = this->GetActorRotation();
+			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), spawnLocation, spawnRotation, SpawnParams);
+
+			SkillCoolTime = 20.f;
+		}
+	}
+}
+
+void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("수류탄 투척"));
+}
+
+void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
+}
 void ADestinyFPSBase::jump(const FInputActionValue& Value)
 {
 	ACharacter::Jump();
