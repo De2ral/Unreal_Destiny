@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "ItemComponent.generated.h"
 

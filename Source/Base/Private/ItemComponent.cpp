@@ -9,11 +9,16 @@ UItemComponent::UItemComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	AActor* Owner = GetOwner();
-
+	
+	AActor* Parent = GetOwner();
+	
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
 	ItemCollider->InitSphereRadius(50.0f);
+	ItemCollider->SetMobility(EComponentMobility::Movable);
+	if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());
+
+	
+
 
 
 	// ...
@@ -25,17 +30,26 @@ void UItemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&UItemComponent::OnOverlapBegin);
+
+
 	
 }
 
 void UItemComponent::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
 
-	// if(OtherActor->ActorHasTag(TEXT("DestinyPlayer") && IsValid(Owner)))
-	// {
-	// 	Destory(Owner);
-	// }
+	AActor* Parent = GetOwner();
+
+	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")) && Parent)
+	{
+
+		//여기에 아이템 - 인벤토리간 상호작용 코드
+
+
+
+		Parent->Destroy();
+	}
 
 }
 
