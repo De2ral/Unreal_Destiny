@@ -3,6 +3,7 @@
 
 #include "DestinyFPSBase.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
@@ -40,9 +41,11 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppSpringArm->bUsePawnControlRotation = true;
 	TppSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 70.f));
 
+	
 	FppCamera->bUsePawnControlRotation = true;
 
 	TppCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
+	
 }
 
 // Called when the game starts or when spawned
@@ -63,6 +66,10 @@ void ADestinyFPSBase::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
@@ -73,7 +80,7 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		SkillCoolTime -= DeltaTime;
 }
 
-void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -86,6 +93,16 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
 		Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
 		Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
+		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::jump);
+
+		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
+		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
+
+		Input->BindAction(SlideAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Slide);
+		Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
+
+		Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
+		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
 	}
 }
 
@@ -103,6 +120,7 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 		AddMovementInput(FowardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
+
 }
 
 void ADestinyFPSBase::Look(const FInputActionValue& Value)
@@ -145,4 +163,69 @@ void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
+}
+void ADestinyFPSBase::jump(const FInputActionValue& Value)
+{
+	ACharacter::Jump();
+
+}
+
+void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
+{
+	bPlayerSprint = true;
+	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
+
+	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue,TEXT("bPlayerSprint = true"));
+
+}
+
+void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
+{
+	bPlayerSprint = false;
+	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+
+	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue,TEXT("bPlayerSprint = false"));
+
+}
+
+void ADestinyFPSBase::Slide(const FInputActionValue& Value)
+{
+	ACharacter::Crouch(false);
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 3000;
+	//FppCamera->SetRelativeLocation(FVector(0,0,-20.0f));
+
+}
+
+void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
+{
+	ACharacter::UnCrouch(false);
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 300;
+	//FppCamera->SetRelativeLocation(FVector(0,0,20.0f));
+}
+
+void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
+{
+	if(bPlayerInteractable && InteractTime <= MaxInteractTime)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = true"));
+		GEngine->AddOnScreenDebugMessage(-1,1.5f,FColor::Blue,FString::Printf(TEXT("InteractTime = %f"),InteractTime));
+		InteractTime += 1.0f;
+
+	}
+
+}
+
+void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
+{
+	if(!bPlayerInteractable)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = false"));
+
+	}
+	else if(bPlayerInteractable)
+	{
+		InteractTime = 0.0f;
+		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("InteractTime to 0"));
+	}
+
 }

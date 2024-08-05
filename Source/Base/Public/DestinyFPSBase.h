@@ -7,6 +7,8 @@
 #include "InputActionValue.h"
 #include "DestinyFPSBase.generated.h"
 
+class UCharacterMovementComponent;
+
 UCLASS()
 class BASE_API ADestinyFPSBase : public ACharacter
 {
@@ -60,12 +62,52 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* UltimateAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* JumpAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* SlideAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* SprintAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* InterAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsSliding;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bPlayerSprint = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float SlideTime;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float InteractTime = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float MaxInteractTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bPlayerInteractable = false ;
+	
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Skill(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
 
+	void Sprint(const FInputActionValue& Value);
+	void SprintEnd(const FInputActionValue& Value);
+
+	void Slide(const FInputActionValue& Value);
+	void SlideEnd(const FInputActionValue& Value);
+
+	void StartInteract(const FInputActionValue& Value);
+	void EndInteract(const FInputActionValue& Value);
+	
 private:
 	float SkillCoolTime = 0.f;
+
 };
