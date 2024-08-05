@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "Titan_Skill_Barrier.h"
 
 
 // Sets default values
@@ -110,6 +111,16 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("전용 스킬"));
+
+	UWorld* world = GetWorld();
+
+	if(world)
+	{
+		FActorSpawnParameters SpawnParams;
+		FVector spawnLocation = this->GetActorLocation();
+		FRotator spawnRotation = this->GetActorForwardVector().Rotation();
+		ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), spawnLocation, spawnRotation, SpawnParams);
+	}
 }
 
 void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
