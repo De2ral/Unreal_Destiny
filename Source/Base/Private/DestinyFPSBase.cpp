@@ -153,7 +153,7 @@ void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 {
 	ACharacter::Crouch(false);
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 3000;
-	FppCamera->SetRelativeLocation(FVector(0,0,-20.0f));
+	//FppCamera->SetRelativeLocation(FVector(0,0,-20.0f));
 
 }
 
@@ -161,7 +161,7 @@ void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
 {
 	ACharacter::UnCrouch(false);
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 300;
-	FppCamera->SetRelativeLocation(FVector(0,0,20.0f));
+	//FppCamera->SetRelativeLocation(FVector(0,0,20.0f));
 }
 
 void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
