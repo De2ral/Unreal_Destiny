@@ -95,6 +95,7 @@ public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Skill(const FInputActionValue& Value);
+	void jump(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
 
