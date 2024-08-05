@@ -14,9 +14,9 @@ ATitan_Skill_Barrier::ATitan_Skill_Barrier()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 
-	Mesh->SetRelativeScale3D(FVector(0.1f, 4.f, 1.5f));
+	Mesh->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/Skill/Titan/Mesh_Shield.Mesh_Shield'"));
 	if(MeshAsset.Succeeded())
 		Mesh->SetStaticMesh(MeshAsset.Object);
 }
