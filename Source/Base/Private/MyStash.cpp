@@ -36,6 +36,7 @@ void AMyStash::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *Other
 		ADestinyFPSBase* APlayer = Cast<ADestinyFPSBase>(OtherActor);
 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - OverlapBegin"));
  		APlayer->bPlayerInteractable = true;
+		APlayer->MaxInteractTime = 50.0f;
 
 	}
 

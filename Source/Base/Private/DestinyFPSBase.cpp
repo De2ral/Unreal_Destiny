@@ -71,13 +71,6 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// if(bIsSliding)
-	// {
-	// 	SlideTime -= 0.1;
-
-	// }
-
-
 
 }
 
@@ -173,7 +166,7 @@ void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
 
 void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
 {
-	if(bPlayerInteractable && InteractTime <= 50.0f)
+	if(bPlayerInteractable && InteractTime <= MaxInteractTime)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = true"));
 		GEngine->AddOnScreenDebugMessage(-1,1.5f,FColor::Blue,FString::Printf(TEXT("InteractTime = %f"),InteractTime));
