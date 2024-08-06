@@ -90,7 +90,10 @@ public:
 	float MaxInteractTime = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bPlayerInteractable = false ;
+	bool bPlayerInteractable = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isShield = false;
 	
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

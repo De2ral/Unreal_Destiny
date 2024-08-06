@@ -26,6 +26,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* Mesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeed;
+
 	void DestroyBarrier();
 
 private:

@@ -35,6 +35,14 @@ void ATitan_Skill_Barrier::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (MoveTime > 0.f)
+	{
+		FVector P0 = GetActorLocation();
+		FVector vt = -GetActorRightVector() * MoveSpeed * DeltaTime;
+		FVector P = P0 + vt;
+		SetActorLocation(P);
+		MoveTime -= DeltaTime;
+	}
 }
 
 void ATitan_Skill_Barrier::DestroyBarrier()

@@ -68,8 +68,6 @@ void ADestinyFPSBase::BeginPlay()
 	}
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
-
-
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
@@ -145,12 +143,13 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 		if(world)
 		{
 			FActorSpawnParameters SpawnParams;
-			FVector spawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 200.f;
-			spawnLocation.Z -= 15.f;
+			FVector spawnLocation = this->GetActorLocation();
+			spawnLocation.Z += 20.f;
 			FRotator spawnRotation = this->GetActorRotation();
 			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), spawnLocation, spawnRotation, SpawnParams);
 
-			SkillCoolTime = 20.f;
+			SkillCoolTime = 3.f;
+			isShield = true;
 		}
 	}
 }
