@@ -37,6 +37,9 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	float MaxHP = 100;
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	bool isDead = false;
+
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	//bool bHit;
 
@@ -46,6 +49,8 @@ public:
 
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite)
     //UStaticMeshComponent* PhysicsMesh;
+	UFUNCTION(BlueprintCallable, Category="Physics")
+    void EnablePhysicsSimulation();
 
 
 };
