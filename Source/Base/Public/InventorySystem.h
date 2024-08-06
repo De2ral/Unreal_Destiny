@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "DestinyFPSBase.h"
 #include "InventorySystem.generated.h"
 
 
@@ -20,9 +21,23 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* InventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputMappingContext* InventoryMappingContext;
+
+	void InvenOpenClose();
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsInvenOpen = false;
+
+
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
+	void AddMapping(ADestinyFPSBase* TargetPlayer);
 		
 };
