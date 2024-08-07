@@ -10,12 +10,12 @@ UItemComponent::UItemComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	
-	AActor* Parent = GetOwner();
+	
 	
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
 	ItemCollider->InitSphereRadius(50.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
-	if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());
+	//if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());
 
 	
 

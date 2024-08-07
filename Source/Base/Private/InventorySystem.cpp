@@ -22,13 +22,23 @@ void UInventorySystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
+
+	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
+
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+	if(Subsystem != nullptr)
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(InventoryMappingContext, 1);
+		}
 
 	AddMapping();
 
 	
 	
 }
+
 
 void UInventorySystem::InvenOpenClose()
 {
@@ -59,10 +69,16 @@ void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UInventorySystem::AddMapping()
 {
 	
-	//ADestinyFPSBase* OwnerPlayer = Cast<ADestinyFPSBase>(GetOwner()->GetPlayerCharacter());
+	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
-	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(OwnerPlayer->InputComponent);
-	Input->BindAction(InventoryAction, ETriggerEvent::Triggered, this, &UInventorySystem::InvenOpenClose);
+ 	APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
 
-}
+ 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+ 	Subsystem->AddMappingContext(InventoryMappingContext, 1);
+
+ 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
+ 	Input->BindAction(InventoryAction, ETriggerEvent::Triggered, this, &UInventorySystem::InvenOpenClose);
+
+ }
+
 

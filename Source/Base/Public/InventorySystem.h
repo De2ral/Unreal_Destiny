@@ -22,13 +22,16 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InventoryAction;
 
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	//class UInputMappingContext* InventoryMappingContext;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputMappingContext* InventoryMappingContext;
 
 	void InvenOpenClose();
+
+	void AddMapping();
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsInvenOpen = false;
@@ -51,14 +54,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	int CurrMaxRefAmmo = 0;
 
-	class AActor* CompOwner = GetOwner();
-
+	
 
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	void AddMapping();
+	
 		
 };
