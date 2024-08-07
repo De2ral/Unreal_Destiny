@@ -39,6 +39,9 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	bool isDead = false;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	bool isAttack = false;
 
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	//bool bHit;
