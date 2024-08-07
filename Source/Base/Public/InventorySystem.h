@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DestinyFPSBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "InventorySystem.generated.h"
 
 

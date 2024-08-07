@@ -20,9 +20,13 @@ UInventorySystem::UInventorySystem()
 // Called when the game starts
 void UInventorySystem::BeginPlay()
 {
-	//Super::BeginPlay();
+	Super::BeginPlay();
 
-	// ...
+	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
+
+	if (PlayerCharacter != nullptr) AddMapping(PlayerCharacter);
+
+
 	
 }
 
@@ -30,14 +34,15 @@ void UInventorySystem::InvenOpenClose()
 {
 	if(bIsInvenOpen)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 열렸다"));
+		bIsInvenOpen = false;
+		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 닫혔다"));
 
 	}
 
 	else if(!bIsInvenOpen)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 닫혔다"));
-		
+		bIsInvenOpen = true;
+		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 열렸다"));
 	}
 
 
@@ -54,23 +59,12 @@ void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UInventorySystem::AddMapping(ADestinyFPSBase* TargetPlayer)
 {
 	
-	if(APlayerController* PlayerController = Cast<APlayerController>(TargetPlayer->GetController()))
-	{
-		if(UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			SubSystem->AddMappingContext(InventoryMappingContext,1);
+	APlayerController* PlayerController = Cast<APlayerController>(TargetPlayer->GetController());
+	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+	SubSystem->AddMappingContext(InventoryMappingContext,1);
 
-		}
-
-		if(UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{
-			Input->BindAction(InventoryAction, ETriggerEvent::Triggered, this, &UInventorySystem::InvenOpenClose);
-
-		}
-		
-
-	}
-
+	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
+	Input->BindAction(InventoryAction, ETriggerEvent::Triggered, this, &UInventorySystem::InvenOpenClose);
 
 }
 
