@@ -147,7 +147,7 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 		if(world)
 		{
 			FActorSpawnParameters SpawnParams;
-			FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation() * 50.f;
+			FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 100.f;
 			SpawnLocation.Z += 20.f;
 			FRotator SpawnRotation = this->GetActorRotation();
 			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
@@ -168,12 +168,11 @@ void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 	{
 		if (world)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("성공 !"));
 			FActorSpawnParameters SpawnParams;
-			FVector SpawnLocation = this->GetActorLocation();
+			FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 50.f;
 			FRotator SpawnRotation = this->GetActorRotation();
-			ATitan_Skill_Grenade* grenadeObejct = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
-
+			ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+			grenadeObject->FireInDirection(this->GetActorForwardVector() + this->GetActorUpVector() / 5.f);
 			CurGrenadeCoolTime = GrenadeCoolTime;
 			isGrenade = true;
 		}
