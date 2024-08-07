@@ -11,6 +11,7 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "Titan_Skill_Barrier.h"
+#include "Titan_Skill_Grenade.h"
 
 
 // Sets default values
@@ -74,8 +75,11 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (SkillCoolTime > 0.f)
-		SkillCoolTime -= DeltaTime;
+	if (CurSkillCoolTime > 0.f)
+		CurSkillCoolTime -= DeltaTime;
+
+	if (CurGrenadeCoolTime > 0.f)
+		CurGrenadeCoolTime -= DeltaTime;
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -138,17 +142,17 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 
 	UWorld* world = GetWorld();
 
-	if(SkillCoolTime <= 0.f)
+	if(CurSkillCoolTime <= 0.f)
 	{
 		if(world)
 		{
 			FActorSpawnParameters SpawnParams;
-			FVector spawnLocation = this->GetActorLocation();
-			spawnLocation.Z += 20.f;
-			FRotator spawnRotation = this->GetActorRotation();
-			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), spawnLocation, spawnRotation, SpawnParams);
+			FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation() * 50.f;
+			SpawnLocation.Z += 20.f;
+			FRotator SpawnRotation = this->GetActorRotation();
+			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
 
-			SkillCoolTime = 3.f;
+			CurSkillCoolTime = SkillCoolTime;
 			isShield = true;
 		}
 	}
@@ -156,7 +160,24 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 
 void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("수류탄 투척"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
+
+	UWorld* world = GetWorld(); 
+
+	if (CurGrenadeCoolTime <= 0.f)
+	{
+		if (world)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("성공 !"));
+			FActorSpawnParameters SpawnParams;
+			FVector SpawnLocation = this->GetActorLocation();
+			FRotator SpawnRotation = this->GetActorRotation();
+			ATitan_Skill_Grenade* grenadeObejct = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+
+			CurGrenadeCoolTime = GrenadeCoolTime;
+			isGrenade = true;
+		}
+	}
 }
 
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)

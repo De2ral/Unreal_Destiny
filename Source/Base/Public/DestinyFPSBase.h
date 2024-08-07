@@ -92,8 +92,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
 
+
+	// Skill Variable
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isShield = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isGrenade = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SkillCoolTime = 3.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float GrenadeCoolTime = 3.f;
+
+
 	
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -112,6 +125,6 @@ public:
 	void EndInteract(const FInputActionValue& Value);
 	
 private:
-	float SkillCoolTime = 0.f;
-
+	float CurSkillCoolTime = 0.f;
+	float CurGrenadeCoolTime = 0.f;
 };

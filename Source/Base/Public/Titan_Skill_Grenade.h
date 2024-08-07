@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Titan_Skill_Barrier.generated.h"
+#include "Titan_Skill_Grenade.generated.h"
 
 UCLASS()
-class BASE_API ATitan_Skill_Barrier : public AActor
+class BASE_API ATitan_Skill_Grenade : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATitan_Skill_Barrier();
+	ATitan_Skill_Grenade();
 
 protected:
 	// Called when the game starts or when spawned
@@ -25,15 +25,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MoveTime;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MoveSpeed;
-
-	void DestroyBarrier();
-
-private:
-	float DestroyDelay = 10.f;
 };
