@@ -25,13 +25,33 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InventoryAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	class UInputMappingContext* InventoryMappingContext;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	//class UInputMappingContext* InventoryMappingContext;
 
 	void InvenOpenClose();
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsInvenOpen = false;
+
+	UPROPERTY(EditDefaultsOnly)
+	int CurrAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly)
+	int CurrMaxAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly)
+	int CurrSpecialAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly)
+	int CurrMaxSpecialAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly)
+	int CurrRefAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly)
+	int CurrMaxRefAmmo = 0;
+
+	class AActor* CompOwner = GetOwner();
 
 
 
@@ -39,6 +59,6 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	void AddMapping(ADestinyFPSBase* TargetPlayer);
+	void AddMapping();
 		
 };

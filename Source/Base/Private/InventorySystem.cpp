@@ -22,11 +22,11 @@ void UInventorySystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	//ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
-	if (PlayerCharacter != nullptr) AddMapping(PlayerCharacter);
+	AddMapping();
 
-
+	
 	
 }
 
@@ -56,14 +56,12 @@ void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void UInventorySystem::AddMapping(ADestinyFPSBase* TargetPlayer)
+void UInventorySystem::AddMapping()
 {
 	
-	APlayerController* PlayerController = Cast<APlayerController>(TargetPlayer->GetController());
-	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-	SubSystem->AddMappingContext(InventoryMappingContext,1);
+	//ADestinyFPSBase* OwnerPlayer = Cast<ADestinyFPSBase>(GetOwner()->GetPlayerCharacter());
 
-	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
+	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(OwnerPlayer->InputComponent);
 	Input->BindAction(InventoryAction, ETriggerEvent::Triggered, this, &UInventorySystem::InvenOpenClose);
 
 }
