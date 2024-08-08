@@ -22,6 +22,24 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	int CurrAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	int MaxAmmo = 480;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	int CurrSpecialAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	int MaxSpecialAmmo = 60;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	int CurrRefAmmo = 0;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	int MaxRefAmmo = 180;
+
 
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	// class UInputAction* InventoryAction;
@@ -35,25 +53,6 @@ protected:
 
 	// UPROPERTY(EditDefaultsOnly)
 	// bool bIsInvenOpen = false;
-
-	UPROPERTY(EditDefaultsOnly)
-	int CurrAmmo = 0;
-
-	UPROPERTY(EditDefaultsOnly)
-	int CurrMaxAmmo = 0;
-
-	UPROPERTY(EditDefaultsOnly)
-	int CurrSpecialAmmo = 0;
-
-	UPROPERTY(EditDefaultsOnly)
-	int CurrMaxSpecialAmmo = 0;
-
-	UPROPERTY(EditDefaultsOnly)
-	int CurrRefAmmo = 0;
-
-	UPROPERTY(EditDefaultsOnly)
-	int CurrMaxRefAmmo = 0;
-
 	
 
 
@@ -61,6 +60,17 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	
+	//inline int GetCurrAmmo() {return CurrAmmo; }
+
+	//inline int GetMaxAmmo() {return MaxAmmo; }
+
+	//inline int CurrSpecialAmmo() {return CurrSpecialAmmo; }
+
+	//inline int MaxSpecialAmmo() {return MaxSpecialAmmo; }
+
+	//inline int CurrRefAmmo() {return CurrRefAmmo; }
+
+	//inline int MaxRefAmmo() {return MaxRefAmmo; }
+
 		
 };
