@@ -23,18 +23,18 @@ protected:
 	virtual void BeginPlay() override;
 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	class UInputAction* InventoryAction;
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	// class UInputAction* InventoryAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	class UInputMappingContext* InventoryMappingContext;
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	// class UInputMappingContext* InventoryMappingContext;
 
-	void InvenOpenClose();
+	// void InvenOpenClose();
 
-	void AddMapping();
+	// void AddMapping();
 
-	UPROPERTY(EditDefaultsOnly)
-	bool bIsInvenOpen = false;
+	// UPROPERTY(EditDefaultsOnly)
+	// bool bIsInvenOpen = false;
 
 	UPROPERTY(EditDefaultsOnly)
 	int CurrAmmo = 0;

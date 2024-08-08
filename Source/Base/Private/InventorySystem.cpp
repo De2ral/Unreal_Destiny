@@ -23,62 +23,76 @@ void UInventorySystem::BeginPlay()
 	Super::BeginPlay();
 
 
-	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
+	// ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	// APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-	if(Subsystem != nullptr)
-		{
-			Subsystem->ClearAllMappings();
-			Subsystem->AddMappingContext(InventoryMappingContext, 1);
-		}
+	// UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+	// if(Subsystem != nullptr)
+	// 	{
+	// 		Subsystem->ClearAllMappings();
+	// 		Subsystem->AddMappingContext(InventoryMappingContext, 1);
+	// 	}
 
-	AddMapping();
+	// AddMapping();
 
 	
 	
 }
 
 
-void UInventorySystem::InvenOpenClose()
-{
-	if(bIsInvenOpen)
-	{
-		bIsInvenOpen = false;
-		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 닫혔다"));
+// void UInventorySystem::InvenOpenClose()
+// {
+// 	if(bIsInvenOpen)
+// 	{
+// 		bIsInvenOpen = false;
+// 		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 닫혔다"));
 
-	}
+// 	}
 
-	else if(!bIsInvenOpen)
-	{
-		bIsInvenOpen = true;
-		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 열렸다"));
-	}
+// 	else if(!bIsInvenOpen)
+// 	{
+// 		bIsInvenOpen = true;
+// 		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 열렸다"));
+// 	}
 
 
-}
+// }
 
 // Called every frame
 void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	//Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+
+	ADestinyFPSBase* TargetPlayer = Cast<ADestinyFPSBase>(GetOwner());
+
+	if(TargetPlayer->bIsInvenOpen)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,TEXT("인벤토리시스템에서 캐스트 - 인벤토리 열림"));
+
+	}
+	else if(!TargetPlayer->bIsInvenOpen)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,TEXT("인벤토리시스템에서 캐스트 - 인벤토리 닫힘"));
+
+	}
 
 	// ...
 }
 
-void UInventorySystem::AddMapping()
-{
+// void UInventorySystem::AddMapping()
+// {
 	
-	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
+// 	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
- 	APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
+//  	APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
 
- 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
- 	Subsystem->AddMappingContext(InventoryMappingContext, 1);
+//  	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+//  	Subsystem->AddMappingContext(InventoryMappingContext, 1);
 
- 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
- 	Input->BindAction(InventoryAction, ETriggerEvent::Triggered, this, &UInventorySystem::InvenOpenClose);
+//  	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
+//  	Input->BindAction(InventoryAction, ETriggerEvent::Triggered, this, &UInventorySystem::InvenOpenClose);
 
- }
+//  }
 
 
