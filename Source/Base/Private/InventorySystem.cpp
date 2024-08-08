@@ -64,18 +64,18 @@ void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 
-	ADestinyFPSBase* TargetPlayer = Cast<ADestinyFPSBase>(GetOwner());
+	// ADestinyFPSBase* TargetPlayer = Cast<ADestinyFPSBase>(GetOwner());
 
-	if(TargetPlayer->bIsInvenOpen)
-	{
-		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,TEXT("인벤토리시스템에서 캐스트 - 인벤토리 열림"));
+	// if(TargetPlayer->bIsInvenOpen)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,TEXT("인벤토리시스템에서 캐스트 - 인벤토리 열림"));
 
-	}
-	else if(!TargetPlayer->bIsInvenOpen)
-	{
-		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,TEXT("인벤토리시스템에서 캐스트 - 인벤토리 닫힘"));
+	// }
+	// else if(!TargetPlayer->bIsInvenOpen)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,TEXT("인벤토리시스템에서 캐스트 - 인벤토리 닫힘"));
 
-	}
+	// }
 
 	// ...
 }
