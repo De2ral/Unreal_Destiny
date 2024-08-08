@@ -45,6 +45,8 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppCamera->bUsePawnControlRotation = true;
 
 	TppCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
+
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 	
 }
 
@@ -228,4 +230,9 @@ void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("InteractTime to 0"));
 	}
 
+}
+
+void ADestinyFPSBase::SetHasRifle(bool bNewHasRifle)
+{
+	bHasRifle = bNewHasRifle;
 }
