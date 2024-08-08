@@ -45,6 +45,7 @@ public:
 
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	//bool bHit;
+	
 
 public:
     UFUNCTION(BlueprintCallable, Category = "HP")
@@ -52,8 +53,13 @@ public:
 
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite)
     //UStaticMeshComponent* PhysicsMesh;
-	UFUNCTION(BlueprintCallable, Category="Physics")
+	UFUNCTION(BlueprintCallable, Category = "Physics")
     void EnablePhysicsSimulation();
 
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	void ItemDrop();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+    TArray<TSubclassOf<AActor>> ItemsToSpawn;
 
 };

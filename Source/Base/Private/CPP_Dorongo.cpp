@@ -91,6 +91,7 @@ void ACPP_Dorongo::TakeDamage1(float DamageAmount)
         //PhysicsMesh->SetSimulatePhysics(true);
         //Destroy();
         isDead = true;
+        ItemDrop();
         EnablePhysicsSimulation();              
     }
 }
@@ -126,4 +127,28 @@ void ACPP_Dorongo::EnablePhysicsSimulation()
     //this->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
     //this->GetMesh()->SetSimulatePhysics(true);
     
+}
+
+void ACPP_Dorongo::ItemDrop()
+{
+    // GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("들어오기는 했는데..")));
+
+    // if (ItemToSpawn)
+    // {
+    //     FVector Location = GetActorLocation();
+    //     FRotator Rotation = GetActorRotation();
+    //     GetWorld()->SpawnActor<AActor>(ItemToSpawn, Location, Rotation);
+    // }
+    if (ItemsToSpawn.Num() > 0)
+    {
+        int32 RandomIndex = FMath::RandRange(0, ItemsToSpawn.Num() - 1);
+        TSubclassOf<AActor> SelectedItem = ItemsToSpawn[RandomIndex];
+
+        if (SelectedItem)
+        {
+            FVector Location = GetActorLocation();
+            FRotator Rotation = GetActorRotation();
+            GetWorld()->SpawnActor<AActor>(SelectedItem, Location, Rotation);
+        }
+    }
 }
