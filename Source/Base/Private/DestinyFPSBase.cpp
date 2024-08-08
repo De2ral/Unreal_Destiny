@@ -170,9 +170,13 @@ void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 		{
 			FActorSpawnParameters SpawnParams;
 			FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 50.f;
-			FRotator SpawnRotation = this->GetActorRotation();
+			FRotator SpawnRotation = FppMesh->GetSocketLocation("GripPoint");
 			ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
 			grenadeObject->FireInDirection(this->GetActorForwardVector() + this->GetActorUpVector() / 5.f);
+
+			FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+			grenadeObject->AttachToComponent(FppMesh, AttachmentRules, FName(TEXT("GripPoint")));
+			
 			CurGrenadeCoolTime = GrenadeCoolTime;
 			isGrenade = true;
 		}

@@ -14,6 +14,7 @@ ATitan_Skill_Grenade::ATitan_Skill_Grenade()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 	Mesh->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
+	Mesh->OnComponentHit.AddDynamic(this, &ATitan_Skill_Grenade::OnHit);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.SM_Drongo_Grenade_FX_Body02'"));
 	if (MeshAsset.Succeeded())
@@ -48,4 +49,15 @@ void ATitan_Skill_Grenade::Tick(float DeltaTime)
 void ATitan_Skill_Grenade::FireInDirection(const FVector& ShootDirection)
 {
 	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
+}
+
+void ATitan_Skill_Grenade::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	this->DestroyGrenade();
+}
+
+void ATitan_Skill_Grenade::DestroyGrenade()
+{
+	if (this)
+		this->Destroy();
 }
