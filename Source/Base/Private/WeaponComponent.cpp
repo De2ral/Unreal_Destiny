@@ -22,8 +22,6 @@ UWeaponComponent::UWeaponComponent()
 
     bIsAiming = false;
 
-
-    
     AimingSpeed = 5.0f; 
     
     AimOffset = FVector(15.0f, 0.0f, 0.0f);
@@ -43,7 +41,7 @@ void UWeaponComponent::BeginPlay()
         //FString ModelPath = TEXT("/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun");
         //FString ModelPath = TEXT("/Engine/BasicShapes/Cube.Cube");
         // 모델을 로드하고 캐릭터에 부착합니다.
-        EquipWeapon2();
+        EquipWeapon3();
     }
 	else
 	{
@@ -52,8 +50,6 @@ void UWeaponComponent::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("Start."));
 
     AddMapping(PlayerCharacter);
-
-
 }
 
 
@@ -181,7 +177,7 @@ void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
     {
         if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
-            Subsystem->AddMappingContext(FireMappingContext, 2);
+            Subsystem->AddMappingContext(FireMappingContext, 1);
         }
 
         if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))

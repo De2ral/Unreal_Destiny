@@ -61,7 +61,7 @@ protected:
 
      virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-private:
+public:
     ADestinyFPSBase* Character;
 
     UPROPERTY(EditAnywhere, Category = "Input")
