@@ -103,7 +103,27 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 
 		Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
 		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
+
+		Input->BindAction(InventoryAction,ETriggerEvent::Completed, this, &ADestinyFPSBase::InvenOpenClose);
 	}
+}
+
+void ADestinyFPSBase::InvenOpenClose()
+{
+	if(bIsInvenOpen)
+	{
+		bIsInvenOpen = false;
+		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 닫혔다"));
+
+	}
+
+	else if(!bIsInvenOpen)
+	{
+		bIsInvenOpen = true;
+		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 열렸다"));
+	}
+
+
 }
 
 void ADestinyFPSBase::Move(const FInputActionValue& Value)
