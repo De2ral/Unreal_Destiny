@@ -47,6 +47,8 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
+
+	WeaponComponent->AddMapping(this);
 	
 }
 

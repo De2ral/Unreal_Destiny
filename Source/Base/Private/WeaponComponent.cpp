@@ -152,6 +152,7 @@ void UWeaponComponent::Fire()
 
 void UWeaponComponent::EquipWeapon1()
 {
+	UE_LOG(LogTemp, Warning, TEXT("1"));
     LoadWeaponByName(FName("Pistol"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
@@ -159,6 +160,7 @@ void UWeaponComponent::EquipWeapon1()
 
 void UWeaponComponent::EquipWeapon2()
 {
+	UE_LOG(LogTemp, Warning, TEXT("2"));
     LoadWeaponByName(FName("Pistol2"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
@@ -166,6 +168,7 @@ void UWeaponComponent::EquipWeapon2()
 
 void UWeaponComponent::EquipWeapon3()
 {
+	UE_LOG(LogTemp, Warning, TEXT("3"));
     LoadWeaponByName(FName("Pistol3"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
@@ -178,7 +181,7 @@ void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
     {
         if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
-            Subsystem->AddMappingContext(FireMappingContext, 1);
+            Subsystem->AddMappingContext(FireMappingContext, 2);
         }
 
         if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
