@@ -15,6 +15,8 @@ ACPP_Dorongo::ACPP_Dorongo()
 	PrimaryActorTick.bCanEverTick = true;
 
 	HP = MaxHP;
+    isAttack = false;
+    
 }
 
 // Called when the game starts or when spawned
@@ -98,6 +100,8 @@ void ACPP_Dorongo::TakeDamage1(float DamageAmount)
 
 float ACPP_Dorongo::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
+    if(!bCanTakeDamage) return 0.0f;
+    
     HP -= DamageAmount;
     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
 
@@ -107,7 +111,17 @@ float ACPP_Dorongo::TakeDamage(float DamageAmount, FDamageEvent const & DamageEv
         ItemDrop();
         EnablePhysicsSimulation();              
     }
+    FTimerHandle UnusedHandle; 
+    GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_Dorongo::ResetDamageCoolDown, DamageCooldownTime, false);
+
     return DamageAmount;
+    
+    
+}
+
+void ACPP_Dorongo::ResetDamageCoolDown()
+{
+    bCanTakeDamage = true;
 }
 
 void ACPP_Dorongo::EnablePhysicsSimulation()

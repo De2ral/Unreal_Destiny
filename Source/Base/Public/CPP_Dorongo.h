@@ -40,9 +40,13 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	bool isDead = false;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
-	bool isAttack = false;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Combat")
+	bool isAttack;
 
+	bool bCanTakeDamage = true;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float DamageCooldownTime = 0.1f;
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	//bool bHit;
 	
@@ -52,10 +56,12 @@ public:
     void TakeDamage1(float DamageAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "HP")
-	float TakeDamage(float DamageAmount, 
+	virtual float TakeDamage(float DamageAmount, 
     FDamageEvent const& DamageEvent, 
     AController* EventInstigator, 
     AActor* DamageCauser)override;
+
+	void ResetDamageCoolDown();
 
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite)
     //UStaticMeshComponent* PhysicsMesh;
