@@ -1,17 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TestWidget.h"
+#include "WeaponWidget.h"
 #include "Components/TextBlock.h"
 
-void UTestWidget::NativeConstruct()
-{
-    Super::NativeConstruct();
-    
-    UpdateAmmo(30, 30);  
-}
-
-void UTestWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
+void UWeaponWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
 {
     if (AmmoText)
     {

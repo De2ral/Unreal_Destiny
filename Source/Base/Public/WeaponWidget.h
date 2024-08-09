@@ -4,27 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "TestWidget.generated.h"
+#include "WeaponWidget.generated.h"
 
 
 /**
  * 
  */
 UCLASS()
-class BASE_API UTestWidget : public UUserWidget
+class BASE_API UWeaponWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-	public:
+public:
     void UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo);
 
 protected:
-    virtual void NativeConstruct() override;
-
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* AmmoText;
-
-	UPROPERTY(meta = (BindWidget))
-	class UCanvasPanel* MainCanvasPanel;
-	
 };

@@ -49,7 +49,7 @@ void UWeaponComponent::BeginPlay()
     if (AmmoWidgetClass)
 	{
         CurrentAmmo = MaxAmmo;
-		AmmoWidget = CreateWidget<UTestWidget>(GetWorld(), AmmoWidgetClass);
+		AmmoWidget = CreateWidget<UWeaponWidget>(GetWorld(), AmmoWidgetClass);
 		if (AmmoWidget)
 		{
 			AmmoWidget->AddToViewport();
@@ -82,12 +82,7 @@ void UWeaponComponent::Fire()
             UE_LOG(LogTemp, Warning, TEXT("PlayerController is null."));
             return;
         }
-
-
 			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-			//const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-            //FVector MuzzleLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
             FVector MuzzleLocation;
             if(CurrentSkeletalMeshComponent)
             {
@@ -97,14 +92,9 @@ void UWeaponComponent::Fire()
                 UE_LOG(LogTemp, Warning, TEXT("MyVector MuzzleLocation: %s"), *MuzzleLocation.ToString()); 
             }
             
-            
-
-
-			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 	
-			// Spawn the projectile at the muzzle
 			AFpsCppProjectile* Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
 			
             if (Projectile == nullptr)
@@ -115,7 +105,6 @@ void UWeaponComponent::Fire()
             
 			const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
 			
-			// 라인트레이스 시작점과 끝점 설정
 			const FVector TraceStart = CameraLocation;
 			const FVector TraceEnd = TraceStart + (SpawnRotation.Vector() * 1000000.0f);
 
@@ -124,17 +113,14 @@ void UWeaponComponent::Fire()
 			CollisionParams.AddIgnoredActor(Character);
 			CollisionParams.AddIgnoredActor(Projectile);
 			
-			// 라인트레이스 수행
 			bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
 
-			// 디버그 라인 그리기
 			DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
 
 			FVector ProjectileDirection = SpawnRotation.Vector();
 			
 			if (bHit)
 			{
-				// 라인트레이스가 맞은 위치 표시
 				DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
 
 				UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
@@ -242,12 +228,8 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
         DefaultOffset =  CurrentStaticMeshComponent->GetRelativeLocation();
         DefaultRotation = CurrentStaticMeshComponent->GetRelativeRotation();
     }
-
     Character->SetHasRifle(true);
-    
 }
-
-
 
 void UWeaponComponent::AttachSelectedModelToCharacter(ADestinyFPSBase *InCharacter, UObject *SelectedModel)
 {
@@ -263,7 +245,6 @@ void UWeaponComponent::AttachSelectedModelToCharacter(ADestinyFPSBase *InCharact
         return;
 	}
 	
-
     UWeaponComponent* WeaponComponent = InCharacter->FindComponentByClass<UWeaponComponent>();
     if (WeaponComponent == nullptr)
     {
@@ -296,7 +277,6 @@ void UWeaponComponent::SetCurrentWeapon(const FGunInfo& NewWeapon)
 {
     CurrentWeapon = NewWeapon;
 }
-
 
 void UWeaponComponent::LoadWeaponByName(FName WeaponName)
 {
@@ -361,9 +341,7 @@ void UWeaponComponent::UpdateWeaponPosition()
     if (CurrentSkeletalMeshComponent)
     {
         CurrentSkeletalMeshComponent->SetRelativeLocation(TargetOffset);
-        CurrentSkeletalMeshComponent->SetRelativeRotation(TargetRotation);
-
-        
+        CurrentSkeletalMeshComponent->SetRelativeRotation(TargetRotation); 
     }
 }
 
@@ -382,8 +360,4 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         CurrentSkeletalMeshComponent->SetRelativeLocation(NewLocation);
         CurrentSkeletalMeshComponent->SetRelativeRotation(NewRotation);
     }
-}
-
-void UWeaponComponent::UpdateAmmoDisplay()
-{
 }
