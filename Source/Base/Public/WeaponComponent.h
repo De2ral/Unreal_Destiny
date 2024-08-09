@@ -6,6 +6,8 @@
 #include "Engine/DataTable.h"
 #include "WeaponDataManage.h"
 
+
+#include "TestWidget.h"
 #include "WeaponComponent.generated.h"
 
 class ADestinyFPSBase;
@@ -28,6 +30,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
 
+   
 
     void AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, UObject* Model);
 
@@ -94,6 +97,18 @@ public:
 
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
+
+
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UTestWidget> AmmoWidgetClass;
+
+    UPROPERTY()
+    UTestWidget* AmmoWidget;
+
+    void UpdateAmmoDisplay();
+
+    int32 CurrentAmmo;
+    int32 MaxAmmo = 100;
 
 private:
     bool bIsAiming;

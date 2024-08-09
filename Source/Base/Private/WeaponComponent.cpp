@@ -37,19 +37,29 @@ void UWeaponComponent::BeginPlay()
     ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (PlayerCharacter != nullptr)
     {
-        // 모델 경로를 지정합니다.
-        //FString ModelPath = TEXT("/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun");
-        //FString ModelPath = TEXT("/Engine/BasicShapes/Cube.Cube");
-        // 모델을 로드하고 캐릭터에 부착합니다.
         EquipWeapon3();
     }
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter called failed."));
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Start."));
 
     AddMapping(PlayerCharacter);
+
+    if (AmmoWidgetClass)
+	{
+        CurrentAmmo = MaxAmmo;
+		AmmoWidget = CreateWidget<UTestWidget>(GetWorld(), AmmoWidgetClass);
+		if (AmmoWidget)
+		{
+			AmmoWidget->AddToViewport();
+			AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
+		}
+	}
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("AmmoWidgetClass called failed."));
+    }
 }
 
 
@@ -57,6 +67,9 @@ void UWeaponComponent::BeginPlay()
 void UWeaponComponent::Fire()
 {
     UE_LOG(LogTemp, Warning, TEXT("Fire2"));
+
+    CurrentAmmo--;
+    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
     
 		UWorld* const World = GetWorld();
 		if (World != nullptr)
@@ -235,6 +248,7 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
 }
 
 
+
 void UWeaponComponent::AttachSelectedModelToCharacter(ADestinyFPSBase *InCharacter, UObject *SelectedModel)
 {
     if (InCharacter == nullptr)
@@ -368,4 +382,8 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         CurrentSkeletalMeshComponent->SetRelativeLocation(NewLocation);
         CurrentSkeletalMeshComponent->SetRelativeRotation(NewRotation);
     }
+}
+
+void UWeaponComponent::UpdateAmmoDisplay()
+{
 }
