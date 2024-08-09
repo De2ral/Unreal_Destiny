@@ -51,6 +51,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "HP")
     void TakeDamage1(float DamageAmount);
 
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	float TakeDamage(float DamageAmount, 
+    FDamageEvent const& DamageEvent, 
+    AController* EventInstigator, 
+    AActor* DamageCauser)override;
+
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite)
     //UStaticMeshComponent* PhysicsMesh;
 	UFUNCTION(BlueprintCallable, Category = "Physics")

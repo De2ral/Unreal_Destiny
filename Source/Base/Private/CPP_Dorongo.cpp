@@ -96,6 +96,20 @@ void ACPP_Dorongo::TakeDamage1(float DamageAmount)
     }
 }
 
+float ACPP_Dorongo::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+    HP -= DamageAmount;
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
+
+    if(HP <= 0.0f && !isDead)
+    {
+        isDead = true;
+        ItemDrop();
+        EnablePhysicsSimulation();              
+    }
+    return DamageAmount;
+}
+
 void ACPP_Dorongo::EnablePhysicsSimulation()
 {    
      // 사망시 AI Controller에 정보 전달. 후 블랙보드에 값을 입력하여, 처리하는건 AIContorller의 역할
