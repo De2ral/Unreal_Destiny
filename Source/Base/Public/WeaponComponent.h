@@ -6,6 +6,8 @@
 #include "Engine/DataTable.h"
 #include "WeaponDataManage.h"
 
+
+#include "WeaponWidget.h"
 #include "WeaponComponent.generated.h"
 
 class ADestinyFPSBase;
@@ -22,13 +24,16 @@ class BASE_API UWeaponComponent : public UActorComponent
 public:
     UWeaponComponent();
 
+    // 투사체
 	UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
 	TSubclassOf<class AFpsCppProjectile> ProjectileClass;
 
+    // 투사체 발사 위치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
 
-
+   
+    // 모델 장착
     void AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, UObject* Model);
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -36,34 +41,41 @@ public:
 
 	void LoadAndAttachModelToCharacter(ADestinyFPSBase* InCharacter, const FString& ModelPath);
 
-
+    // 무기 장착
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
     FGunInfo CurrentWeapon;
 
-    // 데이터 테이블 변수
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
     UDataTable* WeaponDataTable;
 
-    // 무기 데이터를 설정하는 함수
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetCurrentWeapon(const FGunInfo& NewWeapon);
 
-    // 무기 데이터를 이름으로 가져오는 함수
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void LoadWeaponByName(FName WeaponName);
 
-    void AddMapping(ADestinyFPSBase* TargetCharacter);
-
     void RemoveCurrentWeaponModel();
 
+    // 키 입력 추가
+    void AddMapping(ADestinyFPSBase* TargetCharacter);
+
+    // 조준 위치
+    void UpdateWeaponPosition();
+
+    // 위젯
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UWeaponWidget> AmmoWidgetClass;
+
+    UPROPERTY()
+    UWeaponWidget* AmmoWidget;
+    
 protected:
     virtual void BeginPlay() override;
 
-     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-    ADestinyFPSBase* Character;
-
+    
     UPROPERTY(EditAnywhere, Category = "Input")
     class UInputMappingContext* FireMappingContext;
 
@@ -91,18 +103,22 @@ public:
     void EquipWeapon2();
     void EquipWeapon3();
     
+public:
+    ADestinyFPSBase* Character;
 
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
-private:
     bool bIsAiming;
 
-    FVector AimOffset; // 정조준 상태에서 총의 위치 오프셋
-    FVector DefaultOffset; // 기본 총 위치 오프셋
-    FRotator AimRotation; // 정조준 상태에서 총의 회전
-    FRotator DefaultRotation; // 기본 총 회전
+    FVector AimOffset; 
+    FVector DefaultOffset;
+    FRotator AimRotation;
+    FRotator DefaultRotation;
 
     float AimingSpeed;
-    void UpdateWeaponPosition();
+    
+
+    int32 CurrentAmmo;
+    int32 MaxAmmo = 100;
 };

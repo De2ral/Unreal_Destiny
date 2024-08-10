@@ -12,7 +12,8 @@
 				"FPSCore",
 				"Engine",
 				"AIModule",
-				"GameplayCameras"
+				"GameplayCameras",
+				"UMG"
 			]
 		}
 	],
