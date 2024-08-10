@@ -11,7 +11,8 @@
 			"AdditionalDependencies": [
 				"FPSCore",
 				"Engine",
-				"AIModule"
+				"AIModule",
+				"GameplayCameras"
 			]
 		}
 	],
