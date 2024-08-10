@@ -9,6 +9,21 @@
 AAIController_Dorongo::AAIController_Dorongo()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
+    BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorTreeComponent"));
+}
+
+void AAIController_Dorongo::OnPossess(APawn *InPawn)
+{
+	Super::OnPossess(InPawn);
+
+    // 블랙보드 초기화 코드가 필요하면 여기서 설정
+    if (UseBlackboard(BlackboardAsset, BlackboardComponent))
+    {
+        // 초기 블랙보드 값 설정
+		GetBlackboardComponent()->SetValueAsBool(TEXT("IsDead"),false);	
+    }
 }
 
 void AAIController_Dorongo::BeginPlay()
@@ -54,5 +69,26 @@ void AAIController_Dorongo::Tick(float DeltaTime)
 	}
 	else
 		GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), false);
+
 }
 
+void AAIController_Dorongo::SetBlackboardValue(const FName &KeyName, bool Value)
+{
+	 if (BlackboardComponent)
+    {
+        BlackboardComponent->SetValueAsBool(KeyName, Value);
+    }
+}
+
+void AAIController_Dorongo::HandleDeath()
+{
+	// ACPP_Dorongo* ControllerCharacter = Cast<ACPP_Dorongo>(GetPawn());
+	// if(ControllerCharacter)
+	// {
+	// 	ControllerCharacter
+	// }
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("BBBBBBBBBBBBBBBB -- HP ")));
+
+	GetBlackboardComponent()->SetValueAsBool(TEXT("IsDead"),true);	
+
+}
