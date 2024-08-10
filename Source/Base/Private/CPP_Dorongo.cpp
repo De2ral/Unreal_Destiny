@@ -2,11 +2,11 @@
 
 
 #include "CPP_Dorongo.h"
-#include "DrawDebugHelpers.h"
-#include "Engine/Engine.h"
 #include "AIController_Dorongo.h"
-#include "Kismet/GameplayStatics.h"
-#include "Components/CapsuleComponent.h"
+// #include "DrawDebugHelpers.h"
+// #include "Engine/Engine.h"
+// #include "Kismet/GameplayStatics.h"
+// #include "Components/CapsuleComponent.h"
 
 // Sets default values
 ACPP_Dorongo::ACPP_Dorongo()
@@ -78,105 +78,105 @@ void ACPP_Dorongo::PerformLineTrace()
     );
 }
 
-void ACPP_Dorongo::TakeDamage1(float DamageAmount)
-{
-    HP -= DamageAmount;
+// void ACPP_Dorongo::TakeDamage1(float DamageAmount)
+// {
+//     HP -= DamageAmount;
 
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("HP : %d"), HP));
+//     //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("HP : %d"), HP));
 
-    if(HP <= 0.0f && !isDead)
-    {
-        //PhysicsMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PhysicsMesh"));
-        //RootComponent = PhysicsMesh;
+//     if(HP <= 0.0f && !isDead)
+//     {
+//         //PhysicsMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PhysicsMesh"));
+//         //RootComponent = PhysicsMesh;
 
-        // Set the mesh component to simulate physics
-        //PhysicsMesh->SetSimulatePhysics(true);
-        //Destroy();
-        isDead = true;
-        ItemDrop();
-        EnablePhysicsSimulation();              
-    }
-}
+//         // Set the mesh component to simulate physics
+//         //PhysicsMesh->SetSimulatePhysics(true);
+//         //Destroy();
+//         isDead = true;
+//         ItemDrop();
+//         EnablePhysicsSimulation();              
+//     }
+// }
 
-float ACPP_Dorongo::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
-{
-    if(!bCanTakeDamage) return 0.0f;
+// float ACPP_Dorongo::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+// {
+//     if(!bCanTakeDamage) return 0.0f;
     
-    HP -= DamageAmount;
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
+//     HP -= DamageAmount;
+//     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
 
-    if(HP <= 0.0f && !isDead)
-    {
-        isDead = true;
-        ItemDrop();
-        EnablePhysicsSimulation();              
-    }
-    FTimerHandle UnusedHandle; 
-    GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_Dorongo::ResetDamageCoolDown, DamageCooldownTime, false);
+//     if(HP <= 0.0f && !isDead)
+//     {
+//         isDead = true;
+//         ItemDrop();
+//         EnablePhysicsSimulation();              
+//     }
+//     FTimerHandle UnusedHandle; 
+//     GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_Dorongo::ResetDamageCoolDown, DamageCooldownTime, false);
 
-    return DamageAmount;
+//     return DamageAmount;
     
     
-}
+// }
 
-void ACPP_Dorongo::ResetDamageCoolDown()
-{
-    bCanTakeDamage = true;
-}
+// void ACPP_Dorongo::ResetDamageCoolDown()
+// {
+//     bCanTakeDamage = true;
+// }
 
-void ACPP_Dorongo::EnablePhysicsSimulation()
-{    
-     // 사망시 AI Controller에 정보 전달. 후 블랙보드에 값을 입력하여, 처리하는건 AIContorller의 역할
-        AAIController_Dorongo* AIController = Cast<AAIController_Dorongo>(GetController());
+// void ACPP_Dorongo::EnablePhysicsSimulation()
+// {    
+//      // 사망시 AI Controller에 정보 전달. 후 블랙보드에 값을 입력하여, 처리하는건 AIContorller의 역할
+//         AAIController_Dorongo* AIController = Cast<AAIController_Dorongo>(GetController());
 
-        if(AIController)
-        {
-            AIController->SetBlackboardValue("IsDead",true);
-        }
-        else
-        {
-            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("캐스팅 실패")));
-        }
+//         if(AIController)
+//         {
+//             AIController->SetBlackboardValue("IsDead",true);
+//         }
+//         else
+//         {
+//             GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("캐스팅 실패")));
+//         }
         
-    // 캡슐 컴포넌트를 비활성화하고 피직스 시뮬레이션 활성화
-    //GetCapsuleComponent()->SetSimulatePhysics(true);
-    //GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    //GetCharacterMovement()->DisableMovement();
+//     // 캡슐 컴포넌트를 비활성화하고 피직스 시뮬레이션 활성화
+//     //GetCapsuleComponent()->SetSimulatePhysics(true);
+//     //GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//     //GetCharacterMovement()->DisableMovement();
 
-    //충돌 방향 설정 (바라보는 방향 뒤로)
-	FVector ImpulseDirection = GetActorRotation().Vector() * -1.0f;
-	ImpulseDirection.Normalize();
+//     //충돌 방향 설정 (바라보는 방향 뒤로)
+// 	FVector ImpulseDirection = GetActorRotation().Vector() * -1.0f;
+// 	ImpulseDirection.Normalize();
 
-	//충돌 세기
-	float ImpulseStrength = 5000.0f;
-    FVector FinalImpulse = ImpulseDirection * ImpulseStrength;
-    this->GetMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
-	this->GetMesh()->AddImpulseToAllBodiesBelow(FinalImpulse, NAME_None);	
-    //this->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-    //this->GetMesh()->SetSimulatePhysics(true);
+// 	//충돌 세기
+// 	float ImpulseStrength = 5000.0f;
+//     FVector FinalImpulse = ImpulseDirection * ImpulseStrength;
+//     this->GetMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+// 	this->GetMesh()->AddImpulseToAllBodiesBelow(FinalImpulse, NAME_None);	
+//     //this->GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+//     //this->GetMesh()->SetSimulatePhysics(true);
     
-}
+// }
 
-void ACPP_Dorongo::ItemDrop()
-{
-    // GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("들어오기는 했는데..")));
+// void ACPP_Dorongo::ItemDrop()
+// {
+//     // GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("들어오기는 했는데..")));
 
-    // if (ItemToSpawn)
-    // {
-    //     FVector Location = GetActorLocation();
-    //     FRotator Rotation = GetActorRotation();
-    //     GetWorld()->SpawnActor<AActor>(ItemToSpawn, Location, Rotation);
-    // }
-    if (ItemsToSpawn.Num() > 0)
-    {
-        int32 RandomIndex = FMath::RandRange(0, ItemsToSpawn.Num() - 1);
-        TSubclassOf<AActor> SelectedItem = ItemsToSpawn[RandomIndex];
+//     // if (ItemToSpawn)
+//     // {
+//     //     FVector Location = GetActorLocation();
+//     //     FRotator Rotation = GetActorRotation();
+//     //     GetWorld()->SpawnActor<AActor>(ItemToSpawn, Location, Rotation);
+//     // }
+//     if (ItemsToSpawn.Num() > 0)
+//     {
+//         int32 RandomIndex = FMath::RandRange(0, ItemsToSpawn.Num() - 1);
+//         TSubclassOf<AActor> SelectedItem = ItemsToSpawn[RandomIndex];
 
-        if (SelectedItem)
-        {
-            FVector Location = GetActorLocation();
-            FRotator Rotation = GetActorRotation();
-            GetWorld()->SpawnActor<AActor>(SelectedItem, Location, Rotation);
-        }
-    }
-}
+//         if (SelectedItem)
+//         {
+//             FVector Location = GetActorLocation();
+//             FRotator Rotation = GetActorRotation();
+//             GetWorld()->SpawnActor<AActor>(SelectedItem, Location, Rotation);
+//         }
+//     }
+// }

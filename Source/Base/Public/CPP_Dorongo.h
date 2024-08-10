@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CPP_MonsterBase.h"
 #include "GameFramework/Character.h"
 #include "CPP_Dorongo.generated.h"
 
 UCLASS()
-class BASE_API ACPP_Dorongo : public ACharacter
+class BASE_API ACPP_Dorongo : public ACPP_MonsterBase
 {
 	GENERATED_BODY()
 
@@ -31,47 +32,47 @@ public:
 	FVector StartPoint;
 	FVector EndPoint;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
-	float HP;
+	// UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	// float HP;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
-	float MaxHP = 100;
+	// UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	// float MaxHP = 100;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
-	bool isDead = false;
+	// UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	// bool isDead = false;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Combat")
-	bool isAttack;
+	// UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Combat")
+	// bool isAttack;
 
-	bool bCanTakeDamage = true;
+	// bool bCanTakeDamage = true;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	float DamageCooldownTime = 0.1f;
+	// UPROPERTY(EditAnywhere, Category = "Combat")
+	// float DamageCooldownTime = 0.1f;
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	//bool bHit;
 	
 
 public:
-    UFUNCTION(BlueprintCallable, Category = "HP")
-    void TakeDamage1(float DamageAmount);
+    // UFUNCTION(BlueprintCallable, Category = "HP")
+    // void TakeDamage1(float DamageAmount);
 
-	UFUNCTION(BlueprintCallable, Category = "HP")
-	virtual float TakeDamage(float DamageAmount, 
-    FDamageEvent const& DamageEvent, 
-    AController* EventInstigator, 
-    AActor* DamageCauser)override;
+	// UFUNCTION(BlueprintCallable, Category = "HP")
+	// virtual float TakeDamage(float DamageAmount, 
+    // FDamageEvent const& DamageEvent, 
+    // AController* EventInstigator, 
+    // AActor* DamageCauser)override;
 
-	void ResetDamageCoolDown();
+	// void ResetDamageCoolDown();
 
-	//UPROPERTY(EditAnywhere,BlueprintReadWrite)
-    //UStaticMeshComponent* PhysicsMesh;
-	UFUNCTION(BlueprintCallable, Category = "Physics")
-    void EnablePhysicsSimulation();
+	// //UPROPERTY(EditAnywhere,BlueprintReadWrite)
+    // //UStaticMeshComponent* PhysicsMesh;
+	// UFUNCTION(BlueprintCallable, Category = "Physics")
+    // void EnablePhysicsSimulation();
 
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
-	void ItemDrop();
+	// UFUNCTION(BlueprintCallable, Category = "Spawn")
+	// void ItemDrop();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
-    TArray<TSubclassOf<AActor>> ItemsToSpawn;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+    // TArray<TSubclassOf<AActor>> ItemsToSpawn;
 
 };
