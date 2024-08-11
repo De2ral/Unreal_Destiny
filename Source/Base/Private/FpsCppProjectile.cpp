@@ -56,7 +56,7 @@ void AFpsCppProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent,
     if (OtherActor && OtherActor != this)
     {
         // 데미지를 적용합니다.
-        float DamageAmount = 50.0f;  // 기본 데미지 양 설정 (필요에 따라 조정 가능)
+        float DamageAmount = 20.0f;  // 기본 데미지 양 설정 (필요에 따라 조정 가능)
 
         // 발사체를 생성한 플레이어의 컨트롤러를 가져옵니다. 이 예제에서는 발사체의 인스티게이터를 사용합니다.
         AController* InstigatorController = GetInstigatorController();
@@ -69,6 +69,8 @@ void AFpsCppProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent,
             this,                   
             UDamageType::StaticClass()
         );
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("bullet hit : %f"),DamageAmount));
+		
 
         // 발사체를 파괴합니다.
         Destroy();

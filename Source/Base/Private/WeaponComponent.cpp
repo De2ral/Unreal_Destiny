@@ -128,7 +128,7 @@ void UWeaponComponent::Fire()
                     {
                         UE_LOG(LogTemp, Warning, TEXT("linetracing"));
                         UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
-                        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%f"),CurrentWeapon.GunDamage));
+                        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("linetrace hit : %d"),CurrentWeapon.GunDamage));
 
                     }
 
