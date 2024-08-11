@@ -65,4 +65,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString GunModelPath;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool Linetracing;
 };
