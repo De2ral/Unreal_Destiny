@@ -53,6 +53,7 @@ void ACPP_MonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
 {	
     if(!bCanTakeDamage) return 0.0f;
+    DamageValue = DamageAmount;
 
 	float Damage = Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
     
@@ -68,7 +69,7 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
     }
     FTimerHandle UnusedHandle; 
     GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_MonsterBase::ResetDamageCoolDown, DamageCooldownTime, false);
-
+    
     return Damage;
     
 }
