@@ -14,6 +14,7 @@ class BASE_API ACPP_MonsterBase : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ACPP_MonsterBase();
+	
 
 protected:
 	// Called when the game starts or when spawned

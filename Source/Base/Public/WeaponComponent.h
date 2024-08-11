@@ -68,6 +68,9 @@ public:
 
     UPROPERTY()
     UWeaponWidget* AmmoWidget;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+    float Damage;
     
 protected:
     virtual void BeginPlay() override;

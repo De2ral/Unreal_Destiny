@@ -113,21 +113,56 @@ void UWeaponComponent::Fire()
 			CollisionParams.AddIgnoredActor(Character);
 			CollisionParams.AddIgnoredActor(Projectile);
 			
-			bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
+			bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Pawn/*ECC_Visibility*/, CollisionParams);
 
-			DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
+			DrawDebugLine(World, TraceStart, TraceEnd, bHit ? FColor::Red : FColor::Green, false, 1, 0, 1);
 
 			FVector ProjectileDirection = SpawnRotation.Vector();
 			
 			if (bHit)
 			{
+                AActor* HitActor = HitResult.GetActor();
+                if(HitActor && HitActor->ActorHasTag(FName("Enemy")))
+                {
 				DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
 
 				UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
 				UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
 				
 				ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
-			}
+                }
+
+                Damage = 20.0f;
+                UGameplayStatics::ApplyDamage(
+                HitActor,
+                Damage,
+                GetOwner()->GetInstigatorController(), 
+                GetOwner(),            
+                UDamageType::StaticClass()  
+                );
+            };
+            //     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("1")));
+            //     if (HitActor)
+            //     {
+            //         if (HitActor->ActorHasTag(FName("Enemy")))
+            //         {
+            //             UE_LOG(LogTemp, Warning, TEXT("Hit actor has the 'Enemy' tag!"));
+            //         }
+            //         else
+            //         {
+            //             UE_LOG(LogTemp, Warning, TEXT("Hit actor does not have the 'Enemy' tag."));
+            //         }
+            //     }
+            //     if (HitActor)
+            //     {
+            //         UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitActor->GetName());
+
+            //         for (const FName& Tag : HitActor->Tags)
+            //         {
+            //             UE_LOG(LogTemp, Warning, TEXT("Hit actor tag: %s"), *Tag.ToString());
+            //         }
+            //     }
+			// }
 
             if (Projectile->GetProjectileMovement())
             {
