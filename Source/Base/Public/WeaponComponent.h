@@ -105,6 +105,7 @@ public:
     
 public:
     ADestinyFPSBase* Character;
+    AFpsCppProjectile* Projectile;
 
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;

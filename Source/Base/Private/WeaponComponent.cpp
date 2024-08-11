@@ -37,7 +37,7 @@ void UWeaponComponent::BeginPlay()
     ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (PlayerCharacter != nullptr)
     {
-        EquipWeapon3();
+        EquipWeapon1();
     }
 	else
 	{
@@ -76,7 +76,6 @@ void UWeaponComponent::Fire()
 		{
 			APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
 
-
             if (PlayerController == nullptr)
         {
             UE_LOG(LogTemp, Warning, TEXT("PlayerController is null."));
@@ -87,22 +86,14 @@ void UWeaponComponent::Fire()
             if(CurrentSkeletalMeshComponent)
             {
                 MuzzleLocation = CurrentSkeletalMeshComponent->GetComponentLocation() + (CurrentSkeletalMeshComponent->GetRightVector() * 100.0f);
-                UE_LOG(LogTemp, Warning, TEXT("MyVector Location: %s"), *CurrentSkeletalMeshComponent->GetComponentLocation().ToString()); 
-                UE_LOG(LogTemp, Warning, TEXT("MyVector forward: %s"), *CurrentSkeletalMeshComponent->GetForwardVector().ToString()); 
-                UE_LOG(LogTemp, Warning, TEXT("MyVector MuzzleLocation: %s"), *MuzzleLocation.ToString()); 
             }
             
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-	
-			AFpsCppProjectile* Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
+
+            if(!CurrentWeapon.Linetracing)
+			    Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
 			
-            if (Projectile == nullptr)
-            {
-                UE_LOG(LogTemp, Warning, TEXT("Failed to spawn projectile."));
-                return;
-            }
-            
 			const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
 			
 			const FVector TraceStart = CameraLocation;
@@ -110,10 +101,14 @@ void UWeaponComponent::Fire()
 
 			FHitResult HitResult;
 			FCollisionQueryParams CollisionParams;
-			CollisionParams.AddIgnoredActor(Character);
-			CollisionParams.AddIgnoredActor(Projectile);
+			CollisionParams.AddIgnoredActor(GetOwner());
+            if(!CurrentWeapon.Linetracing)
+			    CollisionParams.AddIgnoredActor(Projectile);
 			
-			bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
+            FCollisionObjectQueryParams ObjectQueryParams;
+            ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+			//bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
+            bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, ObjectQueryParams, CollisionParams);
 
 			DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
 
@@ -121,19 +116,29 @@ void UWeaponComponent::Fire()
 			
 			if (bHit)
 			{
-				DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+                if (HitResult.GetActor()->ActorHasTag("Enemy"))
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Hit an actor with the 'Enemy' tag!"));
 
-				UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
-				UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
-				
+                    DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+
+				    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+				    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
+                    if(CurrentWeapon.Linetracing)
+                    {
+                        UE_LOG(LogTemp, Warning, TEXT("linetracing"));
+                        UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
+                    }
+
+                    
+                }
 				ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
 			}
 
-            if (Projectile->GetProjectileMovement())
+            if (Projectile->GetProjectileMovement() && !CurrentWeapon.Linetracing)
             {
                 Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
             }
-
 
 			if (PlayerController != nullptr)
     		{
