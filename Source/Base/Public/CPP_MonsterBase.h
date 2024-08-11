@@ -34,7 +34,7 @@ public:
 	bool isDead = false;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Combat")
-	bool isAttack;
+	bool isAttack;	
 
 	bool bCanTakeDamage = true;
 
