@@ -19,7 +19,7 @@ enum class EItemType : uint8
 };
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS()
 class BASE_API UItemComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -32,19 +32,19 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class USphereComponent* ItemCollider;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class UStaticMeshComponent* ItemMesh;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class UMaterial* SpecAmmoMaterial;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class UMaterial* NormalAmmoMaterial;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class UMaterial* RefAmmoMaterial;
 
 	UFUNCTION()
