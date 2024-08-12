@@ -4,6 +4,8 @@
 #include "DestinyFPSBase.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
@@ -11,6 +13,7 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "Titan_Skill_Barrier.h"
+#include "Titan_Skill_Grenade.h"
 
 
 // Sets default values
@@ -71,16 +74,17 @@ void ADestinyFPSBase::BeginPlay()
 	}
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
-
-
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (SkillCoolTime > 0.f)
-		SkillCoolTime -= DeltaTime;
+	if (CurSkillCoolTime > 0.f)
+		CurSkillCoolTime -= DeltaTime;
+
+	if (CurGrenadeCoolTime > 0.f)
+		CurGrenadeCoolTime -= DeltaTime;
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -107,13 +111,26 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
 		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
 
-		//Input->BindAction(FireAction, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::Fire);
-        //Input->BindAction(AimAction, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::StartAiming);
-        //Input->BindAction(AimAction, ETriggerEvent::Completed, WeaponComponent, &UWeaponComponent::StopAiming);
-        //Input->BindAction(Equip1Action, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquipWeapon1);
-        //Input->BindAction(Equip2Action, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquipWeapon2);
-        //Input->BindAction(Equip3Action, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquipWeapon3);
+		Input->BindAction(InventoryAction,ETriggerEvent::Completed, this, &ADestinyFPSBase::InvenOpenClose);
 	}
+}
+
+void ADestinyFPSBase::InvenOpenClose()
+{
+	if(bIsInvenOpen)
+	{
+		bIsInvenOpen = false;
+		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 닫혔다"));
+
+	}
+
+	else if(!bIsInvenOpen)
+	{
+		bIsInvenOpen = true;
+		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 열렸다"));
+	}
+
+
 }
 
 void ADestinyFPSBase::Move(const FInputActionValue& Value)
@@ -150,24 +167,47 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 
 	UWorld* world = GetWorld();
 
-	if(SkillCoolTime <= 0.f)
+	if(CurSkillCoolTime <= 0.f)
 	{
 		if(world)
 		{
 			FActorSpawnParameters SpawnParams;
-			FVector spawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 200.f;
-			spawnLocation.Z -= 15.f;
-			FRotator spawnRotation = this->GetActorRotation();
-			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), spawnLocation, spawnRotation, SpawnParams);
+			FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 100.f;
+			SpawnLocation.Z += 20.f;
+			FRotator SpawnRotation = this->GetActorRotation();
+			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
 
-			SkillCoolTime = 20.f;
+			CurSkillCoolTime = SkillCoolTime;
+			isShield = true;
 		}
 	}
 }
 
 void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("수류탄 투척"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
+	if (CurGrenadeCoolTime <= 0.f)
+	{
+		CurGrenadeCoolTime = GrenadeCoolTime;
+		isGrenade = true;
+	}
+}
+
+void ADestinyFPSBase::Throw()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	UWorld* world = GetWorld();
+	if (world && PlayerController)
+	{
+		FActorSpawnParameters SpawnParams;
+		FVector SpawnLocation = FppMesh->GetSocketLocation("GripPoint");
+		SpawnLocation.Z -= 50.f; 
+		FRotator SpawnRotation = this->GetActorRotation();
+		ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+		grenadeObject->SetThrowDirection(PlayerController->GetControlRotation().Vector() + this->GetActorUpVector() / 10.f);
+	}
 }
 
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)

@@ -11,15 +11,24 @@ UItemComponent::UItemComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	
 	AActor* Parent = GetOwner();
-	
+
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
 	ItemCollider->InitSphereRadius(50.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
-	if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());	
+
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+
+	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));
+	NormalAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("NormAmmoMat"));
+	RefAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("RefAmmoMat"));
+
+	if(IsValid(Parent)) 
+	{
+		ItemMesh->SetupAttachment(Parent->GetRootComponent());
+		ItemCollider->SetupAttachment(ItemMesh);
+	}
+
 	
-
-
-
 	// ...
 }
 
@@ -28,11 +37,25 @@ UItemComponent::UItemComponent()
 void UItemComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&UItemComponent::OnOverlapBegin);
-	AActor* Parent = GetOwner();
 
-	if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());	
+	switch (ThisItemType)
+	{
+	case EItemType::Ammo:
+		ItemMesh->SetMaterial(0,NormalAmmoMaterial);
+		break;
+	case EItemType::SpecAmmo:
+		ItemMesh->SetMaterial(0,SpecAmmoMaterial);
+		break;
+	case EItemType::RefAmmo:
+		ItemMesh->SetMaterial(0,RefAmmoMaterial);
+		break;
+	
+	default:
+		break;
+	}
+
 	
 }
 
@@ -43,12 +66,36 @@ void UItemComponent::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor 
 
 	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")) && Parent)
 	{
-
+		UInventorySystem* PlayerInventory = Cast<UInventorySystem>(OtherActor->GetComponentByClass(UInventorySystem::StaticClass()));
 		//여기에 아이템 - 인벤토리간 상호작용 코드
+		if(ThisItemType == EItemType::Ammo /*&& !PlayerInventory->bIsAmmoFull()*/)
+		{
+			PlayerInventory->AddCurrAmmo(30);
+			Parent->Destroy();
+			
+		}
+
+		if(ThisItemType == EItemType::RefAmmo && !PlayerInventory->bIsRefAmmoFull())
+		{
+			PlayerInventory->AddCurrRefAmmo(20);
+			Parent->Destroy();
+			
+		}
+
+		if(ThisItemType == EItemType::SpecAmmo && !PlayerInventory->bIsSpecAmmoFull())
+		{
+			PlayerInventory->AddCurrSpecialAmmo(5);
+			Parent->Destroy();
+			
+		}
+
+		// else if(ThisItemType == EItemType::Weapon)
+		// {
 
 
+			
+		// }
 
-		Parent->Destroy();
 	}
 
 }
