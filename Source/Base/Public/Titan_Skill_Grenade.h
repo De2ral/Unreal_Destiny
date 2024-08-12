@@ -29,9 +29,13 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* ExplodeParticle;
+
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
-	void FireInDirection(const FVector& ShootDirection);
+	void PlayExplodeParticleSystem();
+	void SetThrowDirection(FVector Direction);
 	void DestroyGrenade();
 };

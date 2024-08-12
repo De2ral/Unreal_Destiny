@@ -161,25 +161,26 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
-
-	UWorld* world = GetWorld(); 
-
 	if (CurGrenadeCoolTime <= 0.f)
 	{
-		if (world)
-		{
-			FActorSpawnParameters SpawnParams;
-			FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 50.f;
-			FRotator SpawnRotation = FppMesh->GetSocketLocation("GripPoint");
-			ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
-			grenadeObject->FireInDirection(this->GetActorForwardVector() + this->GetActorUpVector() / 5.f);
+		CurGrenadeCoolTime = GrenadeCoolTime;
+		isGrenade = true;
+	}
+}
 
-			FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-			grenadeObject->AttachToComponent(FppMesh, AttachmentRules, FName(TEXT("GripPoint")));
-			
-			CurGrenadeCoolTime = GrenadeCoolTime;
-			isGrenade = true;
-		}
+void ADestinyFPSBase::Throw()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
+
+	UWorld* world = GetWorld();
+	if (world)
+	{
+		FActorSpawnParameters SpawnParams;
+		FVector SpawnLocation = FppMesh->GetSocketLocation("GripPoint");
+		SpawnLocation.Z -= 50.f; 
+		FRotator SpawnRotation = this->GetActorRotation();
+		ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+		grenadeObject->SetThrowDirection(this->GetActorForwardVector() + this->GetActorUpVector() / 10.f);
 	}
 }
 

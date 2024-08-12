@@ -4,6 +4,9 @@
 #include "Titan_Skill_Grenade.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ATitan_Skill_Grenade::ATitan_Skill_Grenade()
@@ -23,13 +26,17 @@ ATitan_Skill_Grenade::ATitan_Skill_Grenade()
 	if(!ProjectileMovementComponent)
 	{
 		ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-		ProjectileMovementComponent->InitialSpeed = 2000.0f;
-		ProjectileMovementComponent->MaxSpeed = 2000.0f;
+		ProjectileMovementComponent->InitialSpeed = 4000.0f;
+		ProjectileMovementComponent->MaxSpeed = 4000.0f;
 		ProjectileMovementComponent->bRotationFollowsVelocity = true;
 		ProjectileMovementComponent->bShouldBounce = true;
 		ProjectileMovementComponent->Bounciness = 0.3f;
 		ProjectileMovementComponent->ProjectileGravityScale = 1.f;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/ParagonDrongo/FX/Particles/Abilities/Grenade/FX/P_Drongo_Grenade_Explode.P_Drongo_Grenade_Explode'"));
+	if (ParticleAsset.Succeeded())
+		ExplodeParticle = ParticleAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -46,13 +53,14 @@ void ATitan_Skill_Grenade::Tick(float DeltaTime)
 
 }
 
-void ATitan_Skill_Grenade::FireInDirection(const FVector& ShootDirection)
+void ATitan_Skill_Grenade::SetThrowDirection(FVector Direction)
 {
-	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
+	ProjectileMovementComponent->Velocity = Direction * ProjectileMovementComponent->InitialSpeed;
 }
 
 void ATitan_Skill_Grenade::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+	this->PlayExplodeParticleSystem();
 	this->DestroyGrenade();
 }
 
@@ -60,4 +68,17 @@ void ATitan_Skill_Grenade::DestroyGrenade()
 {
 	if (this)
 		this->Destroy();
+}
+
+void ATitan_Skill_Grenade::PlayExplodeParticleSystem()
+{
+    if (ExplodeParticle)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(
+            GetWorld(),
+            ExplodeParticle,
+            GetActorLocation(),
+            GetActorRotation()
+        );
+    }
 }

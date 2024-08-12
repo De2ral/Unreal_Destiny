@@ -111,8 +111,8 @@ public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Skill(const FInputActionValue& Value);
-	void jump(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
+	void jump(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
 
 	void Sprint(const FInputActionValue& Value);
@@ -123,6 +123,8 @@ public:
 
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
+
+	void Throw();
 	
 private:
 	float CurSkillCoolTime = 0.f;
