@@ -9,7 +9,8 @@ UItemComponent::UItemComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	
+
+
 	AActor* Parent = GetOwner();
 
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
@@ -52,6 +53,24 @@ void UItemComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&UItemComponent::OnOverlapBegin);
+
+	uint8 randomSeed;
+	randomSeed = FMath::RandRange(2,4);
+
+	switch (randomSeed)
+	{
+	case 2:
+		ThisItemType = EItemType::RefAmmo;
+		break;
+	case 3:
+		ThisItemType = EItemType::Ammo;
+		break;
+	case 4:
+		ThisItemType = EItemType::SpecAmmo;
+		break;
+	default:
+		break;
+	}
 
 	switch (ThisItemType)
 	{
