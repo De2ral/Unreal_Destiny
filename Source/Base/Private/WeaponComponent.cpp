@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "DamageInfo.h"
 
 #include "FpsCppProjectile.h"
 
@@ -66,7 +67,7 @@ void UWeaponComponent::BeginPlay()
 
 void UWeaponComponent::Fire()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Fire2"));
+    UE_LOG(LogTemp, Warning, TEXT("Fire2"));    
 
     CurrentAmmo--;
     AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
@@ -113,7 +114,6 @@ void UWeaponComponent::Fire()
 			DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
 
 			FVector ProjectileDirection = SpawnRotation.Vector();
-			
 			if (bHit)
 			{
                 if (HitResult.GetActor()->ActorHasTag("Enemy"))
@@ -137,7 +137,7 @@ void UWeaponComponent::Fire()
 				ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
 			}
 
-            if (Projectile->GetProjectileMovement() && !CurrentWeapon.Linetracing)
+            if (Projectile)
             {
                 Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
             }

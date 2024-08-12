@@ -8,6 +8,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/UnrealMathUtility.h"
+#include "HitDamageEvent.h"
 #include "Components/CapsuleComponent.h"
 
 // Sets default values
@@ -53,10 +54,11 @@ void ACPP_MonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
 {	
     if(!bCanTakeDamage) return 0.0f;
+    
+	float Damage = Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
+
     DamageValue = DamageAmount;
 
-	float Damage = Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
-    
     HP -= DamageAmount;
     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
 
