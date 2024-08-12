@@ -13,10 +13,15 @@ UItemComponent::UItemComponent()
 	AActor* Parent = GetOwner();
 
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
-	ItemCollider->InitSphereRadius(50.0f);
+	ItemCollider->InitSphereRadius(7.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+	ItemMesh->SetBoundsScale(3.0f);
+	
+	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Unreal_Destiny/Content/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.uasset"));
+	ItemMesh->SetStaticMesh(MeshAsset.Object);
+	ItemMesh->SetSimulatePhysics(true);
 
 	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));
 	NormalAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("NormAmmoMat"));
