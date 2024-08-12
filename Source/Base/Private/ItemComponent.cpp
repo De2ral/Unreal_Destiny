@@ -15,7 +15,18 @@ UItemComponent::UItemComponent()
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
 	ItemCollider->InitSphereRadius(50.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
-	if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());
+
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+
+	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));
+	NormalAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("NormAmmoMat"));
+	RefAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("RefAmmoMat"));
+
+	if(IsValid(Parent)) 
+	{
+		ItemMesh->SetupAttachment(Parent->GetRootComponent());
+		ItemCollider->SetupAttachment(ItemMesh);
+	}
 
 	
 	// ...
@@ -26,9 +37,24 @@ UItemComponent::UItemComponent()
 void UItemComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&UItemComponent::OnOverlapBegin);
 
+	switch (ThisItemType)
+	{
+	case EItemType::Ammo:
+		ItemMesh->SetMaterial(0,NormalAmmoMaterial);
+		break;
+	case EItemType::SpecAmmo:
+		ItemMesh->SetMaterial(0,SpecAmmoMaterial);
+		break;
+	case EItemType::RefAmmo:
+		ItemMesh->SetMaterial(0,RefAmmoMaterial);
+		break;
+	
+	default:
+		break;
+	}
 
 	
 }
