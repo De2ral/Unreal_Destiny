@@ -115,8 +115,6 @@ public:
 	float GrenadeCoolTime = 3.f;
 
 
-	bool bPlayerInteractable = false ;
-
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
 	

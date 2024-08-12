@@ -20,7 +20,7 @@ ACPP_ItemBase::ACPP_ItemBase()
     // PickupItem 컴포넌트를 동적으로 추가
     Item = CreateDefaultSubobject<UItemComponent>(TEXT("ItemComponent"));    
     
-    Item->ItemCollider->SetupAttachment(Mesh);  
+    //Item->ItemCollider->SetupAttachment(Mesh);  
     // Item->ItemCollider->RegisterComponent();  
 }
 
@@ -37,11 +37,11 @@ void ACPP_ItemBase::BeginPlay()
 
     Mesh->AddImpulse(Impulse, NAME_None, true);
 
-    if (Item && Item->ItemCollider && Mesh)
-    {
+    //if (Item && Item->ItemCollider && Mesh)
+    //{
         // 아이템 콜리더를 메쉬에 부착
-        Item->ItemCollider->SetupAttachment(Mesh);        
-    }
+    //    Item->ItemCollider->SetupAttachment(Mesh);        
+    //}
 
 }
 

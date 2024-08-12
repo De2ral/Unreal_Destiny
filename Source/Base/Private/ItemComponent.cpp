@@ -68,7 +68,7 @@ void UItemComponent::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor 
 	{
 		UInventorySystem* PlayerInventory = Cast<UInventorySystem>(OtherActor->GetComponentByClass(UInventorySystem::StaticClass()));
 		//여기에 아이템 - 인벤토리간 상호작용 코드
-		if(ThisItemType == EItemType::Ammo && !PlayerInventory->bIsAmmoFull())
+		if(ThisItemType == EItemType::Ammo /*&& !PlayerInventory->bIsAmmoFull()*/)
 		{
 			PlayerInventory->AddCurrAmmo(30);
 			Parent->Destroy();
