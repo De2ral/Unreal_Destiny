@@ -80,6 +80,9 @@ public:
 	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* InventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsSliding;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -112,7 +115,12 @@ public:
 	float GrenadeCoolTime = 3.f;
 
 
+	bool bPlayerInteractable = false ;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	bool bIsInvenOpen = false;
 	
+	void InvenOpenClose();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Skill(const FInputActionValue& Value);
