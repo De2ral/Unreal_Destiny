@@ -32,7 +32,7 @@ protected:
 	int CurrSpecialAmmo = 0;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
-	int MaxSpecialAmmo = 60;
+	int MaxSpecialAmmo = 30;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int CurrRefAmmo = 0;
@@ -60,17 +60,18 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	//inline int GetCurrAmmo() {return CurrAmmo; }
+	void AddCurrAmmo(int value) { CurrAmmo += value; }
 
-	//inline int GetMaxAmmo() {return MaxAmmo; }
+	void AddCurrSpecialAmmo(int value) { CurrSpecialAmmo += value; }
 
-	//inline int CurrSpecialAmmo() {return CurrSpecialAmmo; }
+	void AddCurrRefAmmo(int value) { CurrRefAmmo += value; }
+	
 
-	//inline int MaxSpecialAmmo() {return MaxSpecialAmmo; }
+	bool bIsAmmoFull() {return (CurrAmmo > MaxAmmo) ? true : false; }
 
-	//inline int CurrRefAmmo() {return CurrRefAmmo; }
+	bool bIsSpecAmmoFull() {return (CurrSpecialAmmo > MaxSpecialAmmo) ? true : false; }
 
-	//inline int MaxRefAmmo() {return MaxRefAmmo; }
+	bool bIsRefAmmoFull() {return (CurrRefAmmo > MaxRefAmmo) ? true : false; }
 
 		
 };

@@ -5,7 +5,17 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/SphereComponent.h"
+#include "InventorySystem.h"
 #include "ItemComponent.generated.h"
+
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+	Ammo UMETA(DisplayName = "Ammo"),
+	RefAmmo UMETA(DisplayName = "RefAmmo"),
+	SpecAmmo UMETA(DisplayName = "SpecAmmo"),
+	Weapon UMETA(DisplayName = "Weapon")
+};
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -30,6 +40,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UPROPERTY(EditAnywhere)
+	EItemType ThisItemType;
 
 		
 };
