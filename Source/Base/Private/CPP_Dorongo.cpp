@@ -31,7 +31,7 @@ void ACPP_Dorongo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	 PerformLineTrace();
+	//PerformLineTrace();
 
 }
 

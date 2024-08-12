@@ -45,4 +45,6 @@ private:
 public:
 	void HandleDeath();
 
+	bool CanLookTarget = false;
+
 };
