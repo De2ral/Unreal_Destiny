@@ -137,7 +137,7 @@ void UWeaponComponent::Fire()
 				ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
 			}
 
-            if (Projectile->GetProjectileMovement() && !CurrentWeapon.Linetracing)
+            if (Projectile)
             {
                 Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
             }
