@@ -15,8 +15,7 @@ UItemComponent::UItemComponent()
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
 	ItemCollider->InitSphereRadius(50.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
-	if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());
-
+	if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());	
 	
 
 
@@ -31,8 +30,9 @@ void UItemComponent::BeginPlay()
 	Super::BeginPlay();
 
 	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&UItemComponent::OnOverlapBegin);
+	AActor* Parent = GetOwner();
 
-
+	if(IsValid(Parent)) ItemCollider->SetupAttachment(Parent->GetRootComponent());	
 	
 }
 

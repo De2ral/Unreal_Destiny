@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+
+#include "WeaponComponent.h"
+
 #include "DestinyFPSBase.generated.h"
 
 class UCharacterMovementComponent;
@@ -74,6 +77,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InterAction;
 
+	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsSliding;
 
@@ -124,6 +129,16 @@ public:
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
 
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+    UWeaponComponent* WeaponComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	bool bHasRifle;
+
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void SetHasRifle(bool bNewHasRifle);
+	
+	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
 	void Throw();
 	
 private:
