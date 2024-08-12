@@ -14,27 +14,19 @@ UItemComponent::UItemComponent()
 	AActor* Parent = GetOwner();
 
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
-	ItemCollider->InitSphereRadius(9.0f);
+	ItemCollider->InitSphereRadius(7.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
-	ItemMesh->SetWorldScale3D(FVector3d(3.0f,3.0f,3.0f));
+	ItemMesh->SetBoundsScale(3.0f);
 	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.SM_Drongo_Grenade_FX_Body02'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Unreal_Destiny/Content/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.uasset"));
 	ItemMesh->SetStaticMesh(MeshAsset.Object);
 	ItemMesh->SetSimulatePhysics(true);
 
 	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));
-	static ConstructorHelpers::FObjectFinder<UMaterial>FoundMaterial(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/SpecAmmoMat.SpecAmmoMat'"));
-	SpecAmmoMaterial = FoundMaterial.Object;
-
 	NormalAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("NormAmmoMat"));
-	static ConstructorHelpers::FObjectFinder<UMaterial>FoundMaterial2(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/NormalAmmoMat.NormalAmmoMat'"));
-	NormalAmmoMaterial = FoundMaterial2.Object;
-
 	RefAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("RefAmmoMat"));
-	static ConstructorHelpers::FObjectFinder<UMaterial>FoundMaterial3(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/RefAmmoMat.RefAmmoMat'"));
-	RefAmmoMaterial = FoundMaterial3.Object;
 
 	if(IsValid(Parent)) 
 	{
