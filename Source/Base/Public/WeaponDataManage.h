@@ -67,5 +67,8 @@ public:
 	FString GunModelPath;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* GunImage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Linetracing;
 };

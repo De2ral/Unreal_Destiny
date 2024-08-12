@@ -106,13 +106,6 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 
 		Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
 		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
-
-		//Input->BindAction(FireAction, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::Fire);
-        //Input->BindAction(AimAction, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::StartAiming);
-        //Input->BindAction(AimAction, ETriggerEvent::Completed, WeaponComponent, &UWeaponComponent::StopAiming);
-        //Input->BindAction(Equip1Action, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquipWeapon1);
-        //Input->BindAction(Equip2Action, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquipWeapon2);
-        //Input->BindAction(Equip3Action, ETriggerEvent::Started, WeaponComponent, &UWeaponComponent::EquipWeapon3);
 	}
 }
 
