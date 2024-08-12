@@ -4,6 +4,7 @@
 #include "Titan_Skill_Grenade.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -60,8 +61,9 @@ void ATitan_Skill_Grenade::SetThrowDirection(FVector Direction)
 
 void ATitan_Skill_Grenade::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+	UGameplayStatics::ApplyDamage(OtherActor, GrenadeDamage, nullptr, this, UDamageType::StaticClass());
 	this->PlayExplodeParticleSystem();
-	this->DestroyGrenade();
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ATitan_Skill_Grenade::DestroyGrenade, 0.05f, false);
 }
 
 void ATitan_Skill_Grenade::DestroyGrenade()
@@ -78,7 +80,8 @@ void ATitan_Skill_Grenade::PlayExplodeParticleSystem()
             GetWorld(),
             ExplodeParticle,
             GetActorLocation(),
-            GetActorRotation()
+            GetActorRotation(),
+			(FVector)((1.5F))
         );
     }
 }

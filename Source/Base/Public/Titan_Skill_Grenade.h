@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "TimerManager.h"
 #include "Titan_Skill_Grenade.generated.h"
 
 UCLASS()
@@ -38,4 +39,8 @@ public:
 	void PlayExplodeParticleSystem();
 	void SetThrowDirection(FVector Direction);
 	void DestroyGrenade();
+
+private:
+	float GrenadeDamage = 50.f;
+	FTimerHandle TimerHandle;
 };
