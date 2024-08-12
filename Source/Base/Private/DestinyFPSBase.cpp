@@ -4,6 +4,8 @@
 #include "DestinyFPSBase.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
@@ -182,15 +184,16 @@ void ADestinyFPSBase::Throw()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
 
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	UWorld* world = GetWorld();
-	if (world)
+	if (world && PlayerController)
 	{
 		FActorSpawnParameters SpawnParams;
 		FVector SpawnLocation = FppMesh->GetSocketLocation("GripPoint");
 		SpawnLocation.Z -= 50.f; 
 		FRotator SpawnRotation = this->GetActorRotation();
 		ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
-		grenadeObject->SetThrowDirection(this->GetActorForwardVector() + this->GetActorUpVector() / 10.f);
+		grenadeObject->SetThrowDirection(PlayerController->GetControlRotation().Vector() + this->GetActorUpVector() / 10.f);
 	}
 }
 
