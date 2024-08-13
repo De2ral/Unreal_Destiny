@@ -60,6 +60,7 @@ void AFpsCppProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent,
     // OtherActor가 유효하고, 자기 자신이 아닌 경우에만 데미지를 가합니다.
 
 	UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin."));
+	UE_LOG(LogTemp, Warning, TEXT("Damage : %f"),Damage);
     if (OtherActor && OtherActor != this)
     {
         AController* InstigatorController = GetInstigatorController();

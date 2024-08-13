@@ -148,6 +148,7 @@ void UWeaponComponent::Fire()
                 if(CurrentWeapon.Linetracing)
                 {
                     UE_LOG(LogTemp, Warning, TEXT("linetracing"));
+                    UE_LOG(LogTemp, Warning, TEXT("Damage : %f"),CurrentWeapon.GunDamage);
                     UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
                     return;
                 }

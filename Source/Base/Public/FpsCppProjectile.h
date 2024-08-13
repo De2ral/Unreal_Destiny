@@ -53,6 +53,6 @@ public:
 
 
 private:
-	int32 Damage;
+	float Damage;
 };
 
