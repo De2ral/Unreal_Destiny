@@ -80,6 +80,9 @@ public:
 	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* InventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsSliding;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -95,13 +98,32 @@ public:
 	float MaxInteractTime = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bPlayerInteractable = false ;
+	bool bPlayerInteractable = false;
+
+
+	// Skill Variable
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isShield = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isGrenade = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SkillCoolTime = 3.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float GrenadeCoolTime = 3.f;
+
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	bool bIsInvenOpen = false;
 	
+	void InvenOpenClose();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Skill(const FInputActionValue& Value);
-	void jump(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
+	void jump(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
 
 	void Sprint(const FInputActionValue& Value);
@@ -116,20 +138,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
 
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    //class UInputAction* FireAction;
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    //class UInputAction* AimAction;
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    //class UInputAction* Equip1Action;
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    //class UInputAction* Equip2Action;
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    //class UInputAction* Equip3Action;
-	
-	
-
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	bool bHasRifle;
 
@@ -137,7 +145,9 @@ public:
 	void SetHasRifle(bool bNewHasRifle);
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
+	void Throw();
+	
 private:
-	float SkillCoolTime = 0.f;
-
+	float CurSkillCoolTime = 0.f;
+	float CurGrenadeCoolTime = 0.f;
 };

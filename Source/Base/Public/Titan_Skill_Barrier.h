@@ -23,11 +23,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Mesh;
 
 	void DestroyBarrier();
 
 private:
 	float DestroyDelay = 10.f;
+	float MoveTime = 0.1f;
+	float MoveSpeed = 500.f;
 };
