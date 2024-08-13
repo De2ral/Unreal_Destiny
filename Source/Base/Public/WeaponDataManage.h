@@ -55,17 +55,26 @@ public:
 	FireTypeList FireType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 GunDamage;
+	float GunDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Rebound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 FireSpeed;
+	float FireSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CurrentAmmo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString GunModelPath;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* GunImage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Linetracing;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMesh* ProjectileMesh;
 };
