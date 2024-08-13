@@ -34,6 +34,13 @@ AFpsCppProjectile::AFpsCppProjectile()
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
 
+	// 메쉬 컴포넌트 생성 및 설정
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
+	Mesh->SetupAttachment(RootComponent);
+
+	// 메쉬의 충돌 설정을 비활성화
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	Tags.Add(FName("Bullets"));
 }
 
@@ -55,16 +62,12 @@ void AFpsCppProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent,
 	UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin."));
     if (OtherActor && OtherActor != this)
     {
-        // 데미지를 적용합니다.
-        float DamageAmount = 20.0f;  // 기본 데미지 양 설정 (필요에 따라 조정 가능)
-
-        // 발사체를 생성한 플레이어의 컨트롤러를 가져옵니다. 이 예제에서는 발사체의 인스티게이터를 사용합니다.
         AController* InstigatorController = GetInstigatorController();
 
         // 데미지 적용
         UGameplayStatics::ApplyDamage(
             OtherActor,              
-            DamageAmount,            
+            Damage,            
             InstigatorController,    
             this,                   
             UDamageType::StaticClass()
@@ -82,4 +85,20 @@ void AFpsCppProjectile::FireInDirection(const FVector& ShootDirection)
     {
         ProjectileMovement->Velocity = ShootDirection * ProjectileMovement->InitialSpeed;
     }
+}
+
+void AFpsCppProjectile::SetProjectileMesh(UStaticMesh* NewMesh)
+{
+	if (NewMesh)
+	{
+		Mesh->SetStaticMesh(NewMesh);
+	}
+}
+
+void AFpsCppProjectile::SetProjectile(UStaticMesh* NewMesh, float speed, float damage)
+{
+	SetProjectileMesh(NewMesh);
+	ProjectileMovement->InitialSpeed = speed;
+	ProjectileMovement->MaxSpeed = speed;
+	Damage = damage;
 }

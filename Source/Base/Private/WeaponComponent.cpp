@@ -89,8 +89,13 @@ void UWeaponComponent::Fire()
         
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+        AFpsCppProjectile* Projectile = nullptr;
         if(!CurrentWeapon.Linetracing)
+        {
 		    Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
+            Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.FireSpeed, CurrentWeapon.GunDamage);
+        }
 		
 		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
 		
@@ -165,6 +170,8 @@ void UWeaponComponent::EquipWeapon1()
     LoadWeaponByName(FName("Pistol"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
+
+    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
 }
 
 void UWeaponComponent::EquipWeapon2()
@@ -172,7 +179,9 @@ void UWeaponComponent::EquipWeapon2()
 	UE_LOG(LogTemp, Warning, TEXT("2"));
     LoadWeaponByName(FName("Pistol2"));
     FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
+    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);   
+
+    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
 }
 
 void UWeaponComponent::EquipWeapon3()
@@ -181,6 +190,9 @@ void UWeaponComponent::EquipWeapon3()
     LoadWeaponByName(FName("Pistol3"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
+
+    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
+    
 }
 
 void UWeaponComponent::Reload()
@@ -384,3 +396,26 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         CurrentSkeletalMeshComponent->SetRelativeRotation(NewRotation);
     }
 }
+
+/*
+void UWeaponComponent::SetProjectileMesh(UStaticMesh* NewMesh)
+{
+    if (ProjectileClass != nullptr)
+    {
+        AFpsCppProjectile* DefaultProjectile = Cast<AFpsCppProjectile>(ProjectileClass->GetDefaultObject());
+        if (DefaultProjectile && NewMesh)
+        {
+            DefaultProjectile->SetProjectileMesh(NewMesh);
+            UE_LOG(LogTemp, Warning, TEXT("Projectile mesh set."));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Failed to set projectile mesh."));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ProjectileClass is null."));
+    }
+}
+*/

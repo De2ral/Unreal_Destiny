@@ -23,10 +23,17 @@ class AFpsCppProjectile : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
 
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* Mesh;
+
 public:
 	AFpsCppProjectile();
 
 	void FireInDirection(const FVector& ShootDirection);
+
+	void SetProjectile(UStaticMesh* NewMesh, float speed, float damage);
+
+	void SetProjectileMesh(UStaticMesh* NewMesh);
 
 	/** called when projectile hits something */
 	UFUNCTION()
@@ -42,5 +49,10 @@ public:
 	USphereComponent* GetCollisionComp() const { return CollisionComp; }
 	/** Returns ProjectileMovement subobject **/
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
+
+
+
+private:
+	int32 Damage;
 };
 

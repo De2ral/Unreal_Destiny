@@ -28,6 +28,8 @@ public:
 	UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
 	TSubclassOf<class AFpsCppProjectile> ProjectileClass;
 
+
+
     // 투사체 발사 위치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
@@ -72,6 +74,8 @@ public:
     // 애니메이션
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* ReloadAnimation;
+
+    //void SetProjectileMesh(UStaticMesh* NewMesh);
     
 protected:
     virtual void BeginPlay() override;
@@ -114,8 +118,7 @@ public:
     
 public:
     ADestinyFPSBase* Character;
-    AFpsCppProjectile* Projectile;
-
+    
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
