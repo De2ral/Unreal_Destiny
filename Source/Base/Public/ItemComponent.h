@@ -47,6 +47,12 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UMaterial* RefAmmoMaterial;
 
+	UPROPERTY(EditAnywhere)
+	class UMaterial* WeaponItemMaterial;
+
+	UPROPERTY(EditAnywhere)
+	class UDataTable* dataTable;
+
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
