@@ -7,6 +7,8 @@
 #include "InputActionValue.h"
 
 #include "WeaponComponent.h"
+#include "SkillWidget.h"
+#include "HUDWidget.h"
 
 #include "DestinyFPSBase.generated.h"
 
@@ -111,6 +113,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GrenadeCoolTime = 3.f;
 
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UHUDWidget> HUDWidgetClass;
+
+    UPROPERTY()
+    UHUDWidget* HUDWidget;
 
 	
 	void Move(const FInputActionValue& Value);

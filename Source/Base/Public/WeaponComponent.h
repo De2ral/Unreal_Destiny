@@ -63,11 +63,11 @@ public:
     void UpdateWeaponPosition();
 
     // 위젯
-    UPROPERTY(EditAnywhere, Category = "UI")
-    TSubclassOf<UWeaponWidget> AmmoWidgetClass;
+    //UPROPERTY(EditAnywhere, Category = "UI")
+    //TSubclassOf<UWeaponWidget> AmmoWidgetClass;
 
-    UPROPERTY()
-    UWeaponWidget* AmmoWidget;
+    //UPROPERTY()
+    //UWeaponWidget* AmmoWidget;
     
 protected:
     virtual void BeginPlay() override;

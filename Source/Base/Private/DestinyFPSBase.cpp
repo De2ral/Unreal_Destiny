@@ -74,6 +74,15 @@ void ADestinyFPSBase::BeginPlay()
 	}
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+	if (HUDWidgetClass)
+	{
+		HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
+		if (HUDWidget)
+		{
+			HUDWidget->AddToViewport();
+		}
+	}
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
