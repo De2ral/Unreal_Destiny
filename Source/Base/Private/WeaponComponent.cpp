@@ -39,8 +39,6 @@ void UWeaponComponent::BeginPlay()
     {
         EquipWeapon1();
         CurrentAmmo = MaxAmmo;
-        if (Character->HUDWidget)
-            Character->HUDWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
     }
 	else
 	{

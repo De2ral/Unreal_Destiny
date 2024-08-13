@@ -149,6 +149,6 @@ public:
 	void Throw();
 	
 private:
-	float CurSkillCoolTime = 0.f;
-	float CurGrenadeCoolTime = 0.f;
+	float CurSkillCoolTime = SkillCoolTime;
+	float CurGrenadeCoolTime = GrenadeCoolTime;
 };

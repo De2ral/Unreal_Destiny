@@ -50,7 +50,6 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
-
 }
 
 // Called when the game starts or when spawned
@@ -75,12 +74,18 @@ void ADestinyFPSBase::BeginPlay()
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
+	CurSkillCoolTime = SkillCoolTime;
+	CurGrenadeCoolTime = GrenadeCoolTime;
+
 	if (HUDWidgetClass)
 	{
 		HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
 		if (HUDWidget)
 		{
 			HUDWidget->AddToViewport();
+			HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo, WeaponComponent->MaxAmmo);
+			HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
+			HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 		}
 	}
 }
@@ -89,11 +94,17 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (CurSkillCoolTime > 0.f)
-		CurSkillCoolTime -= DeltaTime;
+	if (CurSkillCoolTime < SkillCoolTime)
+	{
+		CurSkillCoolTime += DeltaTime;
+		HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
+	}
 
-	if (CurGrenadeCoolTime > 0.f)
-		CurGrenadeCoolTime -= DeltaTime;
+	if (CurGrenadeCoolTime < GrenadeCoolTime)
+	{
+		CurGrenadeCoolTime += DeltaTime;
+		HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
+	}
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -163,7 +174,7 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 
 	UWorld* world = GetWorld();
 
-	if(CurSkillCoolTime <= 0.f)
+	if(CurSkillCoolTime >= SkillCoolTime)
 	{
 		if(world)
 		{
@@ -173,7 +184,7 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 			FRotator SpawnRotation = this->GetActorRotation();
 			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
 
-			CurSkillCoolTime = SkillCoolTime;
+			CurSkillCoolTime = 0.f;
 			isShield = true;
 		}
 	}
@@ -182,9 +193,9 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
-	if (CurGrenadeCoolTime <= 0.f)
+	if (CurGrenadeCoolTime >= GrenadeCoolTime)
 	{
-		CurGrenadeCoolTime = GrenadeCoolTime;
+		CurGrenadeCoolTime = 0.f;
 		isGrenade = true;
 	}
 }
