@@ -2,6 +2,7 @@
 
 
 #include "ItemComponent.h"
+#include "string.h"
 
 // Sets default values for this component's properties
 UItemComponent::UItemComponent()
@@ -49,7 +50,7 @@ UItemComponent::UItemComponent()
 	RefAmmoMaterial = AmmoMaterial3.Object;
 
 	WeaponItemMaterial = CreateDefaultSubobject<UMaterial>(TEXT("WeaponItemMat"));
-	static ConstructorHelpers::FObjectFinder<UMaterial>WeaponItemMaterialFind(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/RefAmmoMat.RefAmmoMat'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>WeaponItemMaterialFind(TEXT("/Script/Engine.Material'/DatasmithContent/Materials/FBXImporter/VRED/MetallicCarpaint.MetallicCarpaint'"));
 	WeaponItemMaterial = WeaponItemMaterialFind.Object;
 
 	if(IsValid(Parent)) 
@@ -144,16 +145,11 @@ void UItemComponent::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor 
 		if(ThisItemType == EItemType::Weapon)
 		{
 			FGunInfo row;
-			row.GunDamage = 24;
-			row.GunType = GunTypeList::PISTOL;
-			row.FireType = FireTypeList::SINGLE;
-			row.FireSpeed = 10;
-			row.CurrentAmmo = 10;
-			row.Rebound = 0;
-			row.BulletType = BulletTypeList::REINFORCE;
+			row.GunName = FName("AwesomePistol");
 			
-			dataTable->AddRow("ItemGetTest",row);
-			
+			FString RowNameStr = FString::Printf(TEXT("PickedUpItem%d"),PickedWeaponIndex);
+			dataTable->AddRow(FName(*RowNameStr),row);
+			PickedWeaponIndex++;
 			Parent->Destroy();
 			
 		}

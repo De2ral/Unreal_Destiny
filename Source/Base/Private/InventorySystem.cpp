@@ -13,6 +13,11 @@ UInventorySystem::UInventorySystem()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	//WeaponArray.SetNum(50);
+	//WeaponArray[0].GunName = FName("AwesomePistol");
+	//WeaponArray[1].GunName = FName("NormalPistol");
+	//WeaponArray[2].GunName = FName("RarePistol");
+
 	// ...
 }
 

@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "DestinyFPSBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "WeaponDataManage.h"
 #include "InventorySystem.generated.h"
 
 
@@ -39,6 +40,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int MaxRefAmmo = 180;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
+	TArray<FGunInfo> WeaponArray;
 
 
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
