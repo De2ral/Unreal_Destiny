@@ -172,21 +172,24 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("전용 스킬"));
 
-	UWorld* world = GetWorld();
-
 	if(CurSkillCoolTime >= SkillCoolTime)
 	{
-		if(world)
-		{
-			FActorSpawnParameters SpawnParams;
-			FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 100.f;
-			SpawnLocation.Z += 20.f;
-			FRotator SpawnRotation = this->GetActorRotation();
-			ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+		CurSkillCoolTime = 0.f;
+		isShield = true;
+	}
+}
 
-			CurSkillCoolTime = 0.f;
-			isShield = true;
-		}
+void ADestinyFPSBase::Shield()
+{
+	UWorld* world = GetWorld();
+
+	if(world)
+	{
+		FActorSpawnParameters SpawnParams;
+		FVector SpawnLocation = this->GetActorLocation() + this->GetActorRotation().Vector() * 100.f;
+		SpawnLocation.Z += 20.f;
+		FRotator SpawnRotation = this->GetActorRotation();
+		ATitan_Skill_Barrier* skillObject = GetWorld()->SpawnActor<ATitan_Skill_Barrier>(ATitan_Skill_Barrier::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
 	}
 }
 

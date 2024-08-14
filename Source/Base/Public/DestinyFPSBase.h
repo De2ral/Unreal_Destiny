@@ -146,6 +146,7 @@ public:
 	void SetHasRifle(bool bNewHasRifle);
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
+	void Shield();
 	void Throw();
 	
 private:
