@@ -27,7 +27,11 @@ void UInventorySystem::BeginPlay()
 {
 	Super::BeginPlay();
 
+	WeaponArray.SetNum(10);
 
+	//WeaponArray[0].GunName = FName("AwesomePistol");
+	//WeaponArray[1].GunName = FName("AwesomePistol");
+	//WeaponArray[2].GunName = FName("AwesomePistol");
 	// ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	// APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
 
@@ -83,6 +87,32 @@ void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// }
 
 	// ...
+}
+
+void UInventorySystem::AddWeaponToInventory()
+{
+	
+	uint8 randomSeed;
+	randomSeed = FMath::RandRange(2,4);
+	FName PistolName;
+	switch (randomSeed)
+	{
+	case 2:
+		PistolName = FName("Pistol");
+		break;
+	case 3:
+		PistolName = FName("Pistol2");
+		break;
+	case 4:
+		PistolName = FName("Pistol3");
+		break;
+	default:
+		break;
+	}
+	WeaponArray[WpnArrayIndex].GunName = PistolName;
+	WpnArrayIndex++;
+
+
 }
 
 // void UInventorySystem::AddMapping()

@@ -144,14 +144,9 @@ void UItemComponent::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor 
 
 		if(ThisItemType == EItemType::Weapon)
 		{
-			FGunInfo row;
-			row.GunName = FName("AwesomePistol");
-			
-			FString RowNameStr = FString::Printf(TEXT("PickedUpItem%d"),PickedWeaponIndex);
-			dataTable->AddRow(FName(*RowNameStr),row);
-			PickedWeaponIndex++;
+
+			PlayerInventory->AddWeaponToInventory();
 			Parent->Destroy();
-			
 		}
 
 	}
