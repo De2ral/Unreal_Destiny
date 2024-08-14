@@ -26,6 +26,9 @@ UWeaponComponent::UWeaponComponent()
     
     AimOffset = FVector(15.0f, 0.0f, 0.0f);
     AimRotation = FRotator(10.0f, -15.0f, 0.0f);
+
+    //FireRate = 0.2f;
+    bIsFiring = false;
 }
 
 
@@ -68,9 +71,18 @@ void UWeaponComponent::Fire()
 {
     UE_LOG(LogTemp, Warning, TEXT("Fire2"));
 
+     if(CurrentAmmo < 1)
+        {
+            StopFiring();
+            Reload();
+            return;
+        }
+
     CurrentAmmo--;
     AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
     
+
+
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -94,7 +106,7 @@ void UWeaponComponent::Fire()
         if(!CurrentWeapon.Linetracing)
         {
 		    Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
-            Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.FireSpeed, CurrentWeapon.GunDamage);
+            Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
         }
 		
 		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
@@ -135,9 +147,6 @@ void UWeaponComponent::Fire()
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
    		}
 
-
-
-
 		if (bHit)
 		{
             if (HitResult.GetActor()->ActorHasTag("Enemy"))
@@ -160,10 +169,46 @@ void UWeaponComponent::Fire()
         {
             Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
         }
-        if(CurrentAmmo < 1)
-            Reload();
+       
 	}
 }
+
+void UWeaponComponent::StartFiring()
+{
+    UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
+    if (!bIsFiring)
+    {
+        bIsFiring = true;
+
+        if (CurrentWeapon.AutoFire)
+        {
+            Fire(); // 첫 발사
+            GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+            UE_LOG(LogTemp, Warning, TEXT("autofire"));
+        }
+        else
+        {
+            Fire(); // 단발 발사
+            UE_LOG(LogTemp, Warning, TEXT("onefire"));
+        }
+    }
+}
+
+void UWeaponComponent::StopFiring()
+{
+    UE_LOG(LogTemp, Warning, TEXT("StopFiring"));
+    if (bIsFiring)
+    {
+        bIsFiring = false;
+
+        if (CurrentWeapon.AutoFire)
+        {
+            GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+        }
+    }
+}
+
+
 
 void UWeaponComponent::EquipWeapon1()
 {
@@ -171,8 +216,6 @@ void UWeaponComponent::EquipWeapon1()
     LoadWeaponByName(FName("Pistol"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
-
-    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
 }
 
 void UWeaponComponent::EquipWeapon2()
@@ -181,8 +224,6 @@ void UWeaponComponent::EquipWeapon2()
     LoadWeaponByName(FName("Pistol2"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);   
-
-    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
 }
 
 void UWeaponComponent::EquipWeapon3()
@@ -191,9 +232,6 @@ void UWeaponComponent::EquipWeapon3()
     LoadWeaponByName(FName("Pistol3"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
-
-    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
-    
 }
 
 void UWeaponComponent::Reload()
@@ -223,7 +261,9 @@ void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
 
         if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
         {
-            EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::Fire);
+            //EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::Fire);
+            EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::StartFiring);
+            EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UWeaponComponent::StopFiring);
             EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &UWeaponComponent::StartAiming);
             EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &UWeaponComponent::StopAiming);
             EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &UWeaponComponent::Reload);

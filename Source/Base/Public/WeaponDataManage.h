@@ -58,10 +58,16 @@ public:
 	float GunDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Rebound;
+	float Rebound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float FireSpeed;
+	float ProjectileSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool AutoFire;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float FireRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 CurrentAmmo;
