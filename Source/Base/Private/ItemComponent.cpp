@@ -2,6 +2,7 @@
 
 
 #include "ItemComponent.h"
+#include "string.h"
 
 // Sets default values for this component's properties
 UItemComponent::UItemComponent()
@@ -9,12 +10,13 @@ UItemComponent::UItemComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
+	static ConstructorHelpers::FObjectFinder<UDataTable> DataTable(TEXT("/Script/Engine.DataTable'/Game/Weapon/NewDataTable2.NewDataTable2'"));
+	dataTable = DataTable.Object;
 
 	AActor* Parent = GetOwner();
 
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
-	ItemCollider->InitSphereRadius(9.0f);
+	ItemCollider->InitSphereRadius(14.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
@@ -23,6 +25,14 @@ UItemComponent::UItemComponent()
 	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.SM_Drongo_Grenade_FX_Body02'"));
 	ItemMesh->SetStaticMesh(MeshAsset.Object);
 	ItemMesh->SetSimulatePhysics(true);
+
+	// else if(ThisItemType == EItemType::Weapon)
+	// {
+	// 	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/FPWeapon/Mesh/FirstPersonProjectileMesh.FirstPersonProjectileMesh'"));
+	// 	ItemMesh->SetStaticMesh(MeshAsset.Object);
+	// 	ItemMesh->SetSimulatePhysics(true);
+	// }
+	
 
 	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));
 	static ConstructorHelpers::FObjectFinder<UMaterial>AmmoMaterial1(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/SpecAmmoMat.SpecAmmoMat'"));
@@ -36,12 +46,12 @@ UItemComponent::UItemComponent()
 	static ConstructorHelpers::FObjectFinder<UMaterial>AmmoMaterial3(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/RefAmmoMat.RefAmmoMat'"));
 	RefAmmoMaterial = AmmoMaterial3.Object;
 
-	if(IsValid(Parent)) 
-	{
-		ItemMesh->SetupAttachment(Parent->GetRootComponent());
-		ItemCollider->SetupAttachment(ItemMesh);
-	}
+	WeaponItemMaterial = CreateDefaultSubobject<UMaterial>(TEXT("WeaponItemMat"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>WeaponItemMaterialFind(TEXT("/Script/Engine.Material'/DatasmithContent/Materials/FBXImporter/VRED/MetallicCarpaint.MetallicCarpaint'"));
+	WeaponItemMaterial = WeaponItemMaterialFind.Object;
 
+	if(IsValid(Parent)) ItemMesh->SetupAttachment(Parent->GetRootComponent());
+	ItemCollider->SetupAttachment(ItemMesh);
 	
 	// ...
 }
@@ -51,12 +61,12 @@ UItemComponent::UItemComponent()
 void UItemComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&UItemComponent::OnOverlapBegin);
+	
 
 	uint8 randomSeed;
-	randomSeed = FMath::RandRange(2,4);
-
+	randomSeed = FMath::RandRange(2,5);
 	switch (randomSeed)
 	{
 	case 2:
@@ -67,6 +77,9 @@ void UItemComponent::BeginPlay()
 		break;
 	case 4:
 		ThisItemType = EItemType::SpecAmmo;
+		break;
+	case 5:
+		ThisItemType = EItemType::Weapon;
 		break;
 	default:
 		break;
@@ -83,8 +96,8 @@ void UItemComponent::BeginPlay()
 	case EItemType::RefAmmo:
 		ItemMesh->SetMaterial(0,RefAmmoMaterial);
 		break;
-	
-	default:
+	case EItemType::Weapon:
+		ItemMesh->SetMaterial(0,WeaponItemMaterial);
 		break;
 	}
 
@@ -121,12 +134,12 @@ void UItemComponent::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor 
 			
 		}
 
-		// else if(ThisItemType == EItemType::Weapon)
-		// {
+		if(ThisItemType == EItemType::Weapon)
+		{
 
-
-			
-		// }
+			PlayerInventory->AddWeaponToInventory();
+			Parent->Destroy();
+		}
 
 	}
 
