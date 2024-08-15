@@ -50,12 +50,8 @@ UItemComponent::UItemComponent()
 	static ConstructorHelpers::FObjectFinder<UMaterial>WeaponItemMaterialFind(TEXT("/Script/Engine.Material'/DatasmithContent/Materials/FBXImporter/VRED/MetallicCarpaint.MetallicCarpaint'"));
 	WeaponItemMaterial = WeaponItemMaterialFind.Object;
 
-	if(IsValid(Parent)) 
-	{
-		ItemMesh->SetupAttachment(Parent->GetRootComponent());
-		ItemCollider->SetupAttachment(ItemMesh);
-	}
-
+	if(IsValid(Parent)) ItemMesh->SetupAttachment(Parent->GetRootComponent());
+	ItemCollider->SetupAttachment(ItemMesh);
 	
 	// ...
 }
@@ -65,30 +61,29 @@ UItemComponent::UItemComponent()
 void UItemComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&UItemComponent::OnOverlapBegin);
 	
 
-	// uint8 randomSeed;
-	// randomSeed = FMath::RandRange(2,4);
-
-	// switch (randomSeed)
-	// {
-	// case 2:
-	// 	ThisItemType = EItemType::RefAmmo;
-	// 	break;
-	// case 3:
-	// 	ThisItemType = EItemType::Ammo;
-	// 	break;
-	// case 4:
-	// 	ThisItemType = EItemType::SpecAmmo;
-	// 	break;
-	// case 5:
-	// 	ThisItemType = EItemType::Weapon;
-	// 	break;
-	// default:
-	// 	break;
-	// }
+	uint8 randomSeed;
+	randomSeed = FMath::RandRange(2,5);
+	switch (randomSeed)
+	{
+	case 2:
+		ThisItemType = EItemType::RefAmmo;
+		break;
+	case 3:
+		ThisItemType = EItemType::Ammo;
+		break;
+	case 4:
+		ThisItemType = EItemType::SpecAmmo;
+		break;
+	case 5:
+		ThisItemType = EItemType::Weapon;
+		break;
+	default:
+		break;
+	}
 
 	switch (ThisItemType)
 	{
