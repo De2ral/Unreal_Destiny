@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CPP_Dorongo.h"
+#include "Components/StaticMeshComponent.h" 
 #include "Components/BoxComponent.h"
 #include "CPP_SpawnBox.generated.h"
 
@@ -29,17 +31,30 @@ public:
     UBoxComponent* SpawnBox;
 
     UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Spawning")
-    TSubclassOf<AActor> EnemyClass;
+    TSubclassOf<ACPP_Dorongo> EnemyClass;
+
+    FTimerHandle SpawnTimerHandle;    
+    ACPP_Dorongo* SpawnedEnemy = nullptr;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Spawning")
     TSubclassOf<class AAIController_Dorongo> AIControllerClass;
 
+	UFUNCTION(BlueprintCallable, Category = "Target")
+    FVector GetTargetLocation_() const;
+
+    UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Target")
+    UStaticMeshComponent* TargetMeshComponent;
+
     UPROPERTY(EditAnywhere, Category = "Spawning")
     float SpawnInterval;
 
-    FTimerHandle SpawnTimerHandle;
+    //FTimerHandle SpawnTimerHandle;
 
     void SpawnEnemy();
 
+    void OnSpawnTimerElapsed();
+    
+    bool IsEnemyValid();
 
+    void CreateTargetMesh();
 };

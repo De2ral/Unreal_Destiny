@@ -72,4 +72,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
     TArray<TSubclassOf<AActor>> ItemsToSpawn;
 
+	FTimerHandle DestroyTimer;
+
+	void DestroyActor();
+
 };

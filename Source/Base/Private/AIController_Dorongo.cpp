@@ -74,7 +74,7 @@ void AAIController_Dorongo::Tick(float DeltaTime)
 
 void AAIController_Dorongo::SetBlackboardValue(const FName &KeyName, bool Value)
 {
-	 if (BlackboardComponent)
+	if (BlackboardComponent)
     {
         BlackboardComponent->SetValueAsBool(KeyName, Value);
     }
