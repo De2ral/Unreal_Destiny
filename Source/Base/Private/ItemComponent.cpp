@@ -16,25 +16,22 @@ UItemComponent::UItemComponent()
 	AActor* Parent = GetOwner();
 
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
-	ItemCollider->InitSphereRadius(9.0f);
+	ItemCollider->InitSphereRadius(14.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMesh->SetWorldScale3D(FVector3d(3.0f,3.0f,3.0f));
 	
-	if(ThisItemType != EItemType::Weapon)
-	{
-		ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.SM_Drongo_Grenade_FX_Body02'"));
-		ItemMesh->SetStaticMesh(MeshAsset.Object);
-		ItemMesh->SetSimulatePhysics(true);
-	}
+	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.SM_Drongo_Grenade_FX_Body02'"));
+	ItemMesh->SetStaticMesh(MeshAsset.Object);
+	ItemMesh->SetSimulatePhysics(true);
 
-	else if(ThisItemType == EItemType::Weapon)
-	{
-		ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/FPWeapon/Mesh/FirstPersonProjectileMesh.FirstPersonProjectileMesh'"));
-		ItemMesh->SetStaticMesh(MeshAsset.Object);
-		ItemMesh->SetSimulatePhysics(true);
-	}
+	// else if(ThisItemType == EItemType::Weapon)
+	// {
+	// 	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/FPWeapon/Mesh/FirstPersonProjectileMesh.FirstPersonProjectileMesh'"));
+	// 	ItemMesh->SetStaticMesh(MeshAsset.Object);
+	// 	ItemMesh->SetSimulatePhysics(true);
+	// }
 	
 
 	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));

@@ -19,9 +19,9 @@ void UInventorySystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	WeaponArray.SetNum(10);
+	WeaponArray.SetNum(MaxInvenSize);
 
-	for(int i = 0; i< 3;i++)
+	for(int i = 0; i < 4;i++)
 	{
 		AddWeaponToInventory();
 	}
@@ -37,8 +37,10 @@ void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 }
 
 void UInventorySystem::AddWeaponToInventory()
-{
-	
+{	
+
+	if(WpnArrayIndex >= MaxInvenSize) return;
+
 	uint8 randomSeed;
 	randomSeed = FMath::RandRange(2,4);
 	FName PistolName;
