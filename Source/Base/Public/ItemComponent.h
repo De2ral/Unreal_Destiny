@@ -50,9 +50,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UMaterial* WeaponItemMaterial;
 
-	UPROPERTY(EditAnywhere)
-	class UDataTable* dataTable;
-
 	UPROPERTY(VisibleAnywhere)
 	int PickedWeaponIndex = 0;
 
