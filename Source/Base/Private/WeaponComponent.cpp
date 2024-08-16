@@ -26,6 +26,8 @@ UWeaponComponent::UWeaponComponent()
     
     AimOffset = FVector(15.0f, 0.0f, 0.0f);
     AimRotation = FRotator(10.0f, -15.0f, 0.0f);
+
+    bIsFiring = false;
 }
 
 
@@ -68,9 +70,18 @@ void UWeaponComponent::Fire()
 {
     UE_LOG(LogTemp, Warning, TEXT("Fire2"));
 
+     if(CurrentAmmo < 1)
+        {
+            StopFiring();
+            Reload();
+            return;
+        }
+
     CurrentAmmo--;
     AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
     
+
+
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -94,7 +105,7 @@ void UWeaponComponent::Fire()
         if(!CurrentWeapon.Linetracing)
         {
 		    Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
-            Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.FireSpeed, CurrentWeapon.GunDamage);
+            Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
         }
 		
 		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
@@ -115,7 +126,7 @@ void UWeaponComponent::Fire()
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
 
-        if (ReloadAnimation != nullptr)
+        if (ReloadAnimation != nullptr && !bIsAiming)
 	    {
 	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
 	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
@@ -134,9 +145,6 @@ void UWeaponComponent::Fire()
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
    		}
-
-
-
 
 		if (bHit)
 		{
@@ -160,10 +168,46 @@ void UWeaponComponent::Fire()
         {
             Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
         }
-        if(CurrentAmmo < 1)
-            Reload();
+       
 	}
 }
+
+void UWeaponComponent::StartFiring()
+{
+    UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
+    if (!bIsFiring)
+    {
+        bIsFiring = true;
+
+        if (CurrentWeapon.AutoFire)
+        {
+            Fire(); // 첫 발사
+            GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+            UE_LOG(LogTemp, Warning, TEXT("autofire"));
+        }
+        else
+        {
+            Fire(); // 단발 발사
+            UE_LOG(LogTemp, Warning, TEXT("onefire"));
+        }
+    }
+}
+
+void UWeaponComponent::StopFiring()
+{
+    UE_LOG(LogTemp, Warning, TEXT("StopFiring"));
+    if (bIsFiring)
+    {
+        bIsFiring = false;
+
+        if (CurrentWeapon.AutoFire)
+        {
+            GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+        }
+    }
+}
+
+
 
 void UWeaponComponent::EquipWeapon1()
 {
@@ -171,8 +215,6 @@ void UWeaponComponent::EquipWeapon1()
     LoadWeaponByName(FName("Pistol"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
-
-    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
 }
 
 void UWeaponComponent::EquipWeapon2()
@@ -181,8 +223,6 @@ void UWeaponComponent::EquipWeapon2()
     LoadWeaponByName(FName("Pistol2"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);   
-
-    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
 }
 
 void UWeaponComponent::EquipWeapon3()
@@ -191,9 +231,6 @@ void UWeaponComponent::EquipWeapon3()
     LoadWeaponByName(FName("Pistol3"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
-
-    //SetProjectileMesh(CurrentWeapon.ProjectileMesh);
-    
 }
 
 void UWeaponComponent::Reload()
@@ -223,7 +260,9 @@ void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
 
         if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
         {
-            EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::Fire);
+            //EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::Fire);
+            EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::StartFiring);
+            EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UWeaponComponent::StopFiring);
             EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &UWeaponComponent::StartAiming);
             EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &UWeaponComponent::StopAiming);
             EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &UWeaponComponent::Reload);
@@ -359,42 +398,60 @@ void UWeaponComponent::RemoveCurrentWeaponModel()
 }
 
 
-
-void UWeaponComponent::UpdateWeaponPosition()
-{
-    if (Character == nullptr)
-        return;
-
-    FVector TargetOffset = bIsAiming ? AimOffset : DefaultOffset;
-    FRotator TargetRotation = bIsAiming ? AimRotation : DefaultRotation;
-
-    if (CurrentStaticMeshComponent)
-    {
-        CurrentStaticMeshComponent->SetRelativeLocation(TargetOffset);
-        CurrentStaticMeshComponent->SetRelativeRotation(TargetRotation);
-    }
-
-    if (CurrentSkeletalMeshComponent)
-    {
-        CurrentSkeletalMeshComponent->SetRelativeLocation(TargetOffset);
-        CurrentSkeletalMeshComponent->SetRelativeRotation(TargetRotation); 
-    }
-}
-
 void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     if (CurrentSkeletalMeshComponent)
     {
-        FVector TargetLocation = bIsAiming ? AimOffset : DefaultOffset;
-        FRotator TargetRotation = bIsAiming ? AimRotation : DefaultRotation;
+        FVector TargetLocation;
+        FRotator TargetRotation;
 
-        FVector NewLocation = FMath::VInterpTo(CurrentSkeletalMeshComponent->GetRelativeLocation(), TargetLocation, DeltaTime, AimingSpeed);
-        FRotator NewRotation = FMath::RInterpTo(CurrentSkeletalMeshComponent->GetRelativeRotation(), TargetRotation, DeltaTime, AimingSpeed);
+        if (bIsAiming)
+        {
+            if (APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController()))
+            {
+                FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
+                FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
 
-        CurrentSkeletalMeshComponent->SetRelativeLocation(NewLocation);
-        CurrentSkeletalMeshComponent->SetRelativeRotation(NewRotation);
+                TargetLocation = CameraLocation + CameraRotation.Vector() * 50.0f; // 카메라 앞에 위치
+                TargetLocation.Z -= 20.0f;
+                TargetRotation = CameraRotation; // 카메라 방향으로 회전
+                TargetRotation.Yaw -= 90;
+
+
+                float CurrentFOV = PlayerController->PlayerCameraManager->GetFOVAngle();
+                float TargetFOV = 30.0f;
+                float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, 5.0f);
+                PlayerController->PlayerCameraManager->SetFOV(NewFOV);
+            }
+        }
+        else
+        {
+            FVector HandLocation;
+            FRotator HandRotation;
+                if (Character->GetFppMesh())
+                {
+                    HandLocation = Character->GetFppMesh()->GetSocketLocation(FName(TEXT("GripPoint")));
+                    HandRotation = Character->GetFppMesh()->GetSocketRotation(FName(TEXT("GripPoint")));
+                }
+            TargetLocation = HandLocation + DefaultOffset; 
+            TargetRotation = HandRotation + DefaultRotation;
+
+            if (APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController()))
+            {
+                float CurrentFOV = PlayerController->PlayerCameraManager->GetFOVAngle();
+                float TargetFOV = 90.0f;
+                float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, 5.0f);
+                PlayerController->PlayerCameraManager->SetFOV(NewFOV);
+            }
+        }
+
+    FVector NewLocation = FMath::VInterpTo(CurrentSkeletalMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+    FRotator NewRotation = FMath::RInterpTo(CurrentSkeletalMeshComponent->GetComponentRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+
+    CurrentSkeletalMeshComponent->SetWorldLocation(NewLocation);
+    CurrentSkeletalMeshComponent->SetWorldRotation(NewRotation);
     }
 }
 

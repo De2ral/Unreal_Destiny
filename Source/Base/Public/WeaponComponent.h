@@ -61,9 +61,6 @@ public:
     // 키 입력 추가
     void AddMapping(ADestinyFPSBase* TargetCharacter);
 
-    // 조준 위치
-    void UpdateWeaponPosition();
-
     // 위젯
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UWeaponWidget> AmmoWidgetClass;
@@ -74,8 +71,6 @@ public:
     // 애니메이션
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* ReloadAnimation;
-
-    //void SetProjectileMesh(UStaticMesh* NewMesh);
     
 protected:
     virtual void BeginPlay() override;
@@ -107,8 +102,15 @@ public:
 
     void Fire();
 
-    void StartAiming() {bIsAiming = true;}
-    void StopAiming() {bIsAiming = false;}
+    void StartFiring();
+    void StopFiring();
+
+    void StartAiming() {
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
+        bIsAiming = true;}
+    void StopAiming() {
+        UE_LOG(LogTemp, Warning, TEXT("StopAiming"));
+        bIsAiming = false;}
 
     void Reload();
 
@@ -116,7 +118,7 @@ public:
     void EquipWeapon2();
     void EquipWeapon3();
     
-public:
+private:
     ADestinyFPSBase* Character;
     
     UStaticMeshComponent* CurrentStaticMeshComponent;
@@ -131,7 +133,9 @@ public:
 
     float AimingSpeed;
     
-
     int32 CurrentAmmo;
-    int32 MaxAmmo = 100;
+    int32 MaxAmmo = 30;
+
+    FTimerHandle FireTimerHandle;  
+    bool bIsFiring = false;                
 };
