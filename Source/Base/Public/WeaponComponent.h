@@ -61,9 +61,6 @@ public:
     // 키 입력 추가
     void AddMapping(ADestinyFPSBase* TargetCharacter);
 
-    // 조준 위치
-    void UpdateWeaponPosition();
-
     // 위젯
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UWeaponWidget> AmmoWidgetClass;

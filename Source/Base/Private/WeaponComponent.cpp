@@ -126,7 +126,7 @@ void UWeaponComponent::Fire()
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
 
-        if (ReloadAnimation != nullptr)
+        if (ReloadAnimation != nullptr && !bIsAiming)
 	    {
 	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
 	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
@@ -398,46 +398,8 @@ void UWeaponComponent::RemoveCurrentWeaponModel()
 }
 
 
-
-void UWeaponComponent::UpdateWeaponPosition()
-{
-    /*
-    if (Character == nullptr)
-        return;
-
-    FVector TargetOffset = bIsAiming ? AimOffset : DefaultOffset;
-    FRotator TargetRotation = bIsAiming ? AimRotation : DefaultRotation;
-
-    if (CurrentStaticMeshComponent)
-    {
-        CurrentStaticMeshComponent->SetRelativeLocation(TargetOffset);
-        CurrentStaticMeshComponent->SetRelativeRotation(TargetRotation);
-    }
-
-    if (CurrentSkeletalMeshComponent)
-    {
-        CurrentSkeletalMeshComponent->SetRelativeLocation(TargetOffset);
-        CurrentSkeletalMeshComponent->SetRelativeRotation(TargetRotation); 
-    }
-    */
-}
-
 void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-    //Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-//
-    //if (CurrentSkeletalMeshComponent)
-    //{
-    //    FVector TargetLocation = bIsAiming ? AimOffset : DefaultOffset;
-    //    FRotator TargetRotation = bIsAiming ? AimRotation : DefaultRotation;
-//
-    //    FVector NewLocation = FMath::VInterpTo(CurrentSkeletalMeshComponent->GetRelativeLocation(), TargetLocation, DeltaTime, AimingSpeed);
-    //    FRotator NewRotation = FMath::RInterpTo(CurrentSkeletalMeshComponent->GetRelativeRotation(), TargetRotation, DeltaTime, AimingSpeed);
-//
-    //    CurrentSkeletalMeshComponent->SetRelativeLocation(NewLocation);
-    //    CurrentSkeletalMeshComponent->SetRelativeRotation(NewRotation);
-    //}
-
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     if (CurrentSkeletalMeshComponent)
