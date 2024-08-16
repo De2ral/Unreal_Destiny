@@ -136,7 +136,6 @@ private:
 
     float AimingSpeed;
     
-
     int32 CurrentAmmo;
     int32 MaxAmmo = 30;
 

@@ -27,7 +27,6 @@ UWeaponComponent::UWeaponComponent()
     AimOffset = FVector(15.0f, 0.0f, 0.0f);
     AimRotation = FRotator(10.0f, -15.0f, 0.0f);
 
-    //FireRate = 0.2f;
     bIsFiring = false;
 }
 
@@ -402,6 +401,7 @@ void UWeaponComponent::RemoveCurrentWeaponModel()
 
 void UWeaponComponent::UpdateWeaponPosition()
 {
+    /*
     if (Character == nullptr)
         return;
 
@@ -419,22 +419,77 @@ void UWeaponComponent::UpdateWeaponPosition()
         CurrentSkeletalMeshComponent->SetRelativeLocation(TargetOffset);
         CurrentSkeletalMeshComponent->SetRelativeRotation(TargetRotation); 
     }
+    */
 }
 
 void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+    //Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+//
+    //if (CurrentSkeletalMeshComponent)
+    //{
+    //    FVector TargetLocation = bIsAiming ? AimOffset : DefaultOffset;
+    //    FRotator TargetRotation = bIsAiming ? AimRotation : DefaultRotation;
+//
+    //    FVector NewLocation = FMath::VInterpTo(CurrentSkeletalMeshComponent->GetRelativeLocation(), TargetLocation, DeltaTime, AimingSpeed);
+    //    FRotator NewRotation = FMath::RInterpTo(CurrentSkeletalMeshComponent->GetRelativeRotation(), TargetRotation, DeltaTime, AimingSpeed);
+//
+    //    CurrentSkeletalMeshComponent->SetRelativeLocation(NewLocation);
+    //    CurrentSkeletalMeshComponent->SetRelativeRotation(NewRotation);
+    //}
+
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     if (CurrentSkeletalMeshComponent)
     {
-        FVector TargetLocation = bIsAiming ? AimOffset : DefaultOffset;
-        FRotator TargetRotation = bIsAiming ? AimRotation : DefaultRotation;
+        FVector TargetLocation;
+        FRotator TargetRotation;
 
-        FVector NewLocation = FMath::VInterpTo(CurrentSkeletalMeshComponent->GetRelativeLocation(), TargetLocation, DeltaTime, AimingSpeed);
-        FRotator NewRotation = FMath::RInterpTo(CurrentSkeletalMeshComponent->GetRelativeRotation(), TargetRotation, DeltaTime, AimingSpeed);
+        if (bIsAiming)
+        {
+            if (APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController()))
+            {
+                FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
+                FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
 
-        CurrentSkeletalMeshComponent->SetRelativeLocation(NewLocation);
-        CurrentSkeletalMeshComponent->SetRelativeRotation(NewRotation);
+                TargetLocation = CameraLocation + CameraRotation.Vector() * 50.0f; // 카메라 앞에 위치
+                TargetLocation.Z -= 20.0f;
+                TargetRotation = CameraRotation; // 카메라 방향으로 회전
+                TargetRotation.Yaw -= 90;
+
+
+                float CurrentFOV = PlayerController->PlayerCameraManager->GetFOVAngle();
+                float TargetFOV = 30.0f;
+                float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, 5.0f);
+                PlayerController->PlayerCameraManager->SetFOV(NewFOV);
+            }
+        }
+        else
+        {
+            FVector HandLocation;
+            FRotator HandRotation;
+                if (Character->GetFppMesh())
+                {
+                    HandLocation = Character->GetFppMesh()->GetSocketLocation(FName(TEXT("GripPoint")));
+                    HandRotation = Character->GetFppMesh()->GetSocketRotation(FName(TEXT("GripPoint")));
+                }
+            TargetLocation = HandLocation + DefaultOffset; 
+            TargetRotation = HandRotation + DefaultRotation;
+
+            if (APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController()))
+            {
+                float CurrentFOV = PlayerController->PlayerCameraManager->GetFOVAngle();
+                float TargetFOV = 90.0f;
+                float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, 5.0f);
+                PlayerController->PlayerCameraManager->SetFOV(NewFOV);
+            }
+        }
+
+    FVector NewLocation = FMath::VInterpTo(CurrentSkeletalMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+    FRotator NewRotation = FMath::RInterpTo(CurrentSkeletalMeshComponent->GetComponentRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+
+    CurrentSkeletalMeshComponent->SetWorldLocation(NewLocation);
+    CurrentSkeletalMeshComponent->SetWorldRotation(NewRotation);
     }
 }
 
