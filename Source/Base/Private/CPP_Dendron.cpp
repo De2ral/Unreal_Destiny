@@ -22,11 +22,11 @@ void ACPP_Dendron::Tick(float DeltaTime)
     {
         PerformLineTrace();
     }
-    else
-    {
-        LastPoint = EndPoint;
-        LastPerformLineTrace();
-    }
+    // else
+    // {
+    //     LastPoint = EndPoint;
+    //     LastPerformLineTrace();
+    // }
 }
 void ACPP_Dendron::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
@@ -40,18 +40,21 @@ void ACPP_Dendron::PerformLineTrace()
     Params.AddIgnoredActor(this); // 자기 자신을 무시
     APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 
-    if (PlayerPawn)
+    if (PlayerPawn && !LastTargetPosition)
     {
         EndPoint = PlayerPawn->GetActorLocation();
     }
     else
     {        
         StartPoint + FVector(GetActorForwardVector() * 400);
+        LastPoint = EndPoint;
     }
     
     StartPoint = GetActorLocation();
     //EndPoint = StartPoint + FVector(GetActorForwardVector() * 400);
 
+    if(!LastTargetPosition)
+    {
     bool bHit = GetWorld()->LineTraceSingleByChannel(
         HitResult,
         StartPoint,
@@ -59,8 +62,21 @@ void ACPP_Dendron::PerformLineTrace()
         ECC_Visibility,
         Params
     );
+    }
+    else
+    {
+        bool bHit = GetWorld()->LineTraceSingleByChannel(
+        HitResult,
+        StartPoint,
+        LastPoint,
+        ECC_Visibility,
+        Params
+    );
+    }
     
     // 디버그 라인 그리기
+    if(!LastTargetPosition)
+    {
     DrawDebugLine(
         GetWorld(),
         StartPoint,
@@ -71,6 +87,20 @@ void ACPP_Dendron::PerformLineTrace()
         0,
         1
     );
+    }
+    else
+    {
+          DrawDebugLine(
+        GetWorld(),
+        StartPoint,
+        LastPoint,
+        bHit ? FColor::Red : FColor::Red,
+        false,
+        0.03f,
+        0,
+        1
+    );
+    }
 }
 
 void ACPP_Dendron::LastPerformLineTrace()

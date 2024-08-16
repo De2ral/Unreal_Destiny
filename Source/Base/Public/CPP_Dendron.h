@@ -39,4 +39,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Line Trace")
 	bool bIsLineTraceActive = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Line Trace")
+	bool LastTargetPosition = false;
 };
