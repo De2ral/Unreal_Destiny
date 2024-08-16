@@ -18,6 +18,9 @@ ACPP_SpawnBox::ACPP_SpawnBox()
 	SpawnBox = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnBox"));
 	RootComponent = SpawnBox;
 
+	TargetMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TargetMeshComponent"));
+    TargetMeshComponent->SetupAttachment(RootComponent);
+
 	SpawnInterval = 5.0f; // 스폰 시간
 
 }
@@ -26,8 +29,9 @@ ACPP_SpawnBox::ACPP_SpawnBox()
 void ACPP_SpawnBox::BeginPlay()
 {
 	Super::BeginPlay();
+	CreateTargetMesh();
 	
-	GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle,this,&ACPP_SpawnBox::SpawnEnemy,SpawnInterval,true);
+	GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle,this,&ACPP_SpawnBox::OnSpawnTimerElapsed,SpawnInterval,true);
 }
 
 // Called every frame
@@ -36,10 +40,19 @@ void ACPP_SpawnBox::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+FVector ACPP_SpawnBox::GetTargetLocation_() const
+{
+    if (TargetMeshComponent)
+    {
+        return TargetMeshComponent->GetComponentLocation();
+    }
+    return FVector::ZeroVector;
+}
+
 void ACPP_SpawnBox::SpawnEnemy()
 {
-	if (EnemyClass)
-    {
+	 if (EnemyClass)
+     {
         FVector SpawnLocation = FMath::RandPointInBox(SpawnBox->Bounds.GetBox());
         FRotator SpawnRotation = FRotator::ZeroRotator;
 
@@ -49,7 +62,8 @@ void ACPP_SpawnBox::SpawnEnemy()
         SpawnParams.Owner = this;
         SpawnParams.Instigator = GetInstigator();
 
-        ACPP_Dorongo* SpawnedEnemy = GetWorld()->SpawnActor<ACPP_Dorongo>(EnemyClass, SpawnLocation, SpawnRotation, SpawnParams);
+        //ACPP_Dorongo* 
+		SpawnedEnemy = GetWorld()->SpawnActor<ACPP_Dorongo>(EnemyClass, SpawnLocation, SpawnRotation, SpawnParams);
 
 		if (SpawnedEnemy)
         {
@@ -58,6 +72,8 @@ void ACPP_SpawnBox::SpawnEnemy()
             	AAIController_Dorongo* AIController = GetWorld()->SpawnActor<AAIController_Dorongo>(AIControllerClass);
             	if (AIController)
             	{
+					FVector TargetLocation = TargetMeshComponent->GetComponentLocation();
+					AIController->MoveToLocation(TargetLocation);
                	 	AIController->Possess(SpawnedEnemy);
             	}
 			}
@@ -72,3 +88,24 @@ void ACPP_SpawnBox::SpawnEnemy()
     }
 }
 
+void ACPP_SpawnBox::OnSpawnTimerElapsed()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Check"));
+
+	if (IsEnemyValid()) return;
+
+    SpawnEnemy();
+}
+
+bool ACPP_SpawnBox::IsEnemyValid()
+{    
+    return SpawnedEnemy && !SpawnedEnemy->IsPendingKill();
+}
+
+void ACPP_SpawnBox::CreateTargetMesh()
+{
+	if (TargetMeshComponent)
+    {
+        TargetMeshComponent->SetRelativeLocation(FVector(0, 0, 0)); // 위치 조정
+    }
+}

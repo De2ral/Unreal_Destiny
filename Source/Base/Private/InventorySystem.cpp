@@ -13,86 +13,55 @@ UInventorySystem::UInventorySystem()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
 }
-
-
 // Called when the game starts
 void UInventorySystem::BeginPlay()
 {
 	Super::BeginPlay();
 
+	WeaponArray.SetNum(MaxInvenSize);
 
-	// ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	// APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
+	for(int i = 0; i < 4;i++)
+	{
+		AddWeaponToInventory();
+	}
 
-	// UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-	// if(Subsystem != nullptr)
-	// 	{
-	// 		Subsystem->ClearAllMappings();
-	// 		Subsystem->AddMappingContext(InventoryMappingContext, 1);
-	// 	}
-
-	// AddMapping();
-
-	
-	
 }
 
 
-// void UInventorySystem::InvenOpenClose()
-// {
-// 	if(bIsInvenOpen)
-// 	{
-// 		bIsInvenOpen = false;
-// 		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 닫혔다"));
-
-// 	}
-
-// 	else if(!bIsInvenOpen)
-// 	{
-// 		bIsInvenOpen = true;
-// 		GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red,TEXT("인벤토리가 열렸다"));
-// 	}
-
-
-// }
-
-// Called every frame
 void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 
-	// ADestinyFPSBase* TargetPlayer = Cast<ADestinyFPSBase>(GetOwner());
-
-	// if(TargetPlayer->bIsInvenOpen)
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,TEXT("인벤토리시스템에서 캐스트 - 인벤토리 열림"));
-
-	// }
-	// else if(!TargetPlayer->bIsInvenOpen)
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Red,TEXT("인벤토리시스템에서 캐스트 - 인벤토리 닫힘"));
-
-	// }
-
-	// ...
 }
 
-// void UInventorySystem::AddMapping()
-// {
-	
-// 	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0));
+void UInventorySystem::AddWeaponToInventory()
+{	
 
-//  	APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
+	if(WpnArrayIndex >= MaxInvenSize) return;
 
-//  	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-//  	Subsystem->AddMappingContext(InventoryMappingContext, 1);
+	uint8 randomSeed;
+	randomSeed = FMath::RandRange(2,4);
+	FName PistolName;
+	switch (randomSeed)
+	{
+	case 2:
+		PistolName = FName("Pistol");
+		break;
+	case 3:
+		PistolName = FName("Pistol2");
+		break;
+	case 4:
+		PistolName = FName("Pistol3");
+		break;
+	default:
+		break;
+	}
+	WeaponArray[WpnArrayIndex].GunName = PistolName;
+	WpnArrayIndex++;
 
-//  	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
-//  	Input->BindAction(InventoryAction, ETriggerEvent::Triggered, this, &UInventorySystem::InvenOpenClose);
 
-//  }
+}
 
 

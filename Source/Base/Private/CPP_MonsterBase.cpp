@@ -68,6 +68,7 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
 		int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
         ItemDrop(ItemCount);
         EnablePhysicsSimulation();              
+        GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &ACPP_MonsterBase::DestroyActor, 5.0f, false);
     }
     FTimerHandle UnusedHandle; 
     GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_MonsterBase::ResetDamageCoolDown, DamageCooldownTime, false);
@@ -139,4 +140,9 @@ void ACPP_MonsterBase::ItemDrop(int32 ItemCount)
     }
 	}
 	
+}
+
+void ACPP_MonsterBase::DestroyActor()
+{
+    Destroy();
 }
