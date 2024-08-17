@@ -52,9 +52,7 @@ void ACPP_Dendron::PerformLineTrace()
     
     StartPoint = GetActorLocation();
     //EndPoint = StartPoint + FVector(GetActorForwardVector() * 400);
-
-    if(!LastTargetPosition)
-    {
+    
     bool bHit = GetWorld()->LineTraceSingleByChannel(
         HitResult,
         StartPoint,
@@ -62,17 +60,7 @@ void ACPP_Dendron::PerformLineTrace()
         ECC_Visibility,
         Params
     );
-    }
-    else
-    {
-        bool bHit = GetWorld()->LineTraceSingleByChannel(
-        HitResult,
-        StartPoint,
-        LastPoint,
-        ECC_Visibility,
-        Params
-    );
-    }
+    
     
     // 디버그 라인 그리기
     if(!LastTargetPosition)
