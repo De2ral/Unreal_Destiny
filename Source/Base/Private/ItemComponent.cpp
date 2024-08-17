@@ -64,7 +64,7 @@ void UItemComponent::BeginPlay()
 	
 
 	uint8 randomSeed;
-	randomSeed = FMath::RandRange(2,5);
+	randomSeed = FMath::RandRange(2,6);
 	switch (randomSeed)
 	{
 	case 2:
@@ -77,6 +77,7 @@ void UItemComponent::BeginPlay()
 		ThisItemType = EItemType::SpecAmmo;
 		break;
 	case 5:
+	case 6:
 		ThisItemType = EItemType::Weapon;
 		break;
 	default:
