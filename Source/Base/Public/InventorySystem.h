@@ -48,11 +48,8 @@ protected:
 	int WpnArrayIndex = 0;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
-	int MaxInvenSize = 10;
-
-	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
-	int CurrItemQuantity = 0;
-
+	int MaxInvenSize = 30;
+	
 	//UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	//class UWidget* InvenUI;
 
