@@ -32,10 +32,14 @@ public:
 
 	void PerformLineTrace();
 	void LastPerformLineTrace();
-
+	
 	FVector StartPoint;
-	FVector EndPoint;
+	FVector EndPoint;	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Line Trace")
 	FVector LastPoint;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Line Trace")
+    FVector TargetLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Line Trace")
 	bool bIsLineTraceActive = false;
