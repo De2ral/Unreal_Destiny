@@ -19,15 +19,6 @@
 UWeaponComponent::UWeaponComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
-
-    bIsAiming = false;
-
-    AimingSpeed = 5.0f; 
-    
-    AimOffset = FVector(15.0f, 0.0f, 0.0f);
-    AimRotation = FRotator(10.0f, -15.0f, 0.0f);
-
-    bIsFiring = false;
 }
 
 
@@ -68,7 +59,7 @@ void UWeaponComponent::BeginPlay()
 
 void UWeaponComponent::Fire()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Fire2"));
+    UE_LOG(LogTemp, Warning, TEXT("Fire"));
 
      if(CurrentAmmo < 1)
         {
@@ -172,6 +163,92 @@ void UWeaponComponent::Fire()
 	}
 }
 
+
+void UWeaponComponent::FireInRange()
+{
+     UE_LOG(LogTemp, Warning, TEXT("Fire2"));
+
+    if (CurrentAmmo < 1)
+    {
+        StopFiring();
+        Reload();
+        return;
+    }
+
+    CurrentAmmo--;
+    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
+
+    UWorld* const World = GetWorld();
+    if (World != nullptr)
+    {
+        APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+        if (PlayerController == nullptr)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("PlayerController is null."));
+            return;
+        }
+
+        const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+        FVector MuzzleLocation;
+        if (CurrentSkeletalMeshComponent)
+        {
+            MuzzleLocation = CurrentSkeletalMeshComponent->GetComponentLocation() + (CurrentSkeletalMeshComponent->GetRightVector() * 100.0f);
+        }
+
+        const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
+        const FVector TraceStart = CameraLocation;
+        
+        const int32 NumPellets = 10; // 총알의 개수
+        const float SpreadAngle = 5.0f; // 발사 범위 각도
+
+        for (int32 i = 0; i < NumPellets; ++i)
+        {
+            // 발사 방향을 랜덤하게 조정 (앞 방향 기준)
+            float RandomHorizontalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
+            float RandomVerticalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
+
+            // 발사 방향을 계산
+            FRotator PelletRotation = SpawnRotation;
+            PelletRotation.Yaw += RandomHorizontalSpread;   // 가로 스프레드
+            PelletRotation.Pitch += RandomVerticalSpread;   // 세로 스프레드
+
+            FVector ShotDirection = PelletRotation.Vector();
+            FVector PelletEnd = TraceStart + (ShotDirection * 1000000.0f);
+
+            FHitResult HitResult;
+            FCollisionQueryParams CollisionParams;
+            CollisionParams.AddIgnoredActor(GetOwner());
+
+            FCollisionObjectQueryParams ObjectQueryParams;
+            ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+            bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
+            DrawDebugLine(World, TraceStart, PelletEnd, FColor::Red, false, 1, 0, 1);
+
+            if (bHit)
+            {
+                if (HitResult.GetActor()->ActorHasTag("Enemy"))
+                {
+                    DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+                    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+                    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
+
+                    UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
+                }
+            }
+
+            // 발사 선을 디버깅을 위해 그립니다.
+        }
+
+        // 발사 후 카메라 흔들림 효과
+        if (PlayerController != nullptr)
+        {
+            if (bIsAiming)
+                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.5f);
+            else
+                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
+        }
+    }
+}
 void UWeaponComponent::StartFiring()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
@@ -181,13 +258,28 @@ void UWeaponComponent::StartFiring()
 
         if (CurrentWeapon.AutoFire)
         {
-            Fire(); // 첫 발사
-            GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+            if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+            {
+                FireInRange();
+                GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::FireInRange, CurrentWeapon.FireRate, true);
+            }
+            else
+            {
+                Fire(); // 첫 발사
+                GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+            }
             UE_LOG(LogTemp, Warning, TEXT("autofire"));
         }
         else
         {
-            Fire(); // 단발 발사
+            if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+            {
+                FireInRange();
+            }
+            else
+            {
+                Fire(); // 단발 발사
+            }
             UE_LOG(LogTemp, Warning, TEXT("onefire"));
         }
     }
@@ -207,7 +299,17 @@ void UWeaponComponent::StopFiring()
     }
 }
 
+void UWeaponComponent::StartAiming()
+{
+    UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
+    bIsAiming = true;
+}
 
+void UWeaponComponent::StopAiming()
+{
+    UE_LOG(LogTemp, Warning, TEXT("StopAiming"));
+    bIsAiming = false;
+}
 
 void UWeaponComponent::EquipWeapon1()
 {
@@ -409,6 +511,15 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
         if (bIsAiming)
         {
+            CurrentScopeSize = FMath::FInterpTo(CurrentScopeSize, 1.0f, DeltaTime, ScopeZoomSpeed);
+            CurrentScopeX = FMath::FInterpTo(CurrentScopeX, 0.0f, DeltaTime, ScopeZoomSpeed);
+            if (AmmoWidget && CurrentWeapon.GunType == GunTypeList::RIFLE)
+            {
+                AmmoWidget->SetScopeSize(CurrentScopeSize);
+                AmmoWidget->ImageMove(CurrentScopeX,CurrentSkeletalMeshComponent);
+            }
+
+
             if (APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController()))
             {
                 FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
@@ -430,11 +541,11 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         {
             FVector HandLocation;
             FRotator HandRotation;
-                if (Character->GetFppMesh())
-                {
-                    HandLocation = Character->GetFppMesh()->GetSocketLocation(FName(TEXT("GripPoint")));
-                    HandRotation = Character->GetFppMesh()->GetSocketRotation(FName(TEXT("GripPoint")));
-                }
+            if (Character->GetFppMesh())
+            {
+                HandLocation = Character->GetFppMesh()->GetSocketLocation(FName(TEXT("GripPoint")));
+                HandRotation = Character->GetFppMesh()->GetSocketRotation(FName(TEXT("GripPoint")));
+            }
             TargetLocation = HandLocation + DefaultOffset; 
             TargetRotation = HandRotation + DefaultRotation;
 
@@ -445,6 +556,14 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, 5.0f);
                 PlayerController->PlayerCameraManager->SetFOV(NewFOV);
             }
+
+            if (AmmoWidget && CurrentWeapon.GunType == GunTypeList::RIFLE)
+            {
+                CurrentScopeSize = 0.5f;
+                CurrentScopeX = 600.0f;
+                AmmoWidget->SetScopeSize(CurrentScopeSize); // 스코프 초기화
+                AmmoWidget->ImageMove(CurrentScopeX,CurrentSkeletalMeshComponent);
+            }
         }
 
     FVector NewLocation = FMath::VInterpTo(CurrentSkeletalMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
@@ -454,26 +573,3 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
     CurrentSkeletalMeshComponent->SetWorldRotation(NewRotation);
     }
 }
-
-/*
-void UWeaponComponent::SetProjectileMesh(UStaticMesh* NewMesh)
-{
-    if (ProjectileClass != nullptr)
-    {
-        AFpsCppProjectile* DefaultProjectile = Cast<AFpsCppProjectile>(ProjectileClass->GetDefaultObject());
-        if (DefaultProjectile && NewMesh)
-        {
-            DefaultProjectile->SetProjectileMesh(NewMesh);
-            UE_LOG(LogTemp, Warning, TEXT("Projectile mesh set."));
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Failed to set projectile mesh."));
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("ProjectileClass is null."));
-    }
-}
-*/
