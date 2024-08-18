@@ -50,8 +50,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	int MaxInvenSize = 30;
 	
-	//UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
-	//class UWidget* InvenUI;
+	UPROPERTY(EditDefaultsOnly)
+	class UTexture2D* GunImg;
 
 
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
