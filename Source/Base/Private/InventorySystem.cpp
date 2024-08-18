@@ -13,6 +13,9 @@ UInventorySystem::UInventorySystem()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	static ConstructorHelpers::FObjectFinder<UTexture2D>GunImageObject(TEXT("/Script/Engine.Texture2D'/Engine/EditorResources/S_Pawn.S_Pawn'"));
+	GunImg = GunImageObject.Object;
+
 }
 // Called when the game starts
 void UInventorySystem::BeginPlay()
@@ -24,6 +27,17 @@ void UInventorySystem::BeginPlay()
 	for(int i = 0; i < 4;i++)
 	{
 		AddWeaponToInventory();
+	}
+
+	//크래쉬 방지를 위한 사전 초기화
+	for(int i = WpnArrayIndex; i < MaxInvenSize; i++)
+	{
+		WeaponArray[i].GunImage = GunImg;
+	}
+
+	if(!WeaponArray[MaxInvenSize - 1].GunImage)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Red,TEXT("빈 공간에 GunImage가 Null이다"));
 	}
 
 }
