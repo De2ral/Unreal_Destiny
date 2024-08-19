@@ -14,6 +14,7 @@ class ADestinyFPSBase;
 class UStaticMesh;
 class USkeletalMesh;
 class AFpsCppProjectile;
+class ATitan_Skill_Grenade;
 
 //UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -28,13 +29,10 @@ public:
 	UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
 	TSubclassOf<class AFpsCppProjectile> ProjectileClass;
 
-
-
     // 투사체 발사 위치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
 
-   
     // 모델 장착
     void AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, UObject* Model);
 
@@ -102,6 +100,7 @@ public:
 
     void Fire();
     void FireInRange();
+    void FireLauncher();
 
     void StartFiring();
     void StopFiring();

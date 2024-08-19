@@ -13,7 +13,8 @@ enum class GunTypeList : uint8
 {
 	PISTOL UMETA(DisplayName = "Pistol"),
     SHOTGUN UMETA(DisplayName = "Shotgun"),
-    RIFLE UMETA(DisplayName = "Rifle")
+    RIFLE UMETA(DisplayName = "Rifle"),
+	LAUNCHER UMETA(DisplayName = "Launcher")
 };
 
 UENUM(BlueprintType)

@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "FpsCppProjectile.h"
+#include "Titan_Skill_Grenade.h"
 
 #include "Camera/CameraShakeBase.h"
 #include "MyLegacyCameraShake.h"
@@ -64,6 +65,7 @@ void UWeaponComponent::Fire()
      if(CurrentAmmo < 1)
         {
             StopFiring();
+            StopAiming();
             Reload();
             return;
         }
@@ -71,8 +73,6 @@ void UWeaponComponent::Fire()
     CurrentAmmo--;
     AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
     
-
-
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -98,7 +98,7 @@ void UWeaponComponent::Fire()
 		    Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
             Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
         }
-		
+        
 		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
 		
 		const FVector TraceStart = CameraLocation;
@@ -116,7 +116,6 @@ void UWeaponComponent::Fire()
 		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
-
         if (ReloadAnimation != nullptr && !bIsAiming)
 	    {
 	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
@@ -126,8 +125,6 @@ void UWeaponComponent::Fire()
 	    		AnimInstance->Montage_Play(ReloadAnimation, 1.f);
 	    	}
 	    }
-
-
 
         if (PlayerController != nullptr)
     	{
@@ -166,7 +163,7 @@ void UWeaponComponent::Fire()
 
 void UWeaponComponent::FireInRange()
 {
-     UE_LOG(LogTemp, Warning, TEXT("Fire2"));
+     UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
     if (CurrentAmmo < 1)
     {
@@ -175,18 +172,11 @@ void UWeaponComponent::FireInRange()
         return;
     }
 
-    
-
     UWorld* const World = GetWorld();
     if (World != nullptr)
     {
         APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-        if (PlayerController == nullptr)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("PlayerController is null."));
-            return;
-        }
-
+        
         const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
         FVector MuzzleLocation;
         if (CurrentSkeletalMeshComponent)
@@ -236,11 +226,7 @@ void UWeaponComponent::FireInRange()
                     UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
                 }
             }
-
-            // 발사 선을 디버깅을 위해 그립니다.
         }
-
-        // 발사 후 카메라 흔들림 효과
         if (PlayerController != nullptr)
         {
             if (bIsAiming)
@@ -250,6 +236,110 @@ void UWeaponComponent::FireInRange()
         }
     }
 }
+
+void UWeaponComponent::FireLauncher()
+{
+    UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
+
+     if(CurrentAmmo < 1)
+        {
+            StopFiring();
+            StopAiming();
+            Reload();
+            return;
+        }
+
+    CurrentAmmo--;
+    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
+    
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+        if (PlayerController == nullptr)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PlayerController is null."));
+        return;
+    }
+		const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+        FVector MuzzleLocation;
+        if(CurrentSkeletalMeshComponent)
+        {
+            MuzzleLocation = CurrentSkeletalMeshComponent->GetComponentLocation() + (CurrentSkeletalMeshComponent->GetRightVector() * 100.0f);
+        }
+        
+		FActorSpawnParameters ActorSpawnParams;
+		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+        ATitan_Skill_Grenade* Projectile = nullptr;
+        if(!CurrentWeapon.Linetracing)
+        {
+		    Projectile = World->SpawnActor<ATitan_Skill_Grenade>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
+            Projectile->SetProjectile(true);
+            Projectile->SetGrenadeDamage(100.0f);
+        }
+        
+		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
+		
+		const FVector TraceStart = CameraLocation;
+		const FVector TraceEnd = TraceStart + (SpawnRotation.Vector() * 1000000.0f);
+		FHitResult HitResult;
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(GetOwner());
+        if(!CurrentWeapon.Linetracing)
+		    CollisionParams.AddIgnoredActor(Projectile);
+		
+        FCollisionObjectQueryParams ObjectQueryParams;
+        ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+		//bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
+        bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, ObjectQueryParams, CollisionParams);
+		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
+		FVector ProjectileDirection = SpawnRotation.Vector();
+		
+        if (ReloadAnimation != nullptr && !bIsAiming)
+	    {
+	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
+	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
+	    	if (AnimInstance != nullptr)
+	    	{
+	    		AnimInstance->Montage_Play(ReloadAnimation, 1.f);
+	    	}
+	    }
+
+        if (PlayerController != nullptr)
+    	{
+            if(bIsAiming)
+    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.5f);
+            else
+                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
+   		}
+
+		if (bHit)
+		{
+            if (HitResult.GetActor()->ActorHasTag("Enemy"))
+            {
+                DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+			    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+			    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
+                if(CurrentWeapon.Linetracing)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("linetracing"));
+                    UE_LOG(LogTemp, Warning, TEXT("Damage : %f"),CurrentWeapon.GunDamage);
+                    UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
+                    return;
+                }
+                
+            }
+			ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
+		}
+        if (Projectile)
+        {
+            Projectile->SetThrowDirection(ProjectileDirection);
+        }
+       
+	}
+}
+
 void UWeaponComponent::StartFiring()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
@@ -276,6 +366,10 @@ void UWeaponComponent::StartFiring()
             if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
             {
                 FireInRange();
+            }
+            else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
+            {
+                FireLauncher();
             }
             else
             {
