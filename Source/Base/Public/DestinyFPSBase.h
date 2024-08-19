@@ -14,6 +14,14 @@
 
 class UCharacterMovementComponent;
 
+UENUM(BlueprintType)
+enum class EPlayerClassEnum : uint8
+{
+	Hunter UMETA(DisplayName = "Hunter"),
+	Warlock UMETA(DisplayName = "Warlock"),
+	Titan UMETA(DisplayName = "Titan")
+};
+
 UCLASS()
 class BASE_API ADestinyFPSBase : public ACharacter
 {
@@ -79,7 +87,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InterAction;
 
-	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InventoryAction;
@@ -102,6 +109,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EPlayerClassEnum PlayerClass;
 
 	// Skill Variable
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
