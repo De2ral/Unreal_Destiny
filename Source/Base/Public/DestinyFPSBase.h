@@ -7,6 +7,8 @@
 #include "InputActionValue.h"
 
 #include "WeaponComponent.h"
+#include "SkillWidget.h"
+#include "HUDWidget.h"
 
 #include "DestinyFPSBase.generated.h"
 
@@ -114,6 +116,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GrenadeCoolTime = 3.f;
 
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UHUDWidget> HUDWidgetClass;
+
+ 	UPROPERTY()
+    UHUDWidget* HUDWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class ATitan_Skill_Grenade> GrenadeClass;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
@@ -145,9 +155,14 @@ public:
 	void SetHasRifle(bool bNewHasRifle);
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
+
+	void Shield();
 	void Throw();
+
+	void SwitchToFirstPerson();
+	void SwitchToThirdPerson();
 	
 private:
-	float CurSkillCoolTime = 0.f;
-	float CurGrenadeCoolTime = 0.f;
+	float CurSkillCoolTime = SkillCoolTime;
+	float CurGrenadeCoolTime = GrenadeCoolTime;
 };

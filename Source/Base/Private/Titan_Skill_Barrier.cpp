@@ -15,6 +15,11 @@ ATitan_Skill_Barrier::ATitan_Skill_Barrier()
 	Mesh->SetupAttachment(RootComponent);
 
 	Mesh->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	Mesh->OnComponentHit.AddDynamic(this, &ATitan_Skill_Barrier::OnHit);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    Mesh->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
+	Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/Skill/Titan/Mesh_Shield.Mesh_Shield'"));
 	if(MeshAsset.Succeeded())
@@ -45,8 +50,12 @@ void ATitan_Skill_Barrier::Tick(float DeltaTime)
 	}
 }
 
+void ATitan_Skill_Barrier::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	OtherActor->Destroy();
+}
+
 void ATitan_Skill_Barrier::DestroyBarrier()
 {
 	Destroy();
 }
-

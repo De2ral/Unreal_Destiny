@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "TimerManager.h"
 #include "Titan_Skill_Grenade.generated.h"
 
 UCLASS()
@@ -32,10 +33,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* ExplodeParticle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* ExplodeCollider;
+
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
+               FVector NormalImpulse, const FHitResult& Hit);
 
 	void PlayExplodeParticleSystem();
+	void ApplyDamageToActorInsideExplodeCollider();
 	void SetThrowDirection(FVector Direction);
 	void DestroyGrenade();
+
+private:
+	float GrenadeDamage = 50.f;
+	FTimerHandle TimerHandle;
 };
