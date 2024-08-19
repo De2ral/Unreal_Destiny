@@ -116,9 +116,11 @@ public:
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class ATitan_Skill_Grenade> GrenadeClass;
+
     UPROPERTY()
     UHUDWidget* HUDWidget;
-
 	
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -146,8 +148,12 @@ public:
 	void SetHasRifle(bool bNewHasRifle);
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
+
 	void Shield();
 	void Throw();
+
+	void SwitchToFirstPerson();
+	void SwitchToThirdPerson();
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;

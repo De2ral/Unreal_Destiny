@@ -22,32 +22,27 @@ ADestinyFPSBase::ADestinyFPSBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	FppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPPMesh"));
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
-
-	FppMesh->SetOnlyOwnerSee(true);
 	TppMesh->SetOwnerNoSee(true);
-
-	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
-
-	FppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FPPCamera"));
-	TppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TPPCamera"));
-
-	TppSpringArm->SetupAttachment(RootComponent);
-	TppCamera->SetupAttachment(TppSpringArm);
 	TppMesh->SetupAttachment(RootComponent);
 
-	FppCamera->SetupAttachment(GetMesh(), FName("Mesh"));
-	FppMesh->SetupAttachment(FppCamera);
-
+	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
 	TppSpringArm->TargetArmLength = 300.0f;
 	TppSpringArm->bUsePawnControlRotation = true;
 	TppSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 70.f));
+	TppSpringArm->SetupAttachment(RootComponent);
 
-	
-	FppCamera->bUsePawnControlRotation = true;
-
+	TppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TPPCamera"));
 	TppCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
+	TppCamera->SetupAttachment(TppSpringArm);
+
+	FppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPPMesh"));
+	FppMesh->SetOnlyOwnerSee(true);
+	FppMesh->SetupAttachment(FppCamera);
+
+	FppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FPPCamera"));
+	FppCamera->bUsePawnControlRotation = true;
+	FppCamera->SetupAttachment(GetMesh(), FName("Mesh"));
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 }
@@ -88,6 +83,8 @@ void ADestinyFPSBase::BeginPlay()
 			HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 		}
 	}
+
+	SwitchToFirstPerson();
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
@@ -215,14 +212,48 @@ void ADestinyFPSBase::Throw()
 		FVector SpawnLocation = FppMesh->GetSocketLocation("GripPoint");
 		SpawnLocation.Z -= 50.f; 
 		FRotator SpawnRotation = this->GetActorRotation();
-		ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(ATitan_Skill_Grenade::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+		ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(GrenadeClass, SpawnLocation, SpawnRotation, SpawnParams);
 		grenadeObject->SetThrowDirection(PlayerController->GetControlRotation().Vector() + this->GetActorUpVector() / 10.f);
+	}
+}
+
+void ADestinyFPSBase::SwitchToFirstPerson()
+{
+	if (FppCamera && TppCamera)
+	{
+		FppCamera->SetActive(true);
+		TppCamera->SetActive(false);
+	}
+
+	if (FppMesh && TppMesh)
+	{
+		FppMesh->SetOwnerNoSee(false);
+		TppMesh->SetOnlyOwnerSee(false);
+	}
+}
+
+void ADestinyFPSBase::SwitchToThirdPerson()
+{
+	if (FppCamera && TppCamera)
+	{
+		FppCamera->SetActive(false);
+		TppCamera->SetActive(true);
+	}
+
+	if (FppMesh && TppMesh)
+	{
+		FppMesh->SetOwnerNoSee(true);
+
+		TppMesh->SetOnlyOwnerSee(false);
+		TppMesh->SetOwnerNoSee(false);
 	}
 }
 
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
+
+	SwitchToThirdPerson();
 }
 void ADestinyFPSBase::jump(const FInputActionValue& Value)
 {
