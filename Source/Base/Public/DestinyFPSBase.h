@@ -82,6 +82,9 @@ public:
 	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* InventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsSliding;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -116,12 +119,16 @@ public:
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
 
+ 	UPROPERTY()
+    UHUDWidget* HUDWidget;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<class ATitan_Skill_Grenade> GrenadeClass;
 
-    UPROPERTY()
-    UHUDWidget* HUDWidget;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	bool bIsInvenOpen = false;
 	
+	void InvenOpenClose();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Skill(const FInputActionValue& Value);

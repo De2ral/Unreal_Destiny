@@ -28,6 +28,8 @@ public:
 	UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
 	TSubclassOf<class AFpsCppProjectile> ProjectileClass;
 
+
+
     // 투사체 발사 위치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
@@ -59,15 +61,16 @@ public:
     // 키 입력 추가
     void AddMapping(ADestinyFPSBase* TargetCharacter);
 
-    // 조준 위치
-    void UpdateWeaponPosition();
-
     // 위젯
-    //UPROPERTY(EditAnywhere, Category = "UI")
-    //TSubclassOf<UWeaponWidget> AmmoWidgetClass;
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UWeaponWidget> AmmoWidgetClass;
 
-    //UPROPERTY()
-    //UWeaponWidget* AmmoWidget;
+    UPROPERTY()
+    UWeaponWidget* AmmoWidget;
+
+    // 애니메이션
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UAnimMontage* ReloadAnimation;
     
 protected:
     virtual void BeginPlay() override;
@@ -86,6 +89,9 @@ public:
     class UInputAction* AimAction;
 
     UPROPERTY(EditAnywhere, Category = "Input")
+    class UInputAction* ReloadAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
     class UInputAction* Equip1Action;
 
     UPROPERTY(EditAnywhere, Category = "Input")
@@ -95,31 +101,44 @@ public:
     class UInputAction* Equip3Action;
 
     void Fire();
+    void FireInRange();
+
+    void StartFiring();
+    void StopFiring();
 
     void StartAiming();
     void StopAiming();
+
+    void Reload();
 
     void EquipWeapon1();
     void EquipWeapon2();
     void EquipWeapon3();
     
-public:
+private:
     ADestinyFPSBase* Character;
-    AFpsCppProjectile* Projectile;
-
+    
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
-    bool bIsAiming;
+    bool bIsAiming = false;
+    bool bIsFiring = false;                
 
-    FVector AimOffset; 
     FVector DefaultOffset;
-    FRotator AimRotation;
     FRotator DefaultRotation;
 
-    float AimingSpeed;
+    float AimingSpeed = 5.0f;
     
-
     int32 CurrentAmmo;
-    int32 MaxAmmo = 100;
+    int32 MaxAmmo = 30;
+
+    FTimerHandle FireTimerHandle;  
+
+     // 스코프 확대 속도
+    float ScopeZoomSpeed = 2.0f;
+
+    // 현재 스코프 크기
+    float CurrentScopeSize = 0.0f;
+
+    float CurrentScopeX = 1.0f;
 };

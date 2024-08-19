@@ -2,6 +2,9 @@
 
 
 #include "InventorySystem.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
 
 // Sets default values for this component's properties
 UInventorySystem::UInventorySystem()
@@ -10,25 +13,89 @@ UInventorySystem::UInventorySystem()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	WeaponArray.SetNum(MaxInvenSize);
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D>GunImageObject(TEXT("/Script/Engine.Texture2D'/Engine/EditorResources/S_Pawn.S_Pawn'"));
+	GunImg = GunImageObject.Object;
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>ProjMesh(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+	
+	for(int i = 0; i < MaxInvenSize; i++)
+	{
+		WeaponArray[i].GunImage = GunImg;
+		WeaponArray[i].BulletType = BulletTypeList::REGULAR;
+		WeaponArray[i].AutoFire = false;
+		WeaponArray[i].CurrentAmmo = 0;
+		WeaponArray[i].FireRate = 0.0f;
+		WeaponArray[i].FireType = FireTypeList::SINGLE;
+		WeaponArray[i].GunID = FName("0000");
+		WeaponArray[i].Linetracing = false;
+		WeaponArray[i].Rebound = 0.0f;
+		WeaponArray[i].ProjectileSpeed = 0.0f;
+		WeaponArray[i].ProjectileMesh = ProjMesh.Object;
+		WeaponArray[i].GunName = FName("aaaa");
+		WeaponArray[i].GunDamage = 0.0f;
+		WeaponArray[i].GunType = GunTypeList::PISTOL;
+		WeaponArray[i].GunModelPath = "/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun";
+	}
+
+
+
 }
-
-
 // Called when the game starts
 void UInventorySystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	for(int i = 0; i < 4;i++)
+	{
+		AddWeaponToInventory();
+	}
+
+	//크래쉬 방지를 위한 사전 초기화
 	
+
+	//if(!WeaponArray[MaxInvenSize - 1])
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Red,TEXT("빈 공간에 데이터가 Null이다"));
+	//}
+
 }
 
 
-// Called every frame
 void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+
 }
+
+void UInventorySystem::AddWeaponToInventory()
+{	
+
+	if(WpnArrayIndex >= MaxInvenSize) return;
+
+	uint8 randomSeed;
+	randomSeed = FMath::RandRange(2,4);
+	FName PistolName;
+	switch (randomSeed)
+	{
+	case 2:
+		PistolName = FName("Pistol");
+		break;
+	case 3:
+		PistolName = FName("Pistol2");
+		break;
+	case 4:
+		PistolName = FName("Pistol3");
+		break;
+	default:
+		break;
+	}
+	WeaponArray[WpnArrayIndex].GunName = PistolName;
+	WpnArrayIndex++;
+
+
+}
+
 
