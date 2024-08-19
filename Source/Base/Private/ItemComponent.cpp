@@ -24,14 +24,6 @@ UItemComponent::UItemComponent()
 	ItemMesh->SetStaticMesh(MeshAsset.Object);
 	ItemMesh->SetSimulatePhysics(true);
 
-	// else if(ThisItemType == EItemType::Weapon)
-	// {
-	// 	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/FPWeapon/Mesh/FirstPersonProjectileMesh.FirstPersonProjectileMesh'"));
-	// 	ItemMesh->SetStaticMesh(MeshAsset.Object);
-	// 	ItemMesh->SetSimulatePhysics(true);
-	// }
-	
-
 	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));
 	static ConstructorHelpers::FObjectFinder<UMaterial>AmmoMaterial1(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/SpecAmmoMat.SpecAmmoMat'"));
 	SpecAmmoMaterial = AmmoMaterial1.Object;

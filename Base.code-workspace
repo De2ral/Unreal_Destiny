@@ -6,11 +6,14 @@
 		},
 		{
 			"name": "UE5",
-			"path": "D:\\Epic Games\\UE_5.1"
+			"path": "C:\\UE_5.1"
 		}
 	],
 	"settings": {
-		"typescript.tsc.autoDetect": "off"
+		"typescript.tsc.autoDetect": "off",
+		"files.associations": {
+			"*.rh": "cpp"
+		}
 	},
 	"extensions": {
 		"recommendations": [
