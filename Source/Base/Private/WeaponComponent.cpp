@@ -175,8 +175,7 @@ void UWeaponComponent::FireInRange()
         return;
     }
 
-    CurrentAmmo--;
-    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
+    
 
     UWorld* const World = GetWorld();
     if (World != nullptr)
@@ -203,6 +202,8 @@ void UWeaponComponent::FireInRange()
 
         for (int32 i = 0; i < NumPellets; ++i)
         {
+            CurrentAmmo--;
+            AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
             // 발사 방향을 랜덤하게 조정 (앞 방향 기준)
             float RandomHorizontalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
             float RandomVerticalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
