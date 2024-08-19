@@ -114,6 +114,9 @@ public:
     void EquipWeapon1();
     void EquipWeapon2();
     void EquipWeapon3();
+
+    int32 CurrentAmmo;
+    int32 MaxAmmo = 30;
     
 private:
     ADestinyFPSBase* Character;
@@ -128,9 +131,6 @@ private:
     FRotator DefaultRotation;
 
     float AimingSpeed = 5.0f;
-    
-    int32 CurrentAmmo;
-    int32 MaxAmmo = 30;
 
     FTimerHandle FireTimerHandle;  
 

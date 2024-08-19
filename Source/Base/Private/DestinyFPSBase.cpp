@@ -36,13 +36,13 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
 	TppCamera->SetupAttachment(TppSpringArm);
 
-	FppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPPMesh"));
-	FppMesh->SetOnlyOwnerSee(true);
-	FppMesh->SetupAttachment(FppCamera);
-
 	FppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FPPCamera"));
 	FppCamera->bUsePawnControlRotation = true;
 	FppCamera->SetupAttachment(GetMesh(), FName("Mesh"));
+
+	FppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPPMesh"));
+	FppMesh->SetOnlyOwnerSee(true);
+	FppMesh->SetupAttachment(FppCamera);
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 }
