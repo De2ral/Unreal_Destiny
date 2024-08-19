@@ -45,6 +45,8 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppMesh->SetupAttachment(FppCamera);
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
+
+	PlayerClass = EPlayerClassEnum::Titan;
 }
 
 // Called when the game starts or when spawned
