@@ -14,6 +14,7 @@
 #include "InputAction.h"
 #include "Titan_Skill_Barrier.h"
 #include "Titan_Skill_Grenade.h"
+#include "Animation/AnimInstance.h"
 
 
 // Sets default values
@@ -29,7 +30,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
 	TppSpringArm->TargetArmLength = 300.0f;
 	TppSpringArm->bUsePawnControlRotation = true;
-	TppSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 70.f));
+	TppSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
 	TppSpringArm->SetupAttachment(RootComponent);
 
 	TppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TPPCamera"));
@@ -103,6 +104,16 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 	{
 		CurGrenadeCoolTime += DeltaTime;
 		HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
+	}
+
+	if (CurUltimateCoolTime < UltimateCoolTime)
+	{
+		CurUltimateCoolTime += DeltaTime;
+	}
+
+	if (isUltimate)
+	{
+		
 	}
 }
 
@@ -243,6 +254,9 @@ void ADestinyFPSBase::SwitchToFirstPerson()
 	if (FppMesh && TppMesh)
 	{
 		FppMesh->SetOwnerNoSee(false);
+		FppMesh->SetOnlyOwnerSee(true);
+
+		TppMesh->SetOwnerNoSee(true);
 		TppMesh->SetOnlyOwnerSee(false);
 	}
 }
@@ -258,9 +272,10 @@ void ADestinyFPSBase::SwitchToThirdPerson()
 	if (FppMesh && TppMesh)
 	{
 		FppMesh->SetOwnerNoSee(true);
+		FppMesh->SetOnlyOwnerSee(false);
 
-		TppMesh->SetOnlyOwnerSee(false);
 		TppMesh->SetOwnerNoSee(false);
+		TppMesh->SetOnlyOwnerSee(true);
 	}
 }
 
@@ -268,8 +283,32 @@ void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
 
-	SwitchToThirdPerson();
+	if (CurUltimateCoolTime >= UltimateCoolTime)
+	{
+		CurUltimateCoolTime = 0.f;
+		isUltimate = true;
+		SwitchToThirdPerson();
+	}
 }
+
+void ADestinyFPSBase::TitanUltimateStart()
+{
+	FVector LaunchDirection = GetActorRotation().Vector();
+	LaunchDirection.Z += 1.5f;
+	float LaunchStrength = 1000.f;
+	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
+	LaunchCharacter(LaunchVelocity, true, true);
+	TppCamera->SetRelativeLocation(FVector(-100.f, 0.f, 500.f));
+	GetCharacterMovement()->GravityScale = 1.25f;
+}
+
+void ADestinyFPSBase::TitanUltimateEnd()
+{
+	isUltimate = false;
+	SwitchToFirstPerson();
+	GetCharacterMovement()->GravityScale = 1.f;
+}
+
 void ADestinyFPSBase::jump(const FInputActionValue& Value)
 {
 	ACharacter::Jump();

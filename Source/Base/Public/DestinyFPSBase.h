@@ -120,10 +120,16 @@ public:
 	bool isGrenade = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isUltimate = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SkillCoolTime = 3.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GrenadeCoolTime = 3.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float UltimateCoolTime = 5.f;
 
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
@@ -168,10 +174,20 @@ public:
 	void Shield();
 	void Throw();
 
+	UFUNCTION(BlueprintCallable)
+	void TitanUltimateStart();
+
+	UFUNCTION(BlueprintCallable)
+	void TitanUltimateEnd();
+
+	UFUNCTION(BlueprintCallable)
 	void SwitchToFirstPerson();
+
+	UFUNCTION(BlueprintCallable)
 	void SwitchToThirdPerson();
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
 	float CurGrenadeCoolTime = GrenadeCoolTime;
+	float CurUltimateCoolTime = UltimateCoolTime;
 };
