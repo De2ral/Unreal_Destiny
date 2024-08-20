@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Components/SphereComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "InteractableObject.h"
 #include "MyStash.generated.h"
 
 class UPrimitiveComponent;
@@ -23,12 +22,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* StashMesh;
-
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	class USphereComponent* Collider;
+	//UPROPERTY(EditAnywhere)
+	//class UStaticMeshComponent* StashMesh;
+//
+//
+	//UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	//class USphereComponent* Collider;
 
 	virtual void ObjAction();
 

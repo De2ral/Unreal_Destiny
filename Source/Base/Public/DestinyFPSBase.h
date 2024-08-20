@@ -146,6 +146,7 @@ public:
 	void Skill(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
 	void jump(const FInputActionValue& Value);
+	void jumpEnd(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
 
 	void Sprint(const FInputActionValue& Value);
@@ -177,4 +178,5 @@ public:
 private:
 	float CurSkillCoolTime = SkillCoolTime;
 	float CurGrenadeCoolTime = GrenadeCoolTime;
+	int jumpCount = 0;
 };

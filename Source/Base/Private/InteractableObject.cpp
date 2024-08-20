@@ -37,9 +37,9 @@ void AInteractableObject::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AA
  		APlayer->bPlayerInteractable = true;
 		APlayer->MaxInteractTime = ObjInteractTime;
 
-	}	
+		if(APlayer->bIsInteractComplete) ObjAction();
 
-	if(APlayer->bIsInteractComplete) ObjAction();
+	}	
 
 }
 

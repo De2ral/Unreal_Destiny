@@ -21,22 +21,14 @@ ACarriableObject::ACarriableObject()
 }
 
 // Called when the game starts or when spawned
-void ACarriableObject::BeginPlay()
-{
-	Super::BeginPlay();
-
-	Collider->OnComponentBeginOverlap.AddDynamic(this,&ACarriableObject::OnOverlapBegin);
-	Collider->OnComponentEndOverlap.AddDynamic(this,&ACarriableObject::OnOverlapEnd);
-	
-}
-
-void ACarriableObject::ObjAction()
-{
-	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> CarriableObject.ObjAction()"));
-
-
-
-}
+//void ACarriableObject::BeginPlay()
+//{
+//	Super::BeginPlay();
+//
+//	Collider->OnComponentBeginOverlap.AddDynamic(this,&ACarriableObject::OnOverlapBegin);
+//	Collider->OnComponentEndOverlap.AddDynamic(this,&ACarriableObject::OnOverlapEnd);
+//	
+//}
 
 //void ACarriableObject::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 //{
@@ -63,9 +55,7 @@ void ACarriableObject::ObjAction()
 
 void ACarriableObject::ObjAction()
 {
-	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> MyStash.ObjAction()"));
-
-
+	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> Carriable.ObjAction()"));
 
 }
 

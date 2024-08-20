@@ -46,7 +46,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 
-	PlayerClass = EPlayerClassEnum::Titan;
+	PlayerClass = EPlayerClassEnum::Hunter;
 }
 
 // Called when the game starts or when spawned
@@ -87,6 +87,17 @@ void ADestinyFPSBase::BeginPlay()
 	}
 
 	SwitchToFirstPerson();
+
+	switch(PlayerClass)
+	{
+		case EPlayerClassEnum::Hunter:
+			this->JumpMaxCount = 2;
+		case EPlayerClassEnum::Titan:
+			this->JumpMaxCount = 1;
+		case EPlayerClassEnum::Warlock:
+			this->JumpMaxCount = 1;
+	}
+
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
@@ -119,7 +130,8 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
 		Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
 		Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
-		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::jump);
+		Input->BindAction(JumpAction, ETriggerEvent::Started, this, &ADestinyFPSBase::jump);
+		Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::jump);
 
 		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
@@ -274,6 +286,11 @@ void ADestinyFPSBase::jump(const FInputActionValue& Value)
 {
 	ACharacter::Jump();
 	UE_LOG(LogTemp, Warning, TEXT("jump")); 
+}
+
+void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
+{
+	
 }
 
 void ADestinyFPSBase::Sprint(const FInputActionValue& Value)

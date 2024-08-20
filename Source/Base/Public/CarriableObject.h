@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Components/SphereComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "InteractableObject.h"
 #include "CarriableObject.generated.h"
 
 UCLASS()
@@ -19,13 +18,13 @@ public:
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	//virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
-	class USphereComponent* Collider;
-
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* CarriableMesh;
+	//UPROPERTY(EditAnywhere)
+	//class USphereComponent* Collider;
+//
+	//UPROPERTY(EditAnywhere)
+	//class UStaticMeshComponent* CarriableMesh;
 
 	virtual void ObjAction();
 
