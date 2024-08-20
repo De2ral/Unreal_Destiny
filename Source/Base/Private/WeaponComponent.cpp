@@ -63,12 +63,10 @@ void UWeaponComponent::Fire()
     UE_LOG(LogTemp, Warning, TEXT("Fire"));
 
      if(CurrentAmmo < 1)
-        {
-            StopFiring();
-            StopAiming();
-            Reload();
-            return;
-        }
+    {
+        StopFiring();
+        return;
+    }
 
     CurrentAmmo--;
     AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
@@ -116,13 +114,13 @@ void UWeaponComponent::Fire()
 		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
-        if (ReloadAnimation != nullptr && !bIsAiming)
+        if (FireAnimation != nullptr && !bIsAiming)
 	    {
 	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
 	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
 	    	if (AnimInstance != nullptr)
 	    	{
-	    		AnimInstance->Montage_Play(ReloadAnimation, 1.f);
+	    		AnimInstance->Montage_Play(FireAnimation, 1.f);
 	    	}
 	    }
 
@@ -165,13 +163,6 @@ void UWeaponComponent::FireInRange()
 {
      UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
-    if (CurrentAmmo < 1)
-    {
-        StopFiring();
-        Reload();
-        return;
-    }
-
     UWorld* const World = GetWorld();
     if (World != nullptr)
     {
@@ -192,6 +183,13 @@ void UWeaponComponent::FireInRange()
 
         for (int32 i = 0; i < NumPellets; ++i)
         {
+            if (CurrentAmmo < 1)
+            {
+                StopFiring();
+                return;
+            }
+
+
             CurrentAmmo--;
             AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
             // 발사 방향을 랜덤하게 조정 (앞 방향 기준)
@@ -227,6 +225,16 @@ void UWeaponComponent::FireInRange()
                 }
             }
         }
+
+        if (FireAnimation != nullptr && !bIsAiming)
+	    {
+	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
+	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
+	    	if (AnimInstance != nullptr)
+	    	{
+	    		AnimInstance->Montage_Play(FireAnimation, 1.f);
+	    	}
+	    }
         if (PlayerController != nullptr)
         {
             if (bIsAiming)
@@ -241,13 +249,11 @@ void UWeaponComponent::FireLauncher()
 {
     UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
 
-     if(CurrentAmmo < 1)
-        {
-            StopFiring();
-            StopAiming();
-            Reload();
-            return;
-        }
+    if(CurrentAmmo < 1)
+    {
+        StopFiring();
+        return;
+    }
 
     CurrentAmmo--;
     AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
@@ -296,13 +302,13 @@ void UWeaponComponent::FireLauncher()
 		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
-        if (ReloadAnimation != nullptr && !bIsAiming)
+        if (FireAnimation != nullptr && !bIsAiming)
 	    {
 	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
 	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
 	    	if (AnimInstance != nullptr)
 	    	{
-	    		AnimInstance->Montage_Play(ReloadAnimation, 1.f);
+	    		AnimInstance->Montage_Play(FireAnimation, 1.f);
 	    	}
 	    }
 
@@ -343,39 +349,50 @@ void UWeaponComponent::FireLauncher()
 void UWeaponComponent::StartFiring()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
-    if (!bIsFiring)
+    if(CurrentAmmo < 1)
     {
-        bIsFiring = true;
+        StopFiring();
+        StopAiming();
+        Reload();
+        return;
+    }
 
-        if (CurrentWeapon.AutoFire)
+    if(!IsReloading)
+    {
+        if (!bIsFiring)
         {
-            if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+            bIsFiring = true;
+
+            if (CurrentWeapon.AutoFire)
             {
-                FireInRange();
-                GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::FireInRange, CurrentWeapon.FireRate, true);
+                if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+                {
+                    FireInRange();
+                    GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::FireInRange, CurrentWeapon.FireRate, true);
+                }
+                else
+                {
+                    Fire(); // 첫 발사
+                    GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+                }
+                UE_LOG(LogTemp, Warning, TEXT("autofire"));
             }
             else
             {
-                Fire(); // 첫 발사
-                GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+                if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+                {
+                    FireInRange();
+                }
+                else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
+                {
+                    FireLauncher();
+                }
+                else
+                {
+                    Fire(); // 단발 발사
+                }
+                UE_LOG(LogTemp, Warning, TEXT("onefire"));
             }
-            UE_LOG(LogTemp, Warning, TEXT("autofire"));
-        }
-        else
-        {
-            if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
-            {
-                FireInRange();
-            }
-            else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
-            {
-                FireLauncher();
-            }
-            else
-            {
-                Fire(); // 단발 발사
-            }
-            UE_LOG(LogTemp, Warning, TEXT("onefire"));
         }
     }
 }
@@ -419,7 +436,7 @@ void UWeaponComponent::EquipWeapon2()
 	UE_LOG(LogTemp, Warning, TEXT("2"));
     LoadWeaponByName(FName("Pistol2"));
     FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);   
+    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);   
 }
 
 void UWeaponComponent::EquipWeapon3()
@@ -427,22 +444,30 @@ void UWeaponComponent::EquipWeapon3()
 	UE_LOG(LogTemp, Warning, TEXT("3"));
     LoadWeaponByName(FName("Pistol3"));
     FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
+    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
 }
 
 void UWeaponComponent::Reload()
 {
+    if(!IsReloading)
+    {
+        IsReloading = true;
+        if (ReloadAnimation != nullptr)
+	    {
+	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
+	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
+	    	if (AnimInstance != nullptr)
+	    	{
+	    		AnimInstance->Montage_Play(ReloadAnimation, 1.f);
+	    	}
+	    }
+    }
+}
+
+void UWeaponComponent::FillAmmo()
+{
     CurrentAmmo = MaxAmmo;
     AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
-    if (ReloadAnimation != nullptr)
-	{
-		ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
-		UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
-		if (AnimInstance != nullptr)
-		{
-			AnimInstance->Montage_Play(ReloadAnimation, 1.f);
-		}
-	}
 }
 
 void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
@@ -620,9 +645,9 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
                 FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
 
-                TargetLocation = CameraLocation + CameraRotation.Vector() * 50.0f; // 카메라 앞에 위치
+                TargetLocation = CameraLocation + CameraRotation.Vector() * 50.0f;
                 TargetLocation.Z -= 20.0f;
-                TargetRotation = CameraRotation; // 카메라 방향으로 회전
+                TargetRotation = CameraRotation;
                 TargetRotation.Yaw -= 90;
 
 
@@ -656,7 +681,7 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
             {
                 CurrentScopeSize = 0.5f;
                 CurrentScopeX = 600.0f;
-                AmmoWidget->SetScopeSize(CurrentScopeSize); // 스코프 초기화
+                AmmoWidget->SetScopeSize(CurrentScopeSize);
                 AmmoWidget->ImageMove(CurrentScopeX,CurrentSkeletalMeshComponent);
             }
         }

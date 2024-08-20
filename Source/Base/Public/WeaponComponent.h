@@ -69,6 +69,9 @@ public:
     // 애니메이션
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* ReloadAnimation;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UAnimMontage* FireAnimation;
     
 protected:
     virtual void BeginPlay() override;
@@ -110,6 +113,12 @@ public:
 
     void Reload();
 
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void FillAmmo();
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void EndReloading() {IsReloading = false;}
+
     void EquipWeapon1();
     void EquipWeapon2();
     void EquipWeapon3();
@@ -140,4 +149,6 @@ private:
     float CurrentScopeSize = 0.0f;
 
     float CurrentScopeX = 1.0f;
+
+    bool IsReloading = false;
 };

@@ -41,9 +41,6 @@ public:
 	FGunInfo(){}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName GunID;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName GunName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -53,13 +50,19 @@ public:
 	BulletTypeList BulletType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FireTypeList FireType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GunDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Max_capacity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Rebound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool Linetracing;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMesh* ProjectileMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ProjectileSpeed;
@@ -71,17 +74,8 @@ public:
 	float FireRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 CurrentAmmo;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString GunModelPath;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* GunImage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Linetracing;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMesh* ProjectileMesh;
 };
