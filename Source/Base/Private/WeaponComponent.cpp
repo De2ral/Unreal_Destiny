@@ -428,7 +428,7 @@ void UWeaponComponent::EquipWeapon1()
 	UE_LOG(LogTemp, Warning, TEXT("1"));
     LoadWeaponByName(FName("Pistol"));
     FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(UGameplayStatics::GetPlayerCharacter(this, 0)), ModelPath);
+    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
 }
 
 void UWeaponComponent::EquipWeapon2()
