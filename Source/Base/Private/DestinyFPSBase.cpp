@@ -319,6 +319,8 @@ void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
 
 	}
 
+	if(MaxInteractTime <= InteractTime) bIsInteractComplete = true;
+
 }
 
 void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)

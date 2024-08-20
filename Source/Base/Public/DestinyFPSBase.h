@@ -106,6 +106,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxInteractTime = 0.0f;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsInteractComplete = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
 

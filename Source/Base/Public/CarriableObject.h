@@ -9,7 +9,7 @@
 #include "CarriableObject.generated.h"
 
 UCLASS()
-class BASE_API ACarriableObject : public AActor
+class BASE_API ACarriableObject : public AInteractableObject
 {
 	GENERATED_BODY()
 	
@@ -27,11 +27,13 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* CarriableMesh;
 
-	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	virtual void ObjAction();
 
-	UFUNCTION()
-	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	//UFUNCTION()
+	//void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+//
+	//UFUNCTION()
+	//void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:	
 	// Called every frame
