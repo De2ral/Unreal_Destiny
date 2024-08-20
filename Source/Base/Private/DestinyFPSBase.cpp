@@ -120,6 +120,9 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		CurGrenadeCoolTime += DeltaTime;
 		HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 	}
+
+
+	
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -341,7 +344,14 @@ void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
 
 	}
 
-	if(MaxInteractTime <= InteractTime) bIsInteractComplete = true;
+	if(InteractTime > MaxInteractTime)
+	{
+		bIsInteractComplete = true;
+		InteractTime = 0.0f;
+		bPlayerInteractable = false;
+	} 
+		
+
 
 }
 
@@ -350,12 +360,13 @@ void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
 	if(!bPlayerInteractable)
 	{
 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = false"));
-
+		//bIsInteractComplete = false;
 	}
 	else if(bPlayerInteractable)
 	{
 		InteractTime = 0.0f;
 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("InteractTime to 0"));
+		//bIsInteractComplete = false;
 	}
 
 }

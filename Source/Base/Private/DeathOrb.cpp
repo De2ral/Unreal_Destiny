@@ -24,9 +24,8 @@ void ADeathOrb::BeginPlay()
 
 void ADeathOrb::ObjAction()
 {
-	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> DeathOrb.ObjAction"));
-
-
+	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Red,TEXT("InteractableObj -> DeathOrb.ObjAction"));
+	Destroy();
 
 }
 

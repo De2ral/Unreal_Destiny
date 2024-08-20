@@ -10,11 +10,11 @@ AInteractableObject::AInteractableObject()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//ObjCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ObjCollider"));
-	//ObjMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ObjMesh"));
-	//ObjCollider->SetupAttachment(RootComponent);
-	//ObjCollider->InitSphereRadius(130.0f);
-	//ObjMesh->SetupAttachment(ObjCollider);
+	ObjCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ObjCollider"));
+	ObjMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ObjMesh"));
+	ObjCollider->SetupAttachment(RootComponent);
+	ObjCollider->InitSphereRadius(130.0f);
+	ObjMesh->SetupAttachment(ObjCollider);
 
 	
 
@@ -32,14 +32,14 @@ void AInteractableObject::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AA
 {
 	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
 	{
-		ADestinyFPSBase* APlayer = Cast<ADestinyFPSBase>(OtherActor);
+		APlayer = Cast<ADestinyFPSBase>(OtherActor);
 		//GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - DeathOrb OverlapBegin"));
  		APlayer->bPlayerInteractable = true;
 		APlayer->MaxInteractTime = ObjInteractTime;
 
-		if(APlayer->bIsInteractComplete) ObjAction();
 
 	}	
+	
 
 }
 
@@ -47,7 +47,7 @@ void AInteractableObject::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AAct
 {
 	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
 	{
-		ADestinyFPSBase* APlayer = Cast<ADestinyFPSBase>(OtherActor);
+		APlayer = Cast<ADestinyFPSBase>(OtherActor);
  		//GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - DeathOrb OverlapEnd"));
  		APlayer->bPlayerInteractable = false;
 	}
@@ -59,7 +59,12 @@ void AInteractableObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
+	if(APlayer && APlayer->bIsInteractComplete) 
+	{
+		ObjAction();
+		APlayer->bIsInteractComplete = false;
+	}
+	
 
 }
 
