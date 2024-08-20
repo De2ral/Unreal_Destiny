@@ -134,6 +134,12 @@ public:
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+    FVector TargetCameraRelativeLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+    float CameraInterpolationSpeed;
+
  	UPROPERTY()
     UHUDWidget* HUDWidget;
 

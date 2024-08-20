@@ -110,11 +110,6 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 	{
 		CurUltimateCoolTime += DeltaTime;
 	}
-
-	if (isUltimate)
-	{
-		
-	}
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -298,8 +293,9 @@ void ADestinyFPSBase::TitanUltimateStart()
 	float LaunchStrength = 1000.f;
 	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
 	LaunchCharacter(LaunchVelocity, true, true);
-	TppCamera->SetRelativeLocation(FVector(-100.f, 0.f, 500.f));
-	GetCharacterMovement()->GravityScale = 1.25f;
+	TppSpringArm->TargetArmLength = 500.0f;
+	TppCamera->SetRelativeLocation(FVector(-350.f, 0.f, 500.f));
+	GetCharacterMovement()->GravityScale = 1.1f;
 }
 
 void ADestinyFPSBase::TitanUltimateEnd()
