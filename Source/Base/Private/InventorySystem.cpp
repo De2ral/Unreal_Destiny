@@ -55,7 +55,7 @@ void UInventorySystem::BeginPlay()
 	//크래쉬 방지를 위한 사전 초기화
 	
 
-	//if(!WeaponArray[MaxInvenSize - 1])
+	//if(!WeaponArray[MaxInvenSize - 1].Gunimage)
 	//{
 	//	GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Red,TEXT("빈 공간에 데이터가 Null이다"));
 	//}

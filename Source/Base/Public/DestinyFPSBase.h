@@ -7,10 +7,20 @@
 #include "InputActionValue.h"
 
 #include "WeaponComponent.h"
+#include "SkillWidget.h"
+#include "HUDWidget.h"
 
 #include "DestinyFPSBase.generated.h"
 
 class UCharacterMovementComponent;
+
+UENUM(BlueprintType)
+enum class EPlayerClassEnum : uint8
+{
+	Hunter UMETA(DisplayName = "Hunter"),
+	Warlock UMETA(DisplayName = "Warlock"),
+	Titan UMETA(DisplayName = "Titan")
+};
 
 UCLASS()
 class BASE_API ADestinyFPSBase : public ACharacter
@@ -77,7 +87,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InterAction;
 
-	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InventoryAction;
@@ -97,9 +106,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxInteractTime = 0.0f;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsInteractComplete = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EPlayerClassEnum PlayerClass;
 
 	// Skill Variable
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -114,6 +128,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GrenadeCoolTime = 3.f;
 
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UHUDWidget> HUDWidgetClass;
+
+ 	UPROPERTY()
+    UHUDWidget* HUDWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class ATitan_Skill_Grenade> GrenadeClass;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
@@ -124,6 +146,7 @@ public:
 	void Skill(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
 	void jump(const FInputActionValue& Value);
+	void jumpEnd(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
 
 	void Sprint(const FInputActionValue& Value);
@@ -145,9 +168,15 @@ public:
 	void SetHasRifle(bool bNewHasRifle);
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
+
+	void Shield();
 	void Throw();
+
+	void SwitchToFirstPerson();
+	void SwitchToThirdPerson();
 	
 private:
-	float CurSkillCoolTime = 0.f;
-	float CurGrenadeCoolTime = 0.f;
+	float CurSkillCoolTime = SkillCoolTime;
+	float CurGrenadeCoolTime = GrenadeCoolTime;
+	int jumpCount = 0;
 };

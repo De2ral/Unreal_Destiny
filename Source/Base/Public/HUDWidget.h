@@ -4,33 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "WeaponWidget.generated.h"
-
+#include "HUDWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BASE_API UWeaponWidget : public UUserWidget
+class BASE_API UHUDWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 public:
-    virtual void NativeConstruct() override;
-
-    void SetScopeSize(float NewSize);
-
-    void ImageMove(float NewX, USkeletalMeshComponent* Object);
-
     void UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo);
+    void UpdateSkillCoolTime(float cur, float max);
+    void UpdateGrenadeCoolTime(float cur, float max);
 
 protected:
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* AmmoText;
 
     UPROPERTY(meta = (BindWidget))
-    class UImage* BaseCrossImage;
+    class UProgressBar* SkillCoolTimeHUD;
 
     UPROPERTY(meta = (BindWidget))
-    class UImage* ScopeCrossImage;
+    class UProgressBar* GrenadeCoolTimeHUD;
 };

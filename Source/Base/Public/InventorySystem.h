@@ -47,7 +47,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int WpnArrayIndex = 0;
 
-	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int MaxInvenSize = 30;
 	
 	UPROPERTY(EditDefaultsOnly)
