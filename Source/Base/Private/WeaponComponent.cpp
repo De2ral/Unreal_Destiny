@@ -485,6 +485,14 @@ void UWeaponComponent::LoadWeaponByName(FName WeaponName)
     }
 }
 
+void UWeaponComponent::SetCurrentWeaponMeshVisibility(bool isVisible)
+{
+    if(CurrentSkeletalMeshComponent)
+        CurrentSkeletalMeshComponent->SetVisibility(isVisible);
+    if(CurrentStaticMeshComponent)
+        CurrentStaticMeshComponent->SetVisibility(isVisible);
+}
+
 void UWeaponComponent::RemoveCurrentWeaponModel()
 {
     if (CurrentStaticMeshComponent)

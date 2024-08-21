@@ -15,7 +15,7 @@
 #include "Titan_Skill_Barrier.h"
 #include "Titan_Skill_Grenade.h"
 #include "Animation/AnimInstance.h"
-
+#include "MyLegacyCameraShake.h"
 
 // Sets default values
 ADestinyFPSBase::ADestinyFPSBase()
@@ -225,7 +225,7 @@ void ADestinyFPSBase::Throw()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
 
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
 	UWorld* world = GetWorld();
 	if (world && PlayerController)
 	{
@@ -294,8 +294,22 @@ void ADestinyFPSBase::TitanUltimateStart()
 	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
 	LaunchCharacter(LaunchVelocity, true, true);
 	TppSpringArm->TargetArmLength = 500.0f;
-	TppCamera->SetRelativeLocation(FVector(-350.f, 0.f, 500.f));
+	TppCamera->SetRelativeLocation(FVector(-500.f, 0.f, 300.f));
 	GetCharacterMovement()->GravityScale = 1.1f;
+	WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+}
+
+void ADestinyFPSBase::CameraShake(float Scale)
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
+
+	if (PlayerController && TppCamera)
+	{ 
+		if (PlayerController->IsLocalController())
+		{
+			PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), Scale);
+		}
+	}
 }
 
 void ADestinyFPSBase::TitanUltimateEnd()
@@ -303,6 +317,7 @@ void ADestinyFPSBase::TitanUltimateEnd()
 	isUltimate = false;
 	SwitchToFirstPerson();
 	GetCharacterMovement()->GravityScale = 1.f;
+	WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 }
 
 void ADestinyFPSBase::jump(const FInputActionValue& Value)

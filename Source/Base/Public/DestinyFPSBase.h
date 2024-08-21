@@ -184,6 +184,9 @@ public:
 	void TitanUltimateStart();
 
 	UFUNCTION(BlueprintCallable)
+	void CameraShake(float Scale);
+
+	UFUNCTION(BlueprintCallable)
 	void TitanUltimateEnd();
 
 	UFUNCTION(BlueprintCallable)
