@@ -63,13 +63,6 @@ void UInventorySystem::BeginPlay()
 }
 
 
-void UInventorySystem::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-
-}
-
 void UInventorySystem::AddWeaponToInventory()
 {	
 

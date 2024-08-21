@@ -23,6 +23,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	void AddMapping(ADestinyFPSBase* TargetCharacter);
+
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int CurrAmmo = 0;
 
@@ -50,7 +52,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UTexture2D* GunImg;
 
-
+	
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	// class UInputAction* InventoryAction;
 
@@ -63,8 +65,6 @@ protected:
 
 	// UPROPERTY(EditDefaultsOnly)
 	// bool bIsInvenOpen = false;
-	
-
 
 public:	
 	// Called every frame
@@ -94,5 +94,9 @@ public:
 
 
 
+private:
+	ADestinyFPSBase* Character;
+
+	void InvenOpenClose();
 		
 };
