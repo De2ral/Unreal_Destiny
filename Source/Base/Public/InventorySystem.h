@@ -41,7 +41,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int MaxRefAmmo = 180;
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FGunInfo> WeaponArray;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
