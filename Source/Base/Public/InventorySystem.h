@@ -41,9 +41,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int MaxRefAmmo = 180;
 
-	UPROPERTY(BlueprintReadWrite)
-	TArray<FGunInfo> WeaponArray;
-
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int WpnArrayIndex = 0;
 
@@ -91,6 +88,9 @@ public:
 	bool bIsSpecAmmoFull() {return (CurrSpecialAmmo > MaxSpecialAmmo) ? true : false; }
 
 	bool bIsRefAmmoFull() {return (CurrRefAmmo > MaxRefAmmo) ? true : false; }
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FGunInfo> WeaponArray;
 
 
 

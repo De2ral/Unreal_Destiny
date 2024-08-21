@@ -46,7 +46,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 
-	PlayerClass = EPlayerClassEnum::Hunter;
+	PlayerClass = EPlayerClassEnum::Warlock;
 
 	switch(PlayerClass)
 	{
@@ -294,11 +294,29 @@ void ADestinyFPSBase::jump(const FInputActionValue& Value)
 {
 	ACharacter::Jump();
 	UE_LOG(LogTemp, Warning, TEXT("jump")); 
+
+	if(PlayerClass == EPlayerClassEnum::Warlock)
+	{
+		if(GetCharacterMovement()->IsFalling())
+		{
+			GetCharacterMovement()->GravityScale = 0.2f;
+		}
+
+	}
 }
 
 void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
 {
 	ACharacter::StopJumping();
+
+	if(PlayerClass == EPlayerClassEnum::Warlock)
+	{
+		if(GetCharacterMovement()->IsFalling())
+		{
+			GetCharacterMovement()->GravityScale = 1.0f;
+		}
+
+	}
 }
 
 void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
