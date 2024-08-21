@@ -16,6 +16,8 @@
 #include "Titan_Skill_Grenade.h"
 #include "Animation/AnimInstance.h"
 #include "MyLegacyCameraShake.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ADestinyFPSBase::ADestinyFPSBase()
@@ -46,6 +48,22 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppMesh->SetupAttachment(FppCamera);
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmashParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Skill_RockBurst/P_RBurst_Fire_Charge_Slam_2.P_RBurst_Fire_Charge_Slam_2'"));
+	if (SmashParticleAsset.Succeeded())
+		TitanUltimateSmashParticle = SmashParticleAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> FistParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/ICE/combat/P_MagicSpray_Ice_02.P_MagicSpray_Ice_02'"));
+	if (FistParticleAsset.Succeeded())
+		TitanUltimateFistParticle = FistParticleAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> LaunchParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/ICE/P_jumpSmash_Spikes_02.P_jumpSmash_Spikes_02'"));
+	if (LaunchParticleAsset.Succeeded())
+		TitanUltimateLaunchParticle = LaunchParticleAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Ambient/Fire/P_Fire_wallTorch_Blue_noSmoke.P_Fire_wallTorch_Blue_noSmoke'"));
+	if (TrailParticleAsset.Succeeded())
+		TitanUltimateTrailParticle = TrailParticleAsset.Object;
 
 	PlayerClass = EPlayerClassEnum::Titan;
 }
@@ -162,17 +180,19 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
+	if (!isUltimate)
 	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-		const FVector FowardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		if (Controller != nullptr)
+		{
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+			const FVector FowardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		AddMovementInput(FowardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
+			AddMovementInput(FowardDirection, MovementVector.Y);
+			AddMovementInput(RightDirection, MovementVector.X);
+		}
 	}
-
 }
 
 void ADestinyFPSBase::Look(const FInputActionValue& Value)
@@ -286,19 +306,6 @@ void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 	}
 }
 
-void ADestinyFPSBase::TitanUltimateStart()
-{
-	FVector LaunchDirection = GetActorRotation().Vector();
-	LaunchDirection.Z += 1.5f;
-	float LaunchStrength = 1000.f;
-	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
-	LaunchCharacter(LaunchVelocity, true, true);
-	TppSpringArm->TargetArmLength = 500.0f;
-	TppCamera->SetRelativeLocation(FVector(-500.f, 0.f, 300.f));
-	GetCharacterMovement()->GravityScale = 1.1f;
-	WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-}
-
 void ADestinyFPSBase::CameraShake(float Scale)
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
@@ -312,11 +319,91 @@ void ADestinyFPSBase::CameraShake(float Scale)
 	}
 }
 
-void ADestinyFPSBase::TitanUltimateEnd()
+void ADestinyFPSBase::TitanUltimateStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation)
+{
+	FVector LaunchDirection = GetActorRotation().Vector();
+	LaunchDirection.Z += ZDirection;
+	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
+	LaunchCharacter(LaunchVelocity, true, true);
+	GetCharacterMovement()->GravityScale = GravityScale;
+
+	TppSpringArm->TargetArmLength = 500.0f;
+	TppCamera->SetRelativeLocation(CameraLocation);
+	
+	WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+
+	if (TitanUltimateLaunchParticle)
+    {
+		FVector ParticleSpawnLocation = TppMesh->GetSocketLocation(TEXT("GroundSocket"));
+        UGameplayStatics::SpawnEmitterAtLocation(
+            GetWorld(),
+            TitanUltimateLaunchParticle,
+            ParticleSpawnLocation,
+            FRotator(0.f, 0.f, 0.f),
+			(FVector)((1.5F))
+        );
+    }
+
+	if (TitanUltimateFistParticle)
+    {
+        UGameplayStatics::SpawnEmitterAttached(
+            TitanUltimateFistParticle,
+            TppMesh,
+			FName("TitanUltimateFistSocket"),
+            FVector::ZeroVector, 
+            FRotator::ZeroRotator,
+			EAttachLocation::SnapToTarget,
+			true
+        );
+    }
+
+	if (TitanUltimateTrailParticle)
+    {
+        UGameplayStatics::SpawnEmitterAttached(
+            TitanUltimateTrailParticle,
+            TppMesh,
+			FName("RootSocket"),
+            FVector::ZeroVector, 
+            FRotator::ZeroRotator,
+			EAttachLocation::SnapToTarget,
+			true
+        );
+    }
+}
+
+void ADestinyFPSBase::TitanUltimateTop(float GravityScale)
+{
+	GetCharacterMovement()->GravityScale = GravityScale;
+}
+
+void ADestinyFPSBase::TitanUltimateSmash()
+{
+	CameraShake(2.f);
+	if (TitanUltimateSmashParticle)
+    {
+		FVector ParticleSpawnLocation = TppMesh->GetSocketLocation(TEXT("TitanUltimateFistSocket"));
+		ParticleSpawnLocation.Z -= 100.f;
+        UGameplayStatics::SpawnEmitterAtLocation(
+            GetWorld(),
+            TitanUltimateSmashParticle,
+            ParticleSpawnLocation,
+            FRotator(0.f, 0.f, 0.f),
+			(FVector)((1.5F))
+        );
+    }
+}
+
+void ADestinyFPSBase::TitanUltimateEnd(float DelayTime)
+{
+	GetCharacterMovement()->GravityScale = 1.f;
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::EndUltimate, DelayTime, false);
+}
+
+void ADestinyFPSBase::EndUltimate()
 {
 	isUltimate = false;
 	SwitchToFirstPerson();
-	GetCharacterMovement()->GravityScale = 1.f;
 	WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 }
 

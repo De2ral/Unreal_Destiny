@@ -131,14 +131,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float UltimateCoolTime = 5.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanUltimateSmashParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanUltimateFistParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanUltimateLaunchParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanUltimateTrailParticle;
+
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-    FVector TargetCameraRelativeLocation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-    float CameraInterpolationSpeed;
 
  	UPROPERTY()
     UHUDWidget* HUDWidget;
@@ -179,15 +185,22 @@ public:
 
 	void Shield();
 	void Throw();
-
-	UFUNCTION(BlueprintCallable)
-	void TitanUltimateStart();
+	void EndUltimate();
 
 	UFUNCTION(BlueprintCallable)
 	void CameraShake(float Scale);
 
 	UFUNCTION(BlueprintCallable)
-	void TitanUltimateEnd();
+	void TitanUltimateStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void TitanUltimateTop(float GravityScale);
+
+	UFUNCTION(BlueprintCallable)
+	void TitanUltimateSmash();
+
+	UFUNCTION(BlueprintCallable)
+	void TitanUltimateEnd(float DelayTime);
 
 	UFUNCTION(BlueprintCallable)
 	void SwitchToFirstPerson();
