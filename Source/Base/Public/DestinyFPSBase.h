@@ -17,9 +17,9 @@ class UCharacterMovementComponent;
 UENUM(BlueprintType)
 enum class EPlayerClassEnum : uint8
 {
-	Hunter UMETA(DisplayName = "Hunter"),
-	Warlock UMETA(DisplayName = "Warlock"),
-	Titan UMETA(DisplayName = "Titan")
+	HUNTER UMETA(DisplayName = "Hunter"),
+	TITAN UMETA(DisplayName = "Titan"),
+	WARLOCK UMETA(DisplayName = "Warlock")
 };
 
 UCLASS()
@@ -131,6 +131,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float UltimateCoolTime = 5.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float UltimateDamage = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* TitanUltimateCollider;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* TitanUltimateSmashParticle;
 
@@ -207,6 +213,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SwitchToThirdPerson();
+
+	void SetClassValue();
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;

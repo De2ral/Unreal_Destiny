@@ -49,29 +49,35 @@ ADestinyFPSBase::ADestinyFPSBase()
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmashParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Skill_RockBurst/P_RBurst_Fire_Charge_Slam_2.P_RBurst_Fire_Charge_Slam_2'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmashParticleAsset(
+		TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Skill_RockBurst/P_RBurst_Fire_Charge_Slam_2.P_RBurst_Fire_Charge_Slam_2'"));
 	if (SmashParticleAsset.Succeeded())
 		TitanUltimateSmashParticle = SmashParticleAsset.Object;
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> FistParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/ICE/combat/P_MagicSpray_Ice_02.P_MagicSpray_Ice_02'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> FistParticleAsset(
+		TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/ICE/combat/P_MagicSpray_Ice_02.P_MagicSpray_Ice_02'"));
 	if (FistParticleAsset.Succeeded())
 		TitanUltimateFistParticle = FistParticleAsset.Object;
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> LaunchParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/ICE/P_jumpSmash_Spikes_02.P_jumpSmash_Spikes_02'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> LaunchParticleAsset(
+		TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Mobile/ICE/P_jumpSmash_Spikes_02.P_jumpSmash_Spikes_02'"));
 	if (LaunchParticleAsset.Succeeded())
 		TitanUltimateLaunchParticle = LaunchParticleAsset.Object;
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Ambient/Fire/P_Fire_wallTorch_Blue_noSmoke.P_Fire_wallTorch_Blue_noSmoke'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(
+		TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Ambient/Fire/P_Fire_wallTorch_Blue_noSmoke.P_Fire_wallTorch_Blue_noSmoke'"));
 	if (TrailParticleAsset.Succeeded())
 		TitanUltimateTrailParticle = TrailParticleAsset.Object;
 
-	PlayerClass = EPlayerClassEnum::Titan;
+	PlayerClass = EPlayerClassEnum::TITAN;
 }
 
 // Called when the game starts or when spawned
 void ADestinyFPSBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetClassValue();
 
 	FInputModeGameOnly GameOnly;
 
@@ -105,7 +111,46 @@ void ADestinyFPSBase::BeginPlay()
 		}
 	}
 
+	TitanUltimateCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ExplodeCollider"));
+	TitanUltimateCollider->SetupAttachment(TppMesh, TEXT("GroundSocket"));
+	TitanUltimateCollider->SetGenerateOverlapEvents(true);
+
 	SwitchToFirstPerson();
+}
+
+
+void ADestinyFPSBase::SetClassValue()
+{
+	if(PlayerClass == EPlayerClassEnum::HUNTER)
+	{
+		// Set Value by Hunter Class
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh> HunterMeshAsset(
+			TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Hunter/Meshes/Genji_Street_Runner.Genji_Street_Runner'"));
+		if(HunterMeshAsset.Succeeded())
+			TppMesh->SetSkeletalMesh(HunterMeshAsset.Object);
+
+		static ConstructorHelpers::FClassFinder<UAnimInstance> HunterAnimClassAsset(
+			TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Hunter/Animations/ABP_Hunter.ABP_Hunter'"));
+		if(HunterAnimClassAsset.Succeeded())
+			TppMesh->SetAnimInstanceClass(HunterAnimClassAsset.Class);
+	}
+	else if(PlayerClass == EPlayerClassEnum::TITAN)
+	{
+		// Set Value by Titan Class
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
+			TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Titan/Meshes/Omega_Knight.Omega_Knight'"));
+		if(TitanMeshAsset.Succeeded())
+			TppMesh->SetSkeletalMesh(TitanMeshAsset.Object);
+
+		static ConstructorHelpers::FClassFinder<UAnimInstance> TitanAnimClassAsset(
+			TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Titan/Animations/ABP_Titan.ABP_Titan'"));
+		if(TitanAnimClassAsset.Succeeded())
+			TppMesh->SetAnimInstanceClass(TitanAnimClassAsset.Class);
+	}
+	else if(PlayerClass == EPlayerClassEnum::WARLOCK)
+	{
+		// Set Value by Titan Class
+	}
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
@@ -378,6 +423,7 @@ void ADestinyFPSBase::TitanUltimateTop(float GravityScale)
 
 void ADestinyFPSBase::TitanUltimateSmash()
 {
+	// VFX & Camera Moving
 	CameraShake(2.f);
 	if (TitanUltimateSmashParticle)
     {
@@ -391,6 +437,16 @@ void ADestinyFPSBase::TitanUltimateSmash()
 			(FVector)((1.5F))
         );
     }
+
+	// Apply Damage
+	TArray<AActor*> OverlappingActors;
+	TitanUltimateCollider->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (!Actor->IsA(ADestinyFPSBase::StaticClass()))
+			UGameplayStatics::ApplyDamage(Actor, UltimateDamage, GetInstigatorController(), this, nullptr);
+	}
 }
 
 void ADestinyFPSBase::TitanUltimateEnd(float DelayTime)
