@@ -68,7 +68,6 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION()
 	void AddCurrAmmo(int value) { CurrAmmo += value; }
@@ -91,6 +90,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FGunInfo> WeaponArray;
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FGunInfo> EQWeaponArray;
 
 
 

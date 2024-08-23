@@ -14,6 +14,7 @@ UInventorySystem::UInventorySystem()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	WeaponArray.SetNum(MaxInvenSize);
+	EQWeaponArray.SetNum(3);
 
 	static ConstructorHelpers::FObjectFinder<UTexture2D>GunImageObject(TEXT("/Script/Engine.Texture2D'/Engine/EditorResources/S_Pawn.S_Pawn'"));
 	GunImg = GunImageObject.Object;
@@ -39,6 +40,25 @@ UInventorySystem::UInventorySystem()
 		WeaponArray[i].GunModelPath = "/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun";
 	}
 
+	for(int i = 0; i < 3; i++)
+	{
+		EQWeaponArray[i].GunImage = GunImg;
+		EQWeaponArray[i].BulletType = BulletTypeList::REGULAR;
+		EQWeaponArray[i].AutoFire = false;
+		EQWeaponArray[i].CurrentAmmo = 0;
+		EQWeaponArray[i].FireRate = 0.0f;
+		EQWeaponArray[i].FireType = FireTypeList::SINGLE;
+		EQWeaponArray[i].GunID = FName("0000");
+		EQWeaponArray[i].Linetracing = false;
+		EQWeaponArray[i].Rebound = 0.0f;
+		EQWeaponArray[i].ProjectileSpeed = 0.0f;
+		EQWeaponArray[i].ProjectileMesh = ProjMesh.Object;
+		EQWeaponArray[i].GunName = FName("aaaa");
+		EQWeaponArray[i].GunDamage = 0.0f;
+		EQWeaponArray[i].GunType = GunTypeList::PISTOL;
+		EQWeaponArray[i].GunModelPath = "/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun";
+	}
+
 
 
 }
@@ -50,6 +70,28 @@ void UInventorySystem::BeginPlay()
 	for(int i = 0; i < 4;i++)
 	{
 		AddWeaponToInventory();
+	}
+
+	for(int i = 0; i < 3;i++)
+	{
+		uint8 randomSeed;
+		randomSeed = FMath::RandRange(2,4);
+		FName WpnName;
+		switch (randomSeed)
+		{
+			case 2:
+				WpnName = FName("Pistol");
+				break;
+			case 3:
+				WpnName = FName("Pistol2");
+				break;
+			case 4:
+				WpnName = FName("Pistol3");
+				break;
+			default:
+				break;
+		}
+		EQWeaponArray[i].GunName = WpnName;
 	}
 
 	//크래쉬 방지를 위한 사전 초기화
