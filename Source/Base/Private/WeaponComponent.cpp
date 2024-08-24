@@ -163,6 +163,13 @@ void UWeaponComponent::FireInRange()
 {
     UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
+    if (CurrentAmmo < 1)
+        {
+            StopFiring();
+            return;
+        }
+    CurrentAmmo--;
+    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
     UWorld* const World = GetWorld();
     if (World != nullptr)
     {
@@ -183,13 +190,6 @@ void UWeaponComponent::FireInRange()
 
         for (int32 i = 0; i < NumPellets; ++i)
         {
-            if (CurrentAmmo < 1)
-            {
-                StopFiring();
-                return;
-            }
-            CurrentAmmo--;
-            AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
             // 발사 방향을 랜덤하게 조정 (앞 방향 기준)
             float RandomHorizontalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
             float RandomVerticalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
@@ -207,22 +207,22 @@ void UWeaponComponent::FireInRange()
             CollisionParams.AddIgnoredActor(GetOwner());
             CollisionParams.bTraceComplex = true; 
 
-            //FCollisionObjectQueryParams ObjectQueryParams;
-            //ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
-            //bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
-            
-            bool bHit = World->LineTraceSingleByChannel(
-                HitResult, 
-                TraceStart, 
-                PelletEnd, 
-                ECC_Visibility,  // 콜리전 채널을 설정
-                CollisionParams
-            );
+            FCollisionObjectQueryParams ObjectQueryParams;
+            ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+            bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
             DrawDebugLine(World, TraceStart, PelletEnd, FColor::Red, false, 1, 0, 1);
+            //bool bHit = World->LineTraceSingleByChannel(
+            //    HitResult, 
+            //    TraceStart, 
+            //    PelletEnd, 
+            //    ECC_Visibility,  // 콜리전 채널을 설정
+            //    CollisionParams
+            //);
+            
 
             if (bHit)
             {
-
+                /*
                 // SkeletalMeshComponent인지 확인
                 USkeletalMeshComponent* HitMesh = Cast<USkeletalMeshComponent>(HitResult.GetComponent());
                 if (HitMesh)
@@ -231,30 +231,20 @@ void UWeaponComponent::FireInRange()
                     FName HitBoneName = HitResult.BoneName;
                     UE_LOG(LogTemp, Warning, TEXT("Hit bone: %s"), *HitBoneName.ToString());
                 }    
-
-                /*
+                */
+                
                 if (HitResult.GetActor()->ActorHasTag("Enemy"))
                 {
-                    
-                }
-                */
-                    /*
                     DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
                     UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
                     UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
-                    //if (HitResult.BoneName == "head")
-                    {
-                        //UE_LOG(LogTemp, Warning, TEXT("Headshot!"));
-                        //UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage * 2.0f, PlayerController, GetOwner(), UDamageType::StaticClass());
-                    }
-                    //else
-                    {
-                        UE_LOG(LogTemp, Warning, TEXT("Headshot! %s"), *HitResult.BoneName.ToString());
-                        UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
-                    }
-                    */
+                    
+                    
+                    UE_LOG(LogTemp, Warning, TEXT("Headshot! %s"), *HitResult.BoneName.ToString());
+                    UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
                 }
             }
+        }
         
 
         if (FireAnimation != nullptr && !bIsAiming)
@@ -460,7 +450,7 @@ void UWeaponComponent::StopAiming()
 void UWeaponComponent::EquipWeapon1()
 {
 	UE_LOG(LogTemp, Warning, TEXT("1"));
-    LoadWeaponByName(FName("Pistol"));
+    LoadWeaponByName(FName("Sniper3"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
 }
@@ -468,7 +458,7 @@ void UWeaponComponent::EquipWeapon1()
 void UWeaponComponent::EquipWeapon2()
 {
 	UE_LOG(LogTemp, Warning, TEXT("2"));
-    LoadWeaponByName(FName("Pistol2"));
+    LoadWeaponByName(FName("Launcher1"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);   
 }
@@ -476,7 +466,7 @@ void UWeaponComponent::EquipWeapon2()
 void UWeaponComponent::EquipWeapon3()
 {
 	UE_LOG(LogTemp, Warning, TEXT("3"));
-    LoadWeaponByName(FName("Pistol3"));
+    LoadWeaponByName(FName("Launcher2"));
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
 }
