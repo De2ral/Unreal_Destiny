@@ -161,7 +161,7 @@ void UWeaponComponent::Fire()
 
 void UWeaponComponent::FireInRange()
 {
-     UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
+    UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
     UWorld* const World = GetWorld();
     if (World != nullptr)
@@ -188,8 +188,6 @@ void UWeaponComponent::FireInRange()
                 StopFiring();
                 return;
             }
-
-
             CurrentAmmo--;
             AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
             // 발사 방향을 랜덤하게 조정 (앞 방향 기준)
@@ -207,24 +205,57 @@ void UWeaponComponent::FireInRange()
             FHitResult HitResult;
             FCollisionQueryParams CollisionParams;
             CollisionParams.AddIgnoredActor(GetOwner());
+            CollisionParams.bTraceComplex = true; 
 
-            FCollisionObjectQueryParams ObjectQueryParams;
-            ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
-            bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
+            //FCollisionObjectQueryParams ObjectQueryParams;
+            //ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+            //bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
+            
+            bool bHit = World->LineTraceSingleByChannel(
+                HitResult, 
+                TraceStart, 
+                PelletEnd, 
+                ECC_Visibility,  // 콜리전 채널을 설정
+                CollisionParams
+            );
             DrawDebugLine(World, TraceStart, PelletEnd, FColor::Red, false, 1, 0, 1);
 
             if (bHit)
             {
+
+                // SkeletalMeshComponent인지 확인
+                USkeletalMeshComponent* HitMesh = Cast<USkeletalMeshComponent>(HitResult.GetComponent());
+                if (HitMesh)
+                {
+                    // Bone 이름 출력
+                    FName HitBoneName = HitResult.BoneName;
+                    UE_LOG(LogTemp, Warning, TEXT("Hit bone: %s"), *HitBoneName.ToString());
+                }    
+
+                /*
                 if (HitResult.GetActor()->ActorHasTag("Enemy"))
                 {
+                    
+                }
+                */
+                    /*
                     DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
                     UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
                     UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
-
-                    UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
+                    //if (HitResult.BoneName == "head")
+                    {
+                        //UE_LOG(LogTemp, Warning, TEXT("Headshot!"));
+                        //UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage * 2.0f, PlayerController, GetOwner(), UDamageType::StaticClass());
+                    }
+                    //else
+                    {
+                        UE_LOG(LogTemp, Warning, TEXT("Headshot! %s"), *HitResult.BoneName.ToString());
+                        UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
+                    }
+                    */
                 }
             }
-        }
+        
 
         if (FireAnimation != nullptr && !bIsAiming)
 	    {
@@ -244,6 +275,8 @@ void UWeaponComponent::FireInRange()
         }
     }
 }
+
+
 
 void UWeaponComponent::FireLauncher()
 {
@@ -333,9 +366,10 @@ void UWeaponComponent::FireLauncher()
                     UE_LOG(LogTemp, Warning, TEXT("Damage : %f"),CurrentWeapon.GunDamage);
                     UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
                     return;
-                }
-                
+                } 
             }
+                
+            
 			ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
 		}
         if (Projectile)
