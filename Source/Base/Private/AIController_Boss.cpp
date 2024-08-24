@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "AIController_Boss.h"
 #include "CPP_Boss_ConsecratedMind.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "AIController_Boss.h"
 
 AAIController_Boss::AAIController_Boss()
 {
