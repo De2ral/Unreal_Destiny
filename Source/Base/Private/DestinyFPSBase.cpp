@@ -5,9 +5,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -25,6 +27,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 	TppMesh->SetOwnerNoSee(true);
 	TppMesh->SetupAttachment(RootComponent);
+
 
 	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
 	TppSpringArm->TargetArmLength = 300.0f;
@@ -70,6 +73,15 @@ void ADestinyFPSBase::BeginPlay()
 	Super::BeginPlay();
 
 	FInputModeGameOnly GameOnly;
+
+	// 캐릭터 기본 캡슐 높이 설정
+    DefaultCapsuleHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+
+    // 슬라이딩 시 캡슐 높이 설정 (기본 높이의 절반 또는 사용자가 원하는 값으로 설정)
+    SlideCapsuleHeight = DefaultCapsuleHeight / 2.0f;
+
+	// 초기 캡슐 크기 설정
+    GetCapsuleComponent()->InitCapsuleSize(42.0f, DefaultCapsuleHeight);
 
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if (PlayerController != nullptr)
@@ -121,7 +133,27 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 	}
 
+	//슬라이딩 시작 (마지막으로 받은 전방벡터로 고정)
+	if(bIsSliding)
+	{
+		AddMovementInput(SlideVector,1);
+		SlideTime -= 1;
 
+	}
+
+	//슬라이딩 끝
+	if(SlideTime < 0.0f)
+	{
+		bIsSliding = false;
+		SlideTime = 150.0f;
+		GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedScale;
+		bIsSliding = false;
+  		GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultCapsuleHeight);
+	}
+
+	//GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf("MaxWalkSpeed = %f",GetCharacterMovement()->MaxWalkSpeed));
+
+	
 	
 }
 
@@ -144,8 +176,8 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
 
-		Input->BindAction(SlideAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Slide);
-		Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
+		Input->BindAction(SlideAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Slide);
+		//Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
 
 		Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
 		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
@@ -176,7 +208,7 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
+	if (Controller != nullptr && !bIsSliding)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -185,7 +217,9 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 
 		AddMovementInput(FowardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
+
 	}
+
 
 }
 
@@ -322,7 +356,7 @@ void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
 void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 {
 	bPlayerSprint = true;
-	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
+	GetCharacterMovement()->MaxWalkSpeed *= 1.5f;
 
 	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue,TEXT("bPlayerSprint = true"));
 
@@ -331,7 +365,7 @@ void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 {
 	bPlayerSprint = false;
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	GetCharacterMovement()->MaxWalkSpeed /= 1.5f;
 
 	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue,TEXT("bPlayerSprint = false"));
 
@@ -339,18 +373,24 @@ void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 
 void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 {
-	ACharacter::Crouch(false);
-	GetCharacterMovement()->MaxWalkSpeedCrouched = 3000;
-	//FppCamera->SetRelativeLocation(FVector(0,0,-20.0f));
+	//SlidingTime만큼 슬라이딩 시작
+	
+	if(!bIsSliding)
+	{
+		SlideVector = FppCamera->GetForwardVector();
+		bIsSliding = true;
+		GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedScale;
+		GetCapsuleComponent()->SetCapsuleHalfHeight(SlideCapsuleHeight);
+	}
 
 }
 
-void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
-{
-	ACharacter::UnCrouch(false);
-	GetCharacterMovement()->MaxWalkSpeedCrouched = 300;
-	//FppCamera->SetRelativeLocation(FVector(0,0,20.0f));
-}
+ //void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
+ //{
+ //	GetCharacterMovement()->MaxWalkSpeed /= 2.0f;
+//	bIsSliding = false;
+ //   GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultCapsuleHeight);
+ //}
 
 void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
 {

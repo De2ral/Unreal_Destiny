@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-
 #include "WeaponComponent.h"
 #include "SkillWidget.h"
 #include "HUDWidget.h"
@@ -92,13 +91,13 @@ public:
 	class UInputAction* InventoryAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bIsSliding;
+	bool bIsSliding = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bPlayerSprint = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float SlideTime;
+	float SlideTime = 300.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float InteractTime = 0.0f;
@@ -111,6 +110,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
+
+	UPROPERTY(EditDefaultsOnly)
+	FVector SlideVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerClassEnum PlayerClass;
@@ -139,6 +141,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	bool bPlayerIsMoving = false;
 	
 	void InvenOpenClose();
 	void Move(const FInputActionValue& Value);
@@ -179,4 +184,7 @@ private:
 	float CurSkillCoolTime = SkillCoolTime;
 	float CurGrenadeCoolTime = GrenadeCoolTime;
 	int jumpCount = 0;
+	float DefaultCapsuleHeight;
+    float SlideCapsuleHeight;
+	float SlideSpeedScale = 2.3f;
 };
