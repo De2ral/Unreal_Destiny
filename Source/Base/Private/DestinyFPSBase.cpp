@@ -74,14 +74,14 @@ void ADestinyFPSBase::BeginPlay()
 
 	FInputModeGameOnly GameOnly;
 
+	// 초기 캡슐 크기 설정
+    //GetCapsuleComponent()->InitCapsuleSize(42.0f, DefaultCapsuleHeight);
+
 	// 캐릭터 기본 캡슐 높이 설정
     DefaultCapsuleHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 
     // 슬라이딩 시 캡슐 높이 설정 (기본 높이의 절반 또는 사용자가 원하는 값으로 설정)
-    SlideCapsuleHeight = DefaultCapsuleHeight / 2.0f;
-
-	// 초기 캡슐 크기 설정
-    GetCapsuleComponent()->InitCapsuleSize(42.0f, DefaultCapsuleHeight);
+    SlideCapsuleHeight = DefaultCapsuleHeight / 10.0f;
 
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if (PlayerController != nullptr)
