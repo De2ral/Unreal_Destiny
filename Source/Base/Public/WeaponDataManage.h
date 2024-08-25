@@ -12,8 +12,9 @@ UENUM(BlueprintType)
 enum class GunTypeList : uint8
 {
 	PISTOL UMETA(DisplayName = "Pistol"),
-    SHOTGUN UMETA(DisplayName = "Shotgun"),
     RIFLE UMETA(DisplayName = "Rifle"),
+    SHOTGUN UMETA(DisplayName = "Shotgun"),
+	SNIPER UMETA(DisplayName = "Sniper"),
 	LAUNCHER UMETA(DisplayName = "Launcher")
 };
 
@@ -25,13 +26,6 @@ enum class BulletTypeList : uint8
 	REINFORCE UMETA(DisplayName = "Reinforce")
 };
 
-UENUM(BlueprintType)
-enum class FireTypeList : uint8
-{
-	SINGLE UMETA(DisplayName = "Single"),
-	BURST UMETA(DisplayName = "Burst"),
-	CONTINU UMETA(DisplayName = "Continu")
-};
 
 USTRUCT(BlueprintType)
 struct FGunInfo : public FTableRowBase
@@ -78,4 +72,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* GunImage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AimLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AimRotation;
 };

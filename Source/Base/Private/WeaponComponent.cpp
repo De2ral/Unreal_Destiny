@@ -20,23 +20,16 @@
 UWeaponComponent::UWeaponComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
+
+    Character = Cast<ADestinyFPSBase>(GetOwner());
 }
-
-
 
 void UWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
 
     ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
-    if (PlayerCharacter != nullptr)
-    {
-        EquipWeapon1();
-    }
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter called failed."));
-	}
+    
 
     AddMapping(PlayerCharacter);
 
@@ -54,6 +47,19 @@ void UWeaponComponent::BeginPlay()
     {
         UE_LOG(LogTemp, Warning, TEXT("AmmoWidgetClass called failed."));
     }
+
+    if (PlayerCharacter != nullptr)
+    {
+        Slot1Weapon = FName(TEXT("Rifle3"));
+        Slot2Weapon = FName(TEXT("Pistol1"));
+        Slot3Weapon = FName(TEXT("Sniper3"));
+
+        EquipWeapon1();
+    }
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter called failed."));
+	}
 }
 
 
@@ -82,9 +88,9 @@ void UWeaponComponent::Fire()
     }
 		const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
         FVector MuzzleLocation;
-        if(CurrentSkeletalMeshComponent)
+        if(CurrentStaticMeshComponent)
         {
-            MuzzleLocation = CurrentSkeletalMeshComponent->GetComponentLocation() + (CurrentSkeletalMeshComponent->GetRightVector() * 100.0f);
+            MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 100.0f);
         }
         
 		FActorSpawnParameters ActorSpawnParams;
@@ -158,7 +164,6 @@ void UWeaponComponent::Fire()
 	}
 }
 
-
 void UWeaponComponent::FireInRange()
 {
     UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
@@ -177,9 +182,9 @@ void UWeaponComponent::FireInRange()
         
         const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
         FVector MuzzleLocation;
-        if (CurrentSkeletalMeshComponent)
+        if (CurrentStaticMeshComponent)
         {
-            MuzzleLocation = CurrentSkeletalMeshComponent->GetComponentLocation() + (CurrentSkeletalMeshComponent->GetRightVector() * 100.0f);
+            MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 100.0f);
         }
 
         const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
@@ -266,8 +271,6 @@ void UWeaponComponent::FireInRange()
     }
 }
 
-
-
 void UWeaponComponent::FireLauncher()
 {
     UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
@@ -292,9 +295,9 @@ void UWeaponComponent::FireLauncher()
     }
 		const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
         FVector MuzzleLocation;
-        if(CurrentSkeletalMeshComponent)
+        if(CurrentStaticMeshComponent)
         {
-            MuzzleLocation = CurrentSkeletalMeshComponent->GetComponentLocation() + (CurrentSkeletalMeshComponent->GetRightVector() * 100.0f);
+            MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 100.0f);
         }
         
 		FActorSpawnParameters ActorSpawnParams;
@@ -439,36 +442,51 @@ void UWeaponComponent::StartAiming()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
     bIsAiming = true;
+    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
 }
 
 void UWeaponComponent::StopAiming()
 {
     UE_LOG(LogTemp, Warning, TEXT("StopAiming"));
     bIsAiming = false;
+    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
 }
 
 void UWeaponComponent::EquipWeapon1()
 {
 	UE_LOG(LogTemp, Warning, TEXT("1"));
-    LoadWeaponByName(FName("Sniper3"));
+    LoadWeaponByName(Slot1Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
 }
 
 void UWeaponComponent::EquipWeapon2()
 {
 	UE_LOG(LogTemp, Warning, TEXT("2"));
-    LoadWeaponByName(FName("Launcher1"));
+    LoadWeaponByName(Slot2Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);   
+    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);   
 }
 
 void UWeaponComponent::EquipWeapon3()
 {
 	UE_LOG(LogTemp, Warning, TEXT("3"));
-    LoadWeaponByName(FName("Launcher2"));
+    LoadWeaponByName(Slot3Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+}
+
+void UWeaponComponent::UseAmmo()
+{
+    if(CurrentWeapon.GunName == Slot1Weapon)
+        Ammo1--;
+    else if(CurrentWeapon.GunName == Slot2Weapon)
+        Ammo2--;
+    else if(CurrentWeapon.GunName == Slot3Weapon)
+        Ammo3--;
 }
 
 void UWeaponComponent::Reload()
@@ -490,6 +508,49 @@ void UWeaponComponent::Reload()
 
 void UWeaponComponent::FillAmmo()
 {
+    if(CurrentWeapon.GunName == Slot1Weapon)
+    {
+        Ammo1 = CurrentWeapon.Max_capacity;
+    }
+        
+    else if(CurrentWeapon.GunName == Slot2Weapon)
+    {
+        Ammo2 = CurrentWeapon.Max_capacity;
+    }
+       
+    else if(CurrentWeapon.GunName == Slot3Weapon)
+    {
+        Ammo3 = CurrentWeapon.Max_capacity;
+    }
+
+
+    switch (CurrentWeapon.BulletType)
+    {
+        case BulletTypeList::REGULAR:
+        {
+            int inven_REGULAR = 100;
+            inven_REGULAR -= CurrentWeapon.Max_capacity;
+            AmmoWidget->UpdateAmmo(Ammo1, inven_REGULAR);
+            break;
+        }
+        case BulletTypeList::SPECIAL:
+        {
+            int inven_SPECIAL = 100;
+            inven_SPECIAL -= CurrentWeapon.Max_capacity;
+            AmmoWidget->UpdateAmmo(Ammo1, inven_SPECIAL);
+            break;
+        }
+            
+        case BulletTypeList::REINFORCE:
+        {
+            int inven_REINFORCE = 100;
+            inven_REINFORCE -= CurrentWeapon.Max_capacity;
+            AmmoWidget->UpdateAmmo(Ammo1, inven_REINFORCE);
+            break;
+        } 
+    }
+
+        
     CurrentAmmo = MaxAmmo;
     AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
 }
@@ -549,7 +610,10 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
         CurrentStaticMeshComponent = NewObject<UStaticMeshComponent>(Character);
         CurrentStaticMeshComponent->SetStaticMesh(StaticMesh);
         FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-        CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPoint")));
+        if(CurrentWeapon.GunType != GunTypeList::PISTOL)
+            CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPoint")));
+        else
+            CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPointPistol")));
         CurrentStaticMeshComponent->RegisterComponent();
 
         UE_LOG(LogTemp, Warning, TEXT("StaticMesh"));
@@ -557,7 +621,6 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
         DefaultOffset =  CurrentStaticMeshComponent->GetRelativeLocation();
         DefaultRotation = CurrentStaticMeshComponent->GetRelativeRotation();
     }
-    Character->SetHasRifle(true);
 }
 
 void UWeaponComponent::AttachSelectedModelToCharacter(ADestinyFPSBase *InCharacter, UObject *SelectedModel)
@@ -605,6 +668,10 @@ void UWeaponComponent::LoadAndAttachModelToCharacter(ADestinyFPSBase *InCharacte
 void UWeaponComponent::SetCurrentWeapon(const FGunInfo& NewWeapon)
 {
     CurrentWeapon = NewWeapon;
+    if(CurrentWeapon.GunType == GunTypeList::PISTOL)
+        Character->SetHasRifle(false);
+    else
+        Character->SetHasRifle(true);
 }
 
 void UWeaponComponent::LoadWeaponByName(FName WeaponName)
@@ -648,7 +715,7 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    if (CurrentSkeletalMeshComponent)
+    if (CurrentStaticMeshComponent)
     {
         FVector TargetLocation;
         FRotator TargetRotation;
@@ -657,10 +724,10 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         {
             CurrentScopeSize = FMath::FInterpTo(CurrentScopeSize, 1.0f, DeltaTime, ScopeZoomSpeed);
             CurrentScopeX = FMath::FInterpTo(CurrentScopeX, 0.0f, DeltaTime, ScopeZoomSpeed);
-            if (AmmoWidget && CurrentWeapon.GunType == GunTypeList::RIFLE)
+            if (AmmoWidget && CurrentWeapon.GunType == GunTypeList::SNIPER)
             {
                 AmmoWidget->SetScopeSize(CurrentScopeSize);
-                AmmoWidget->ImageMove(CurrentScopeX,CurrentSkeletalMeshComponent);
+                AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent);
             }
 
 
@@ -669,12 +736,23 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
                 FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
 
-                TargetLocation = CameraLocation + CameraRotation.Vector() * 50.0f;
-                TargetLocation.Z -= 20.0f;
-                TargetRotation = CameraRotation;
-                TargetRotation.Yaw -= 90;
+                FVector ForwardVector = CameraRotation.Vector();
+                FVector RightVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Y);
+                FVector UpVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Z);
 
+                // 총의 목표 위치를 카메라의 위치에서 전방으로 이동한 위치로 설정합니다.
+                TargetLocation = CameraLocation + (ForwardVector * 50.0f); // 카메라 앞쪽으로 100 유닛 이동
+                
+                // 카메라의 아래쪽으로 약간의 오프셋을 추가합니다.
+                TargetLocation -= UpVector * 20.0f; // 카메라의 아래쪽으로 20 유닛 이동
 
+                FQuat QuatRotation = FQuat(CameraRotation);
+
+                TargetRotation = QuatRotation.Rotator();
+                QuatRotation = QuatRotation * FQuat(FRotator(0.0f, -77.5f, 0.0f)); // 기존 Yaw 조정 부분을 쿼터니언으로 처리
+                TargetRotation = QuatRotation.Rotator();
+
+                
                 float CurrentFOV = PlayerController->PlayerCameraManager->GetFOVAngle();
                 float TargetFOV = 30.0f;
                 float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, 5.0f);
@@ -701,19 +779,19 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 PlayerController->PlayerCameraManager->SetFOV(NewFOV);
             }
 
-            if (AmmoWidget && CurrentWeapon.GunType == GunTypeList::RIFLE)
+            if (AmmoWidget && CurrentWeapon.GunType == GunTypeList::SNIPER)
             {
                 CurrentScopeSize = 0.5f;
                 CurrentScopeX = 600.0f;
                 AmmoWidget->SetScopeSize(CurrentScopeSize);
-                AmmoWidget->ImageMove(CurrentScopeX,CurrentSkeletalMeshComponent);
+                AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent);
             }
         }
 
-    FVector NewLocation = FMath::VInterpTo(CurrentSkeletalMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
-    FRotator NewRotation = FMath::RInterpTo(CurrentSkeletalMeshComponent->GetComponentRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
-
-    CurrentSkeletalMeshComponent->SetWorldLocation(NewLocation);
-    CurrentSkeletalMeshComponent->SetWorldRotation(NewRotation);
+    FVector NewLocation = FMath::VInterpTo(CurrentStaticMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+    FRotator NewRotation = FMath::RInterpTo(CurrentStaticMeshComponent->GetComponentRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+    
+    CurrentStaticMeshComponent->SetWorldLocation(NewLocation);
+    CurrentStaticMeshComponent->SetWorldRotation(NewRotation);
     }
 }

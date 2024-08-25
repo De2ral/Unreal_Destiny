@@ -21,6 +21,8 @@ void UWeaponWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
     }
 }
 
+
+
 void UWeaponWidget::SetScopeSize(float NewSize)
 {
     if (ScopeCrossImage)
@@ -30,9 +32,8 @@ void UWeaponWidget::SetScopeSize(float NewSize)
 }
 
 
-void UWeaponWidget::ImageMove(float NewX, USkeletalMeshComponent* Object)
+void UWeaponWidget::ImageMove(float NewX, UStaticMeshComponent* Object)
 {
-    UE_LOG(LogTemp, Warning, TEXT("ImageMove : %f"),NewX);
     FVector2D TempPosition = FVector2D(NewX,0.5f);
     if (ScopeCrossImage && Object)
     {
@@ -51,4 +52,54 @@ void UWeaponWidget::ImageMove(float NewX, USkeletalMeshComponent* Object)
         }
     }
 
+}
+
+void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
+{
+    FString TexturePath;
+
+    switch (GunType)
+    {
+    case 0:
+        if(isAiming)
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Pistol_Aim.Pistol_Aim'");
+        else
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Pitol_Idle.Pitol_Idle'");
+        break;
+    case 1:
+        if(isAiming)
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Rifle_Aim.Rifle_Aim'");
+        else
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Rifle_Idle.Rifle_Idle'");
+        break;
+    case 2:
+        if(isAiming)
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Shotgun_Anim.Shotgun_Anim'");
+        else
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Shotgun_Idle.Shotgun_Idle'");
+        break;
+    case 3:
+        if(!isAiming)
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Sniper_Idle.Sniper_Idle'");
+        break;
+    case 4:
+        if(!isAiming)
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Launcher_Idle.Launcher_Idle'");
+        break;
+
+    default:
+        UE_LOG(LogTemp, Warning, TEXT("Unknown gun type!"));
+        return;
+    }
+
+    UTexture2D* LoadedTexture = LoadObject<UTexture2D>(nullptr, *TexturePath);
+    if (LoadedTexture)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("cross success"));
+        BaseCrossImage->SetBrushFromTexture(LoadedTexture);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Failed to load texture from path: %s"), *TexturePath);
+    }
 }

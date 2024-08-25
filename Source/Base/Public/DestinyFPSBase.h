@@ -148,7 +148,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasRifle;
 
 	UFUNCTION(BlueprintCallable, Category = Weapon)

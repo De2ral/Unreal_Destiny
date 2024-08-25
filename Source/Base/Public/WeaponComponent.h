@@ -42,8 +42,7 @@ public:
 	void LoadAndAttachModelToCharacter(ADestinyFPSBase* InCharacter, const FString& ModelPath);
 
     // 무기 장착
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-    FGunInfo CurrentWeapon;
+
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
     UDataTable* WeaponDataTable;
@@ -111,7 +110,10 @@ public:
     void StartAiming();
     void StopAiming();
 
+    void UseAmmo();
+
     void Reload();
+
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void FillAmmo();
@@ -123,12 +125,26 @@ public:
     void EquipWeapon2();
     void EquipWeapon3();
 
+    void SetSlot1Weapon(FName inweapon) {Slot1Weapon = inweapon;} 
+    void SetSlot2Weapon(FName inweapon) {Slot2Weapon = inweapon;}
+    void SetSlot3Weapon(FName inweapon) {Slot3Weapon = inweapon;}
+
     int32 CurrentAmmo;
     int32 MaxAmmo = 30;
     
 private:
     ADestinyFPSBase* Character;
     
+    FGunInfo CurrentWeapon;
+
+    FName Slot1Weapon;
+    FName Slot2Weapon;
+    FName Slot3Weapon;
+
+    int32 Ammo1;
+    int32 Ammo2;
+    int32 Ammo3;
+
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
