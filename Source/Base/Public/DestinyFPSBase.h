@@ -51,10 +51,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* TppCamera;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* FppMesh;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* TppMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -87,9 +87,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InterAction;
 
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* LeftClickAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* RightClickAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsSliding;
@@ -123,19 +128,49 @@ public:
 	bool isUltimate = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isSmash = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isMeleeAttack = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SkillCoolTime = 3.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GrenadeCoolTime = 3.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float UltimateCoolTime = 5.f;
+	float UltimateCoolTime = 25.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float UltimateDuration = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SmashCoolTime = 7.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MeleeAttackCoolTime = 2.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float UltimateDamage = 100.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TitanPunchDamage = 75.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
-	class USphereComponent* TitanUltimateCollider;
+	class USphereComponent* TitanSmashCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* TitanPunchCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* TitanPunchDamageCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanPunchStartParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanPunchParticle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* TitanUltimateSmashParticle;
@@ -178,6 +213,9 @@ public:
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
 
+	void LeftClickFunction(const FInputActionValue& Value);
+	void RightClickFunction(const FInputActionValue& Value);
+
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
 
@@ -197,16 +235,22 @@ public:
 	void CameraShake(float Scale);
 
 	UFUNCTION(BlueprintCallable)
-	void TitanUltimateStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation);
+	void TitanMeleeAttackStart(float ZDirection, float LaunchStrength);
 
 	UFUNCTION(BlueprintCallable)
-	void TitanUltimateTop(float GravityScale);
+	void TitanMeleeAttackEnd();
 
 	UFUNCTION(BlueprintCallable)
-	void TitanUltimateSmash();
+	void TitanSmashStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation);
 
 	UFUNCTION(BlueprintCallable)
-	void TitanUltimateEnd(float DelayTime);
+	void TitanSmashTop(float ZDirection, float LaunchStrength, float GravityScale);
+
+	UFUNCTION(BlueprintCallable)
+	void TitanSmashDown();
+
+	UFUNCTION(BlueprintCallable)
+	void TitanSmashEnd(float DelayTime);
 
 	UFUNCTION(BlueprintCallable)
 	void SwitchToFirstPerson();
@@ -215,9 +259,18 @@ public:
 	void SwitchToThirdPerson();
 
 	void SetClassValue();
+	void TitanPunchCollisionEvents();
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
 	float CurGrenadeCoolTime = GrenadeCoolTime;
 	float CurUltimateCoolTime = UltimateCoolTime;
+	float CurUltimateDuration = UltimateDuration;
+	float CurSmashCoolTime = SmashCoolTime;
+	float CurMeleeAttackCoolTime = MeleeAttackCoolTime;
+
+	bool isTitanPunch = false;
+
+	USkeletalMesh* SelectedMesh = nullptr;
+	TSubclassOf<UAnimInstance> SelectedAnimInstanceClass = nullptr;
 };

@@ -253,7 +253,7 @@ void UWeaponComponent::FireInRange()
 void UWeaponComponent::StartFiring()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
-    if (!bIsFiring)
+    if (!bIsFiring && !Character->isUltimate)
     {
         bIsFiring = true;
 
@@ -302,8 +302,11 @@ void UWeaponComponent::StopFiring()
 
 void UWeaponComponent::StartAiming()
 {
-    UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
-    bIsAiming = true;
+    if (!Character->isUltimate)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
+        bIsAiming = true;
+    }
 }
 
 void UWeaponComponent::StopAiming()

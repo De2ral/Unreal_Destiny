@@ -32,7 +32,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
 	TppSpringArm->TargetArmLength = 300.0f;
 	TppSpringArm->bUsePawnControlRotation = true;
-	TppSpringArm->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
+	TppSpringArm->SocketOffset.Z = 150.f;
 	TppSpringArm->SetupAttachment(RootComponent);
 
 	TppCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TPPCamera"));
@@ -69,7 +69,35 @@ ADestinyFPSBase::ADestinyFPSBase()
 	if (TrailParticleAsset.Succeeded())
 		TitanUltimateTrailParticle = TrailParticleAsset.Object;
 
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> PunchParticleAsset(
+		TEXT("/Script/Engine.ParticleSystem'/Game/FXVarietyPack/Particles/P_ky_waterBallHit.P_ky_waterBallHit'"));
+	if (PunchParticleAsset.Succeeded())
+		TitanPunchParticle = PunchParticleAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> PunchStartParticleAsset(
+		TEXT("/Script/Engine.ParticleSystem'/Game/FXVarietyPack/Particles/P_ky_shotShockwave_2.P_ky_shotShockwave_2'"));
+	if (PunchStartParticleAsset.Succeeded())
+		TitanPunchStartParticle = PunchStartParticleAsset.Object;
+		
+
+	TitanSmashCollider = CreateDefaultSubobject<USphereComponent>(TEXT("TitanSmashCollider"));
+	TitanSmashCollider->SetupAttachment(TppMesh, TEXT("GroundSocket"));
+	TitanSmashCollider->SetGenerateOverlapEvents(true);
+	TitanSmashCollider->InitSphereRadius(10.f);
+
+	TitanPunchCollider = CreateDefaultSubobject<USphereComponent>(TEXT("TitanPunchCollider"));
+	TitanPunchCollider->SetupAttachment(TppMesh, TEXT("TitanUltimateFistSocket"));
+	TitanPunchCollider->SetGenerateOverlapEvents(true);
+	TitanPunchCollider->InitSphereRadius(0.5f);
+
+	TitanPunchDamageCollider = CreateDefaultSubobject<USphereComponent>(TEXT("TitanPunchDamageCollider"));
+	TitanPunchDamageCollider->SetupAttachment(TppMesh, TEXT("TitanUltimateFistSocket"));
+	TitanPunchDamageCollider->SetGenerateOverlapEvents(true);
+	TitanPunchDamageCollider->InitSphereRadius(2.f);
+
 	PlayerClass = EPlayerClassEnum::TITAN;
+
+	SetClassValue();
 }
 
 // Called when the game starts or when spawned
@@ -77,7 +105,13 @@ void ADestinyFPSBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetClassValue();
+	if (TppMesh)
+	{
+		if (SelectedMesh)
+			TppMesh->SetSkeletalMesh(SelectedMesh);
+		if (SelectedAnimInstanceClass)
+			TppMesh->SetAnimInstanceClass(SelectedAnimInstanceClass);
+	}
 
 	FInputModeGameOnly GameOnly;
 
@@ -111,45 +145,54 @@ void ADestinyFPSBase::BeginPlay()
 		}
 	}
 
-	TitanUltimateCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ExplodeCollider"));
-	TitanUltimateCollider->SetupAttachment(TppMesh, TEXT("GroundSocket"));
-	TitanUltimateCollider->SetGenerateOverlapEvents(true);
-
 	SwitchToFirstPerson();
 }
 
 
 void ADestinyFPSBase::SetClassValue()
 {
-	if(PlayerClass == EPlayerClassEnum::HUNTER)
+	switch (PlayerClass)
 	{
-		// Set Value by Hunter Class
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh> HunterMeshAsset(
-			TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Hunter/Meshes/Genji_Street_Runner.Genji_Street_Runner'"));
-		if(HunterMeshAsset.Succeeded())
-			TppMesh->SetSkeletalMesh(HunterMeshAsset.Object);
+		case EPlayerClassEnum::HUNTER:
+			{
+				ConstructorHelpers::FObjectFinder<USkeletalMesh> HunterMeshAsset(
+					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Hunter/Meshes/Genji_Street_Runner.Genji_Street_Runner'"));
+				if(HunterMeshAsset.Succeeded())
+					SelectedMesh = HunterMeshAsset.Object;
 
-		static ConstructorHelpers::FClassFinder<UAnimInstance> HunterAnimClassAsset(
-			TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Hunter/Animations/ABP_Hunter.ABP_Hunter'"));
-		if(HunterAnimClassAsset.Succeeded())
-			TppMesh->SetAnimInstanceClass(HunterAnimClassAsset.Class);
-	}
-	else if(PlayerClass == EPlayerClassEnum::TITAN)
-	{
-		// Set Value by Titan Class
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
-			TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Titan/Meshes/Omega_Knight.Omega_Knight'"));
-		if(TitanMeshAsset.Succeeded())
-			TppMesh->SetSkeletalMesh(TitanMeshAsset.Object);
+				ConstructorHelpers::FClassFinder<UAnimInstance> HunterAnimClassAsset(
+					TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Hunter/Animations/ABP_Hunter.ABP_Hunter_C'"));
+				if (HunterAnimClassAsset.Succeeded())
+				{
+					SelectedAnimInstanceClass = HunterAnimClassAsset.Class;
+				}
+			}
+		break;
 
-		static ConstructorHelpers::FClassFinder<UAnimInstance> TitanAnimClassAsset(
-			TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Titan/Animations/ABP_Titan.ABP_Titan'"));
-		if(TitanAnimClassAsset.Succeeded())
-			TppMesh->SetAnimInstanceClass(TitanAnimClassAsset.Class);
-	}
-	else if(PlayerClass == EPlayerClassEnum::WARLOCK)
-	{
-		// Set Value by Titan Class
+		case EPlayerClassEnum::TITAN:
+			{
+				ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
+					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Titan/Meshes/Omega_Knight.Omega_Knight'"));
+				if(TitanMeshAsset.Succeeded())
+					SelectedMesh = TitanMeshAsset.Object;
+
+				ConstructorHelpers::FClassFinder<UAnimInstance> TitanAnimClassAsset(
+					TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Titan/Animations/ABP_Titan.ABP_Titan_C'"));
+				if(TitanAnimClassAsset.Succeeded())
+					SelectedAnimInstanceClass = TitanAnimClassAsset.Class;
+			}
+		break;
+
+		case EPlayerClassEnum::WARLOCK:
+			{
+			}
+		break;
+
+		default:
+			{
+
+			}
+		break;
 	}
 }
 
@@ -172,6 +215,28 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 	if (CurUltimateCoolTime < UltimateCoolTime)
 	{
 		CurUltimateCoolTime += DeltaTime;
+	}
+
+	if (CurUltimateDuration < UltimateDuration)
+	{
+		CurUltimateDuration += DeltaTime;
+		if (CurUltimateDuration >= UltimateDuration)
+			EndUltimate();
+	}
+
+	if (CurSmashCoolTime < SmashCoolTime)
+	{
+		CurSmashCoolTime += DeltaTime;
+	}
+
+	if (CurMeleeAttackCoolTime < MeleeAttackCoolTime)
+	{
+		CurMeleeAttackCoolTime += DeltaTime;
+	}
+
+	if (isTitanPunch)
+	{
+		TitanPunchCollisionEvents();
 	}
 }
 
@@ -200,6 +265,9 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
 
 		Input->BindAction(InventoryAction,ETriggerEvent::Completed, this, &ADestinyFPSBase::InvenOpenClose);
+
+		Input->BindAction(LeftClickAction,ETriggerEvent::Started, this, &ADestinyFPSBase::LeftClickFunction);
+		Input->BindAction(RightClickAction,ETriggerEvent::Started, this, &ADestinyFPSBase::RightClickFunction);
 	}
 }
 
@@ -225,7 +293,7 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (!isUltimate)
+	if (!isSmash && !isMeleeAttack)
 	{
 		if (Controller != nullptr)
 		{
@@ -346,8 +414,25 @@ void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 	if (CurUltimateCoolTime >= UltimateCoolTime)
 	{
 		CurUltimateCoolTime = 0.f;
+		CurUltimateDuration = 0.f;
 		isUltimate = true;
 		SwitchToThirdPerson();
+		if (PlayerClass == EPlayerClassEnum::TITAN)
+		{
+			// Titan Ultimate Start
+			if (TitanUltimateFistParticle)
+			{
+				UGameplayStatics::SpawnEmitterAttached(
+					TitanUltimateFistParticle,
+					TppMesh,
+					FName("TitanUltimateFistSocket"),
+					FVector::ZeroVector, 
+					FRotator::ZeroRotator,
+					EAttachLocation::SnapToTarget,
+					true
+				);
+			}
+		}
 	}
 }
 
@@ -364,7 +449,35 @@ void ADestinyFPSBase::CameraShake(float Scale)
 	}
 }
 
-void ADestinyFPSBase::TitanUltimateStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation)
+void ADestinyFPSBase::TitanMeleeAttackStart(float ZDirection, float LaunchStrength)
+{
+	FVector LaunchDirection = GetActorRotation().Vector();
+	LaunchDirection.Z += ZDirection;
+	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
+	LaunchCharacter(LaunchVelocity, true, true);
+	isTitanPunch = true;
+
+	if (TitanUltimateFistParticle)
+	{
+		FVector ParticleSpawnLocation = TppMesh->GetSocketLocation(TEXT("TitanUltimateFistSocket"));
+		FRotator ParticleSpawnRotation = this->GetActorRotation();
+        UGameplayStatics::SpawnEmitterAtLocation(
+            GetWorld(),
+            TitanPunchStartParticle,
+            ParticleSpawnLocation,
+            ParticleSpawnRotation,
+			(FVector)((1.5F))
+        );
+	}
+}
+
+void ADestinyFPSBase::TitanMeleeAttackEnd()
+{
+	isMeleeAttack = false;
+	isTitanPunch = false;
+}
+
+void ADestinyFPSBase::TitanSmashStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation)
 {
 	FVector LaunchDirection = GetActorRotation().Vector();
 	LaunchDirection.Z += ZDirection;
@@ -389,19 +502,6 @@ void ADestinyFPSBase::TitanUltimateStart(float ZDirection, float LaunchStrength,
         );
     }
 
-	if (TitanUltimateFistParticle)
-    {
-        UGameplayStatics::SpawnEmitterAttached(
-            TitanUltimateFistParticle,
-            TppMesh,
-			FName("TitanUltimateFistSocket"),
-            FVector::ZeroVector, 
-            FRotator::ZeroRotator,
-			EAttachLocation::SnapToTarget,
-			true
-        );
-    }
-
 	if (TitanUltimateTrailParticle)
     {
         UGameplayStatics::SpawnEmitterAttached(
@@ -416,15 +516,19 @@ void ADestinyFPSBase::TitanUltimateStart(float ZDirection, float LaunchStrength,
     }
 }
 
-void ADestinyFPSBase::TitanUltimateTop(float GravityScale)
+void ADestinyFPSBase::TitanSmashTop(float ZDirection, float LaunchStrength, float GravityScale)
 {
+	FVector LaunchDirection = GetActorRotation().Vector();
+	LaunchDirection.Z += ZDirection;
+	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
+	LaunchCharacter(LaunchVelocity, true, true);
 	GetCharacterMovement()->GravityScale = GravityScale;
 }
 
-void ADestinyFPSBase::TitanUltimateSmash()
+void ADestinyFPSBase::TitanSmashDown()
 {
 	// VFX & Camera Moving
-	CameraShake(2.f);
+	CameraShake(3.f);
 	if (TitanUltimateSmashParticle)
     {
 		FVector ParticleSpawnLocation = TppMesh->GetSocketLocation(TEXT("TitanUltimateFistSocket"));
@@ -440,7 +544,7 @@ void ADestinyFPSBase::TitanUltimateSmash()
 
 	// Apply Damage
 	TArray<AActor*> OverlappingActors;
-	TitanUltimateCollider->GetOverlappingActors(OverlappingActors);
+	TitanSmashCollider->GetOverlappingActors(OverlappingActors);
 
 	for (AActor* Actor : OverlappingActors)
 	{
@@ -449,16 +553,19 @@ void ADestinyFPSBase::TitanUltimateSmash()
 	}
 }
 
-void ADestinyFPSBase::TitanUltimateEnd(float DelayTime)
+void ADestinyFPSBase::TitanSmashEnd(float DelayTime)
 {
 	GetCharacterMovement()->GravityScale = 1.f;
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::EndUltimate, DelayTime, false);
+	TppCamera->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	TppSpringArm->TargetArmLength = 300.0f;
+	isSmash = false;
 }
 
 void ADestinyFPSBase::EndUltimate()
 {
 	isUltimate = false;
+	isMeleeAttack = false;
+	isSmash = false;
 	SwitchToFirstPerson();
 	WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 }
@@ -529,7 +636,69 @@ void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
 
 }
 
+void ADestinyFPSBase::LeftClickFunction(const FInputActionValue &Value)
+{
+	if (isUltimate)
+	{
+		if (PlayerClass == EPlayerClassEnum::TITAN)
+		{
+			if (CurMeleeAttackCoolTime >= MeleeAttackCoolTime)
+			{
+				CurMeleeAttackCoolTime = 0.f;
+				isMeleeAttack = true;
+			}
+		}
+	}
+}
+
+void ADestinyFPSBase::RightClickFunction(const FInputActionValue &Value)
+{
+	if (isUltimate)
+	{
+		if (PlayerClass == EPlayerClassEnum::TITAN)
+		{
+			if (CurSmashCoolTime >= SmashCoolTime)
+			{
+				CurSmashCoolTime = 0.f;
+				isSmash = true;
+			}
+		}
+	}
+}
+
 void ADestinyFPSBase::SetHasRifle(bool bNewHasRifle)
 {
 	bHasRifle = bNewHasRifle;
+}
+
+void ADestinyFPSBase::TitanPunchCollisionEvents()
+{
+	TArray<AActor*> OverlappingActors;
+	TitanPunchCollider->GetOverlappingActors(OverlappingActors);
+
+	if (OverlappingActors.Num() > 1)
+	{
+		CameraShake(1.5f);
+		
+		TArray<AActor*> DamagedActors;
+		TitanPunchDamageCollider->GetOverlappingActors(DamagedActors);
+		for (AActor* Actor : DamagedActors)
+		{
+			if (!Actor->IsA(ADestinyFPSBase::StaticClass()))
+				UGameplayStatics::ApplyDamage(Actor, TitanPunchDamage, GetInstigatorController(), this, nullptr);
+		}
+		isTitanPunch = false;
+
+		if (TitanPunchParticle)
+		{
+			FVector ParticleSpawnLocation = TppMesh->GetSocketLocation(TEXT("TitanUltimateFistSocket"));
+			UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				TitanPunchParticle,
+				ParticleSpawnLocation,
+				FRotator(0.f, 0.f, 0.f),
+				(FVector)((1.5F))
+			);
+		}
+	}
 }
