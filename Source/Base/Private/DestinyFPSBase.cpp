@@ -5,9 +5,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -25,6 +27,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 	TppMesh->SetOwnerNoSee(true);
 	TppMesh->SetupAttachment(RootComponent);
+
 
 	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
 	TppSpringArm->TargetArmLength = 300.0f;
@@ -45,6 +48,26 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppMesh->SetupAttachment(FppCamera);
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
+
+	PlayerClass = EPlayerClassEnum::Warlock;
+
+	LastPlayerPos = GetActorLocation();
+
+	switch(PlayerClass)
+	{
+		case EPlayerClassEnum::Hunter:
+			this->JumpMaxCount = 2;
+			break;
+		case EPlayerClassEnum::Titan:
+			this->JumpMaxCount = 1;
+			break;
+		case EPlayerClassEnum::Warlock:
+			this->JumpMaxCount = 1;
+			GetCharacterMovement()->JumpZVelocity = 800.0f;
+			break;
+		default:
+			break;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -53,6 +76,15 @@ void ADestinyFPSBase::BeginPlay()
 	Super::BeginPlay();
 
 	FInputModeGameOnly GameOnly;
+
+	// 초기 캡슐 크기 설정
+    //GetCapsuleComponent()->InitCapsuleSize(42.0f, DefaultCapsuleHeight);
+
+	// 캐릭터 기본 캡슐 높이 설정
+    DefaultCapsuleHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+
+    // 슬라이딩 시 캡슐 높이 설정 (기본 높이의 절반 또는 사용자가 원하는 값으로 설정)
+    SlideCapsuleHeight = DefaultCapsuleHeight / 10.0f;
 
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if (PlayerController != nullptr)
@@ -85,11 +117,15 @@ void ADestinyFPSBase::BeginPlay()
 	}
 
 	SwitchToFirstPerson();
+
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if(bIsPlayerAlive && HP <= 0.0f) Death();
+	else if (!bIsPlayerAlive && HP > 0.0f) Revive();
 
 	if (CurSkillCoolTime < SkillCoolTime)
 	{
@@ -102,6 +138,49 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		CurGrenadeCoolTime += DeltaTime;
 		HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 	}
+
+	//슬라이딩 시작 (마지막으로 받은 전방벡터로 고정)
+	if(bIsSliding)
+	{
+		AddMovementInput(SlideVector,1);
+		SlideTime -= 1;
+
+	}
+
+	//슬라이딩 끝
+	if(SlideTime < 0.0f)
+	{
+		bIsSliding = false;
+		SlideTime = 150.0f;
+		GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedScale;
+  		GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultCapsuleHeight);
+	}
+
+	//GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf("MaxWalkSpeed = %f",GetCharacterMovement()->MaxWalkSpeed));
+
+	if(PosTickCoolTime > 0.0f) PosTickCoolTime -= 1;
+
+	else if(PosTickCoolTime <= 0.0f && !GetCharacterMovement()->IsFalling())
+	{
+		if(bIsPlayerAlive)
+		{
+			LastPlayerPos = GetActorLocation();
+
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				1.5f,
+				FColor::Blue,
+				FString::Printf(TEXT("LastPlayerPos = X=%f,Y=%f,Z=%f"),LastPlayerPos.X,LastPlayerPos.Y,LastPlayerPos.Z));
+
+			PosTickCoolTime = 400.0f;
+
+			//if(DeathOrbTest) GetWorld()->SpawnActor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+
+		}
+		
+	} 
+	
+	
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -112,23 +191,30 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 
 	if (Input != nullptr)
 	{
-		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
-		Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
-		Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
-		Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
-		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::jump);
+		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::DeathRevive);
 
-		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
-		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
+		if(bIsPlayerAlive)
+		{
+			Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
+			Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
+			Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
+			Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
+			Input->BindAction(JumpAction, ETriggerEvent::Started, this, &ADestinyFPSBase::jump);
+			Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::jumpEnd);
 
-		Input->BindAction(SlideAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Slide);
-		Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
+			Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
+			Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
 
-		Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
-		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
+			Input->BindAction(SlideAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Slide);
+			//Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
 
-		Input->BindAction(InventoryAction,ETriggerEvent::Completed, this, &ADestinyFPSBase::InvenOpenClose);
+			Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
+			Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
+
+			Input->BindAction(InventoryAction,ETriggerEvent::Completed, this, &ADestinyFPSBase::InvenOpenClose);
+		}
+		
 	}
 }
 
@@ -154,7 +240,7 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
+	if (Controller != nullptr && !bIsSliding)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -163,7 +249,9 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 
 		AddMovementInput(FowardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
+
 	}
+
 
 }
 
@@ -272,12 +360,35 @@ void ADestinyFPSBase::jump(const FInputActionValue& Value)
 {
 	ACharacter::Jump();
 	UE_LOG(LogTemp, Warning, TEXT("jump")); 
+
+	if(PlayerClass == EPlayerClassEnum::Warlock)
+	{
+		if(GetCharacterMovement()->IsFalling())
+		{
+			GetCharacterMovement()->GravityScale = 0.2f;
+		}
+
+	}
+}
+
+void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
+{
+	ACharacter::StopJumping();
+
+	if(PlayerClass == EPlayerClassEnum::Warlock)
+	{
+		if(GetCharacterMovement()->IsFalling())
+		{
+			GetCharacterMovement()->GravityScale = 1.0f;
+		}
+
+	}
 }
 
 void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 {
 	bPlayerSprint = true;
-	GetCharacterMovement()->MaxWalkSpeed = 1200.0f;
+	GetCharacterMovement()->MaxWalkSpeed *= 1.5f;
 
 	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue,TEXT("bPlayerSprint = true"));
 
@@ -286,7 +397,7 @@ void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 {
 	bPlayerSprint = false;
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	GetCharacterMovement()->MaxWalkSpeed /= 1.5f;
 
 	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue,TEXT("bPlayerSprint = false"));
 
@@ -294,18 +405,24 @@ void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 
 void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 {
-	ACharacter::Crouch(false);
-	GetCharacterMovement()->MaxWalkSpeedCrouched = 3000;
-	//FppCamera->SetRelativeLocation(FVector(0,0,-20.0f));
+	//SlidingTime만큼 슬라이딩 시작
+	
+	if(!bIsSliding)
+	{
+		SlideVector = FppCamera->GetForwardVector();
+		bIsSliding = true;
+		GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedScale;
+		GetCapsuleComponent()->SetCapsuleHalfHeight(SlideCapsuleHeight);
+	}
 
 }
 
-void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
-{
-	ACharacter::UnCrouch(false);
-	GetCharacterMovement()->MaxWalkSpeedCrouched = 300;
-	//FppCamera->SetRelativeLocation(FVector(0,0,20.0f));
-}
+ //void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
+ //{
+ //	GetCharacterMovement()->MaxWalkSpeed /= 2.0f;
+//	bIsSliding = false;
+ //   GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultCapsuleHeight);
+ //}
 
 void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
 {
@@ -317,6 +434,15 @@ void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
 
 	}
 
+	if(InteractTime > MaxInteractTime)
+	{
+		bIsInteractComplete = true;
+		InteractTime = 0.0f;
+		bPlayerInteractable = false;
+	} 
+		
+
+
 }
 
 void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
@@ -324,17 +450,51 @@ void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
 	if(!bPlayerInteractable)
 	{
 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("bPlayerIntaractable = false"));
-
+		//bIsInteractComplete = false;
 	}
 	else if(bPlayerInteractable)
 	{
 		InteractTime = 0.0f;
 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("InteractTime to 0"));
+		//bIsInteractComplete = false;
 	}
+
+}
+
+void ADestinyFPSBase::Death()
+{
+	bIsPlayerAlive = false;
+
+	if(!SpawnedDeathOrb)
+	{
+		SpawnedDeathOrb = GetWorld()->SpawnActor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+		SetActorLocation(LastPlayerPos);
+		SwitchToThirdPerson();
+		TppMesh->SetOwnerNoSee(true);
+		FppMesh->SetOwnerNoSee(true);
+        
+    }
+}
+
+void ADestinyFPSBase::Revive()
+{
+	bIsPlayerAlive = true;
+
+	//사망 테스트를 위해 추가한 기능 (추후 멀티플레이 구현 시 삭제 요망)
+	if(SpawnedDeathOrb != nullptr) SpawnedDeathOrb->Destroy();
+
+	SwitchToFirstPerson();
 
 }
 
 void ADestinyFPSBase::SetHasRifle(bool bNewHasRifle)
 {
 	bHasRifle = bNewHasRifle;
+}
+
+void ADestinyFPSBase::DeathRevive(const FInputActionValue &Value)
+{
+	if(HP > 0.0f) HP = 0.0f;
+	else if(HP <= 0.0f) HP = 100.0f;
+
 }

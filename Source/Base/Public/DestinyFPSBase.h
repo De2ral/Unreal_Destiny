@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-
 #include "WeaponComponent.h"
 #include "SkillWidget.h"
 #include "HUDWidget.h"
@@ -13,6 +12,14 @@
 #include "DestinyFPSBase.generated.h"
 
 class UCharacterMovementComponent;
+
+UENUM(BlueprintType)
+enum class EPlayerClassEnum : uint8
+{
+	Hunter UMETA(DisplayName = "Hunter"),
+	Warlock UMETA(DisplayName = "Warlock"),
+	Titan UMETA(DisplayName = "Titan")
+};
 
 UCLASS()
 class BASE_API ADestinyFPSBase : public ACharacter
@@ -79,19 +86,20 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InterAction;
 
-	
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InventoryAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bIsSliding;
+	class UInputAction* DeathReviveAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsSliding = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bPlayerSprint = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float SlideTime;
+	float SlideTime = 300.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float InteractTime = 0.0f;
@@ -99,9 +107,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxInteractTime = 0.0f;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsInteractComplete = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
 
+	UPROPERTY(EditDefaultsOnly)
+	FVector SlideVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EPlayerClassEnum PlayerClass;
 
 	// Skill Variable
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -127,6 +143,14 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	bool bPlayerIsMoving = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<AActor> DeathOrbTest;
+
+	AActor* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
 	void Move(const FInputActionValue& Value);
@@ -134,6 +158,7 @@ public:
 	void Skill(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
 	void jump(const FInputActionValue& Value);
+	void jumpEnd(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
 
 	void Sprint(const FInputActionValue& Value);
@@ -144,6 +169,12 @@ public:
 
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
+
+	void DeathRevive(const FInputActionValue& Value);
+
+	void Death();
+
+	void Revive();
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
@@ -161,8 +192,23 @@ public:
 
 	void SwitchToFirstPerson();
 	void SwitchToThirdPerson();
+
+	UFUNCTION(BlueprintCallable)
+	FVector GetLastPlayerPos() {return LastPlayerPos;};
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsPlayerAlive() {return bIsPlayerAlive;}
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
 	float CurGrenadeCoolTime = GrenadeCoolTime;
+	int jumpCount = 0;
+	float DefaultCapsuleHeight;
+    float SlideCapsuleHeight;
+	float SlideSpeedScale = 2.3f;
+	FVector LastPlayerPos;
+	float PosTickCoolTime = 400.0f;
+	bool bIsPlayerAlive = true;
+
+	float HP = 100.0f;
 };
