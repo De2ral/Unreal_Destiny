@@ -124,6 +124,9 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if(bIsPlayerAlive && HP <= 0.0f) Death();
+	else if (!bIsPlayerAlive && HP > 0.0f) Revive();
+
 	if (CurSkillCoolTime < SkillCoolTime)
 	{
 		CurSkillCoolTime += DeltaTime;
@@ -150,7 +153,6 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		bIsSliding = false;
 		SlideTime = 150.0f;
 		GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedScale;
-		bIsSliding = false;
   		GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultCapsuleHeight);
 	}
 
@@ -160,19 +162,22 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 
 	else if(PosTickCoolTime <= 0.0f && !GetCharacterMovement()->IsFalling())
 	{
-		LastPlayerPos = GetActorLocation();
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			1.5f,
-			FColor::Blue,
-			FString::Printf(TEXT("LastPlayerPos = X=%f,Y=%f,Z=%f"),LastPlayerPos.X,LastPlayerPos.Y,LastPlayerPos.Z));
-		PosTickCoolTime = 400.0f;
-
-
-		if(DeathOrbTest)
+		if(bIsPlayerAlive)
 		{
-			GetWorld()->SpawnActor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+			LastPlayerPos = GetActorLocation();
+
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				1.5f,
+				FColor::Blue,
+				FString::Printf(TEXT("LastPlayerPos = X=%f,Y=%f,Z=%f"),LastPlayerPos.X,LastPlayerPos.Y,LastPlayerPos.Z));
+
+			PosTickCoolTime = 400.0f;
+
+			//if(DeathOrbTest) GetWorld()->SpawnActor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+
 		}
+		
 	} 
 	
 	
@@ -186,24 +191,30 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 
 	if (Input != nullptr)
 	{
-		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
-		Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
-		Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
-		Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
-		Input->BindAction(JumpAction, ETriggerEvent::Started, this, &ADestinyFPSBase::jump);
-		Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::jumpEnd);
+		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::DeathRevive);
 
-		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
-		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
+		if(bIsPlayerAlive)
+		{
+			Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
+			Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
+			Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
+			Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
+			Input->BindAction(JumpAction, ETriggerEvent::Started, this, &ADestinyFPSBase::jump);
+			Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::jumpEnd);
 
-		Input->BindAction(SlideAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Slide);
-		//Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
+			Input->BindAction(SprintAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Sprint);
+			Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SprintEnd);
 
-		Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
-		Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
+			Input->BindAction(SlideAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Slide);
+			//Input->BindAction(SlideAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::SlideEnd);
 
-		Input->BindAction(InventoryAction,ETriggerEvent::Completed, this, &ADestinyFPSBase::InvenOpenClose);
+			Input->BindAction(InterAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::StartInteract);
+			Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
+
+			Input->BindAction(InventoryAction,ETriggerEvent::Completed, this, &ADestinyFPSBase::InvenOpenClose);
+		}
+		
 	}
 }
 
@@ -450,7 +461,40 @@ void ADestinyFPSBase::EndInteract(const FInputActionValue &Value)
 
 }
 
+void ADestinyFPSBase::Death()
+{
+	bIsPlayerAlive = false;
+
+	if(!SpawnedDeathOrb)
+	{
+		SpawnedDeathOrb = GetWorld()->SpawnActor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+		SetActorLocation(LastPlayerPos);
+		SwitchToThirdPerson();
+		TppMesh->SetOwnerNoSee(true);
+		FppMesh->SetOwnerNoSee(true);
+        
+    }
+}
+
+void ADestinyFPSBase::Revive()
+{
+	bIsPlayerAlive = true;
+
+	//사망 테스트를 위해 추가한 기능 (추후 멀티플레이 구현 시 삭제 요망)
+	if(SpawnedDeathOrb != nullptr) SpawnedDeathOrb->Destroy();
+
+	SwitchToFirstPerson();
+
+}
+
 void ADestinyFPSBase::SetHasRifle(bool bNewHasRifle)
 {
 	bHasRifle = bNewHasRifle;
+}
+
+void ADestinyFPSBase::DeathRevive(const FInputActionValue &Value)
+{
+	if(HP > 0.0f) HP = 0.0f;
+	else if(HP <= 0.0f) HP = 100.0f;
+
 }

@@ -86,9 +86,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InterAction;
 
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* InventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* DeathReviveAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsSliding = false;
@@ -147,6 +149,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AActor> DeathOrbTest;
+
+	AActor* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
 	void Move(const FInputActionValue& Value);
@@ -165,6 +169,12 @@ public:
 
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
+
+	void DeathRevive(const FInputActionValue& Value);
+
+	void Death();
+
+	void Revive();
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
@@ -185,6 +195,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetLastPlayerPos() {return LastPlayerPos;};
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsPlayerAlive() {return bIsPlayerAlive;}
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
@@ -195,4 +208,7 @@ private:
 	float SlideSpeedScale = 2.3f;
 	FVector LastPlayerPos;
 	float PosTickCoolTime = 400.0f;
+	bool bIsPlayerAlive = true;
+
+	float HP = 100.0f;
 };
