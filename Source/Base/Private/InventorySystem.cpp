@@ -36,9 +36,9 @@ UInventorySystem::UInventorySystem()
 		WeaponArray[i].GunDamage = 0.0f;
 		WeaponArray[i].GunType = GunTypeList::PISTOL;
 		WeaponArray[i].GunModelPath = "/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun";
-		EQWeaponArray[i].AimLocation = 0.0f;
-		EQWeaponArray[i].AimRotation = 0.0f;
-		EQWeaponArray[i].CameraZoom = 0.0f;
+		WeaponArray[i].AimLocation = 0.0f;
+		WeaponArray[i].AimRotation = 0.0f;
+		WeaponArray[i].CameraZoom = 0.0f;
 	}
 
 	for(int i = 0; i < 3; i++)
