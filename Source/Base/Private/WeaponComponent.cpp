@@ -449,7 +449,7 @@ void UWeaponComponent::SetSlot3Weapon(FName inweapon)
 
 int UWeaponComponent::CurrentAmmo()
 {
-    int CurrentTempAmmo;
+    int CurrentTempAmmo = 0;
     
     if(CurrentWeapon.GunName == Slot1Weapon)
         CurrentTempAmmo = Ammo1;
@@ -463,7 +463,7 @@ int UWeaponComponent::CurrentAmmo()
 
 int UWeaponComponent::StoredAmmo()
 {
-    int StoredTempAmmo;
+    int StoredTempAmmo = 0;
     switch (CurrentWeapon.BulletType)
     {
         case BulletTypeList::REGULAR:
