@@ -51,16 +51,19 @@ ADestinyFPSBase::ADestinyFPSBase()
 
 	PlayerClass = EPlayerClassEnum::Warlock;
 
+	LastPlayerPos = GetActorLocation();
+
 	switch(PlayerClass)
 	{
 		case EPlayerClassEnum::Hunter:
-			JumpMaxCount = 3;
+			this->JumpMaxCount = 2;
 			break;
 		case EPlayerClassEnum::Titan:
-			JumpMaxCount = 1;
+			this->JumpMaxCount = 1;
 			break;
 		case EPlayerClassEnum::Warlock:
-			JumpMaxCount = 2;
+			this->JumpMaxCount = 1;
+			GetCharacterMovement()->JumpZVelocity = 800.0f;
 			break;
 		default:
 			break;
@@ -153,6 +156,24 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 
 	//GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf("MaxWalkSpeed = %f",GetCharacterMovement()->MaxWalkSpeed));
 
+	if(PosTickCoolTime > 0.0f) PosTickCoolTime -= 1;
+
+	else if(PosTickCoolTime <= 0.0f && !GetCharacterMovement()->IsFalling())
+	{
+		LastPlayerPos = GetActorLocation();
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			1.5f,
+			FColor::Blue,
+			FString::Printf(TEXT("LastPlayerPos = X=%f,Y=%f,Z=%f"),LastPlayerPos.X,LastPlayerPos.Y,LastPlayerPos.Z));
+		PosTickCoolTime = 400.0f;
+
+
+		if(DeathOrbTest)
+		{
+			GetWorld()->SpawnActor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+		}
+	} 
 	
 	
 }

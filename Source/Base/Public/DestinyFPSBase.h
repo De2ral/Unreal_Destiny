@@ -144,6 +144,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bPlayerIsMoving = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<AActor> DeathOrbTest;
 	
 	void InvenOpenClose();
 	void Move(const FInputActionValue& Value);
@@ -179,6 +182,9 @@ public:
 
 	void SwitchToFirstPerson();
 	void SwitchToThirdPerson();
+
+	UFUNCTION(BlueprintCallable)
+	FVector GetLastPlayerPos() {return LastPlayerPos;};
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
@@ -187,4 +193,6 @@ private:
 	float DefaultCapsuleHeight;
     float SlideCapsuleHeight;
 	float SlideSpeedScale = 2.3f;
+	FVector LastPlayerPos;
+	float PosTickCoolTime = 400.0f;
 };
