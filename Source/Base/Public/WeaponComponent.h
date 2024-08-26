@@ -124,13 +124,19 @@ public:
     void EquipWeapon1();
     void EquipWeapon2();
     void EquipWeapon3();
+    
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void SetSlot1Weapon(FName inweapon);
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void SetSlot2Weapon(FName inweapon);
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void SetSlot3Weapon(FName inweapon);
 
-    void SetSlot1Weapon(FName inweapon) {Slot1Weapon = inweapon;} 
-    void SetSlot2Weapon(FName inweapon) {Slot2Weapon = inweapon;}
-    void SetSlot3Weapon(FName inweapon) {Slot3Weapon = inweapon;}
+    int CurrentAmmo();
+    int StoredAmmo();
 
-    int32 CurrentAmmo;
-    int32 MaxAmmo = 30;
+    //int32 CurrentAmmo;
+    //int32 MaxAmmo = 30;
     
 private:
     ADestinyFPSBase* Character;
@@ -141,9 +147,13 @@ private:
     FName Slot2Weapon;
     FName Slot3Weapon;
 
-    int32 Ammo1;
-    int32 Ammo2;
-    int32 Ammo3;
+    int Ammo1 = 0;
+    int Ammo2 = 0;
+    int Ammo3 = 0;
+
+    int StoredAmmo_Regular = 100;
+    int StoredAmmo_Special = 150;
+    int StoredAmmo_Reinforce = 300;
 
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;

@@ -30,24 +30,23 @@ void UWeaponComponent::BeginPlay()
 
     ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
     
-
     AddMapping(PlayerCharacter);
+
 
     if (AmmoWidgetClass)
 	{
-        CurrentAmmo = MaxAmmo;
+        //CurrentAmmo = MaxAmmo;
 		AmmoWidget = CreateWidget<UWeaponWidget>(GetWorld(), AmmoWidgetClass);
 		if (AmmoWidget)
 		{
 			AmmoWidget->AddToViewport();
-			AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
+			//AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
 		}
 	}
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("AmmoWidgetClass called failed."));
     }
-
     if (PlayerCharacter != nullptr)
     {
         Slot1Weapon = FName(TEXT("Rifle3"));
@@ -60,6 +59,7 @@ void UWeaponComponent::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter called failed."));
 	}
+    FillAmmo();
 }
 
 
@@ -68,15 +68,6 @@ void UWeaponComponent::Fire()
 {
     UE_LOG(LogTemp, Warning, TEXT("Fire"));
 
-     if(CurrentAmmo < 1)
-    {
-        StopFiring();
-        return;
-    }
-
-    CurrentAmmo--;
-    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
-    
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -168,13 +159,6 @@ void UWeaponComponent::FireInRange()
 {
     UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
-    if (CurrentAmmo < 1)
-        {
-            StopFiring();
-            return;
-        }
-    CurrentAmmo--;
-    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
     UWorld* const World = GetWorld();
     if (World != nullptr)
     {
@@ -216,28 +200,9 @@ void UWeaponComponent::FireInRange()
             ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
             bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
             DrawDebugLine(World, TraceStart, PelletEnd, FColor::Red, false, 1, 0, 1);
-            //bool bHit = World->LineTraceSingleByChannel(
-            //    HitResult, 
-            //    TraceStart, 
-            //    PelletEnd, 
-            //    ECC_Visibility,  // 콜리전 채널을 설정
-            //    CollisionParams
-            //);
-            
 
             if (bHit)
             {
-                /*
-                // SkeletalMeshComponent인지 확인
-                USkeletalMeshComponent* HitMesh = Cast<USkeletalMeshComponent>(HitResult.GetComponent());
-                if (HitMesh)
-                {
-                    // Bone 이름 출력
-                    FName HitBoneName = HitResult.BoneName;
-                    UE_LOG(LogTemp, Warning, TEXT("Hit bone: %s"), *HitBoneName.ToString());
-                }    
-                */
-                
                 if (HitResult.GetActor()->ActorHasTag("Enemy"))
                 {
                     DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
@@ -249,6 +214,7 @@ void UWeaponComponent::FireInRange()
                     UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
                 }
             }
+
         }
         
 
@@ -274,16 +240,7 @@ void UWeaponComponent::FireInRange()
 void UWeaponComponent::FireLauncher()
 {
     UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
-
-    if(CurrentAmmo < 1)
-    {
-        StopFiring();
-        return;
-    }
-
-    CurrentAmmo--;
-    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
-    
+ 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -376,14 +333,7 @@ void UWeaponComponent::FireLauncher()
 void UWeaponComponent::StartFiring()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
-    if(CurrentAmmo < 1)
-    {
-        StopFiring();
-        StopAiming();
-        Reload();
-        return;
-    }
-
+    UseAmmo();
     if(!IsReloading)
     {
         if (!bIsFiring)
@@ -454,39 +404,117 @@ void UWeaponComponent::StopAiming()
 
 void UWeaponComponent::EquipWeapon1()
 {
-	UE_LOG(LogTemp, Warning, TEXT("1"));
     LoadWeaponByName(Slot1Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::EquipWeapon2()
 {
-	UE_LOG(LogTemp, Warning, TEXT("2"));
     LoadWeaponByName(Slot2Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);   
+    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::EquipWeapon3()
 {
-	UE_LOG(LogTemp, Warning, TEXT("3"));
     LoadWeaponByName(Slot3Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+}
+
+void UWeaponComponent::SetSlot1Weapon(FName inweapon)
+{
+    Slot1Weapon = inweapon;
+    EquipWeapon1();
+}
+
+void UWeaponComponent::SetSlot2Weapon(FName inweapon)
+{
+    Slot2Weapon = inweapon;
+    EquipWeapon1();
+}
+
+void UWeaponComponent::SetSlot3Weapon(FName inweapon)
+{
+    Slot3Weapon = inweapon;
+    EquipWeapon1();
+}
+
+int UWeaponComponent::CurrentAmmo()
+{
+    int CurrentTempAmmo;
+    
+    if(CurrentWeapon.GunName == Slot1Weapon)
+        CurrentTempAmmo = Ammo1;
+    else if(CurrentWeapon.GunName == Slot2Weapon)
+        CurrentTempAmmo = Ammo2;
+    else if(CurrentWeapon.GunName == Slot3Weapon)
+        CurrentTempAmmo = Ammo3;      
+
+    return CurrentTempAmmo;
+}
+
+int UWeaponComponent::StoredAmmo()
+{
+    int StoredTempAmmo;
+    switch (CurrentWeapon.BulletType)
+    {
+        case BulletTypeList::REGULAR:
+            StoredTempAmmo = StoredAmmo_Regular;
+            break;
+        case BulletTypeList::SPECIAL:
+            StoredTempAmmo = StoredAmmo_Special;
+            break;
+        case BulletTypeList::REINFORCE:
+            StoredTempAmmo = StoredAmmo_Reinforce;
+            break;
+    }
+    return StoredTempAmmo;
 }
 
 void UWeaponComponent::UseAmmo()
 {
     if(CurrentWeapon.GunName == Slot1Weapon)
+    {
+        if(Ammo1 < 1)
+        {
+            StopFiring();
+            StopAiming();
+            Reload();
+            return;
+        }
         Ammo1--;
+    }
     else if(CurrentWeapon.GunName == Slot2Weapon)
+    {
+        if(Ammo2 < 1)
+        {
+            StopFiring();
+            StopAiming();
+            Reload();
+            return;
+        }
         Ammo2--;
+    }
     else if(CurrentWeapon.GunName == Slot3Weapon)
+    {
+        if(Ammo3 < 1)
+        {
+            StopFiring();
+            StopAiming();
+            Reload();
+            return;
+        }
         Ammo3--;
+    }
+    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::Reload()
@@ -510,6 +538,7 @@ void UWeaponComponent::FillAmmo()
 {
     if(CurrentWeapon.GunName == Slot1Weapon)
     {
+        UE_LOG(LogTemp, Warning, TEXT("Slot1Weapon"));
         Ammo1 = CurrentWeapon.Max_capacity;
     }
         
@@ -523,36 +552,29 @@ void UWeaponComponent::FillAmmo()
         Ammo3 = CurrentWeapon.Max_capacity;
     }
 
-
     switch (CurrentWeapon.BulletType)
     {
         case BulletTypeList::REGULAR:
         {
-            int inven_REGULAR = 100;
-            inven_REGULAR -= CurrentWeapon.Max_capacity;
-            AmmoWidget->UpdateAmmo(Ammo1, inven_REGULAR);
+            StoredAmmo_Regular -= CurrentWeapon.Max_capacity;
             break;
         }
         case BulletTypeList::SPECIAL:
         {
-            int inven_SPECIAL = 100;
-            inven_SPECIAL -= CurrentWeapon.Max_capacity;
-            AmmoWidget->UpdateAmmo(Ammo1, inven_SPECIAL);
+            StoredAmmo_Special -= CurrentWeapon.Max_capacity;
             break;
         }
             
         case BulletTypeList::REINFORCE:
         {
-            int inven_REINFORCE = 100;
-            inven_REINFORCE -= CurrentWeapon.Max_capacity;
-            AmmoWidget->UpdateAmmo(Ammo1, inven_REINFORCE);
+            StoredAmmo_Reinforce -= CurrentWeapon.Max_capacity;
             break;
         } 
     }
 
-        
-    CurrentAmmo = MaxAmmo;
-    AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
+    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    //CurrentAmmo = MaxAmmo;
+    //AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
 }
 
 void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)

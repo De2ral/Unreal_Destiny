@@ -47,7 +47,7 @@ public:
 	float GunDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Max_capacity;
+	int Max_capacity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Rebound;
@@ -78,4 +78,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AimRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CameraZoom;
 };
