@@ -356,6 +356,7 @@ void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 
 	SwitchToThirdPerson();
 }
+
 void ADestinyFPSBase::jump(const FInputActionValue& Value)
 {
 	ACharacter::Jump();
@@ -481,7 +482,11 @@ void ADestinyFPSBase::Revive()
 	bIsPlayerAlive = true;
 
 	//사망 테스트를 위해 추가한 기능 (추후 멀티플레이 구현 시 삭제 요망)
-	if(SpawnedDeathOrb != nullptr) SpawnedDeathOrb->Destroy();
+	if(SpawnedDeathOrb != nullptr)
+	{
+		SpawnedDeathOrb->Destroy();
+		SpawnedDeathOrb = nullptr;
+	}
 
 	SwitchToFirstPerson();
 
