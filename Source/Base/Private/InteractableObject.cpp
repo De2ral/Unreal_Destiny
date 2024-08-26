@@ -33,11 +33,12 @@ void AInteractableObject::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AA
 	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
 	{
 		APlayer = Cast<ADestinyFPSBase>(OtherActor);
+		if(APlayer->GetIsPlayerAlive())
+		{
+			APlayer->bPlayerInteractable = true;
+			APlayer->MaxInteractTime = ObjInteractTime;
+		}
 		//GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - DeathOrb OverlapBegin"));
- 		APlayer->bPlayerInteractable = true;
-		APlayer->MaxInteractTime = ObjInteractTime;
-
-
 	}	
 	
 

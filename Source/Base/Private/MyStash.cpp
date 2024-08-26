@@ -12,10 +12,10 @@ AMyStash::AMyStash()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//StashMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StashMesh"));
-//
+
 	//Collider = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionTest"));
 	//Collider->SetupAttachment(RootComponent);
-//
+
 	//StashMesh->SetupAttachment(Collider);
 
 	ObjInteractTime = 40.0f;

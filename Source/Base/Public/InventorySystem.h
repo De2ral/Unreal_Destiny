@@ -23,6 +23,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	void AddMapping(ADestinyFPSBase* TargetCharacter);
+
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int CurrAmmo = 0;
 
@@ -41,9 +43,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int MaxRefAmmo = 180;
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
-	TArray<FGunInfo> WeaponArray;
-
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int WpnArrayIndex = 0;
 
@@ -53,7 +52,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UTexture2D* GunImg;
 
-
+	
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	// class UInputAction* InventoryAction;
 
@@ -66,12 +65,9 @@ protected:
 
 	// UPROPERTY(EditDefaultsOnly)
 	// bool bIsInvenOpen = false;
-	
-
 
 public:	
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION()
 	void AddCurrAmmo(int value) { CurrAmmo += value; }
@@ -92,7 +88,17 @@ public:
 
 	bool bIsRefAmmoFull() {return (CurrRefAmmo > MaxRefAmmo) ? true : false; }
 
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FGunInfo> WeaponArray;
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FGunInfo> EQWeaponArray;
 
 
+
+private:
+	ADestinyFPSBase* Character;
+
+	void InvenOpenClose();
 		
 };
