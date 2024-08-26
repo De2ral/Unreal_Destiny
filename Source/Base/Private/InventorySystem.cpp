@@ -36,6 +36,9 @@ UInventorySystem::UInventorySystem()
 		WeaponArray[i].GunDamage = 0.0f;
 		WeaponArray[i].GunType = GunTypeList::PISTOL;
 		WeaponArray[i].GunModelPath = "/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun";
+		EQWeaponArray[i].AimLocation = 0.0f;
+		EQWeaponArray[i].AimRotation = 0.0f;
+		EQWeaponArray[i].CameraZoom = 0.0f;
 	}
 
 	for(int i = 0; i < 3; i++)
@@ -43,10 +46,8 @@ UInventorySystem::UInventorySystem()
 		EQWeaponArray[i].GunImage = GunImg;
 		EQWeaponArray[i].BulletType = BulletTypeList::REGULAR;
 		EQWeaponArray[i].AutoFire = false;
-		EQWeaponArray[i].CurrentAmmo = 0;
+		EQWeaponArray[i].Max_capacity = 0;
 		EQWeaponArray[i].FireRate = 0.0f;
-		EQWeaponArray[i].FireType = FireTypeList::SINGLE;
-		EQWeaponArray[i].GunID = FName("0000");
 		EQWeaponArray[i].Linetracing = false;
 		EQWeaponArray[i].Rebound = 0.0f;
 		EQWeaponArray[i].ProjectileSpeed = 0.0f;
@@ -55,6 +56,9 @@ UInventorySystem::UInventorySystem()
 		EQWeaponArray[i].GunDamage = 0.0f;
 		EQWeaponArray[i].GunType = GunTypeList::PISTOL;
 		EQWeaponArray[i].GunModelPath = "/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun";
+		EQWeaponArray[i].AimLocation = 0.0f;
+		EQWeaponArray[i].AimRotation = 0.0f;
+		EQWeaponArray[i].CameraZoom = 0.0f;
 	}
 
 
