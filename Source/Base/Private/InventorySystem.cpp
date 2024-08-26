@@ -26,10 +26,8 @@ UInventorySystem::UInventorySystem()
 		WeaponArray[i].GunImage = GunImg;
 		WeaponArray[i].BulletType = BulletTypeList::REGULAR;
 		WeaponArray[i].AutoFire = false;
-		WeaponArray[i].CurrentAmmo = 0;
+		WeaponArray[i].Max_capacity = 0;
 		WeaponArray[i].FireRate = 0.0f;
-		WeaponArray[i].FireType = FireTypeList::SINGLE;
-		WeaponArray[i].GunID = FName("0000");
 		WeaponArray[i].Linetracing = false;
 		WeaponArray[i].Rebound = 0.0f;
 		WeaponArray[i].ProjectileSpeed = 0.0f;

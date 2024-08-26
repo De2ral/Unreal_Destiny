@@ -110,7 +110,7 @@ void ADestinyFPSBase::BeginPlay()
 		if (HUDWidget)
 		{
 			HUDWidget->AddToViewport();
-			HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo, WeaponComponent->MaxAmmo);
+			HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
 			HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
 			HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 		}

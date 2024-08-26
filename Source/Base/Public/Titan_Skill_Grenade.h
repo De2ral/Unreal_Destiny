@@ -45,7 +45,10 @@ public:
 	void SetThrowDirection(FVector Direction);
 	void DestroyGrenade();
 
+	void SetProjectile(bool inbool) {IsProjectile = true;}
+	void SetGrenadeDamage(float indamage) {GrenadeDamage = indamage;}
 private:
 	float GrenadeDamage = 50.f;
 	FTimerHandle TimerHandle;
+	bool IsProjectile = false;
 };

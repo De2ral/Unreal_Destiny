@@ -14,6 +14,7 @@ class ADestinyFPSBase;
 class UStaticMesh;
 class USkeletalMesh;
 class AFpsCppProjectile;
+class ATitan_Skill_Grenade;
 
 //UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -28,13 +29,10 @@ public:
 	UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
 	TSubclassOf<class AFpsCppProjectile> ProjectileClass;
 
-
-
     // 투사체 발사 위치
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
 
-   
     // 모델 장착
     void AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, UObject* Model);
 
@@ -44,8 +42,7 @@ public:
 	void LoadAndAttachModelToCharacter(ADestinyFPSBase* InCharacter, const FString& ModelPath);
 
     // 무기 장착
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-    FGunInfo CurrentWeapon;
+
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
     UDataTable* WeaponDataTable;
@@ -71,6 +68,9 @@ public:
     // 애니메이션
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* ReloadAnimation;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UAnimMontage* FireAnimation;
     
 protected:
     virtual void BeginPlay() override;
@@ -102,6 +102,7 @@ public:
 
     void Fire();
     void FireInRange();
+    void FireLauncher();
 
     void StartFiring();
     void StopFiring();
@@ -109,18 +110,51 @@ public:
     void StartAiming();
     void StopAiming();
 
+    void UseAmmo();
+
     void Reload();
+
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void FillAmmo();
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void EndReloading() {IsReloading = false;}
 
     void EquipWeapon1();
     void EquipWeapon2();
     void EquipWeapon3();
+    
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void SetSlot1Weapon(FName inweapon);
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void SetSlot2Weapon(FName inweapon);
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void SetSlot3Weapon(FName inweapon);
 
-    int32 CurrentAmmo;
-    int32 MaxAmmo = 30;
+    int CurrentAmmo();
+    int StoredAmmo();
+
+    //int32 CurrentAmmo;
+    //int32 MaxAmmo = 30;
     
 private:
     ADestinyFPSBase* Character;
     
+    FGunInfo CurrentWeapon;
+
+    FName Slot1Weapon;
+    FName Slot2Weapon;
+    FName Slot3Weapon;
+
+    int Ammo1 = 0;
+    int Ammo2 = 0;
+    int Ammo3 = 0;
+
+    int StoredAmmo_Regular = 100;
+    int StoredAmmo_Special = 150;
+    int StoredAmmo_Reinforce = 300;
+
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
@@ -141,4 +175,6 @@ private:
     float CurrentScopeSize = 0.0f;
 
     float CurrentScopeX = 1.0f;
+
+    bool IsReloading = false;
 };
