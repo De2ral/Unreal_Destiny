@@ -891,10 +891,10 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
     //FHitResult HitResult;
 
-    FVector TraceEnd = CurrentStaticMeshComponent->GetComponentLocation() + PlayerCameraManager->GetForwardVector()*1000.0f;
-    //bool bHit = World->LineTraceSingleByObjectType(HitResult, CurrentStaticMeshComponent->GetComponentLocation(), TraceEnd, ObjectQueryParams, CollisionParams);
-    APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-    UWorld* const World = GetWorld();
-    DrawDebugLine(World,  CurrentStaticMeshComponent->GetComponentLocation(), TraceEnd, FColor::Red, false, 1, 0, 1);
+    //FVector TraceEnd = CurrentStaticMeshComponent->GetComponentLocation() + PlayerCameraManager->GetForwardVector()*1000.0f;
+    ////bool bHit = World->LineTraceSingleByObjectType(HitResult, CurrentStaticMeshComponent->GetComponentLocation(), TraceEnd, ObjectQueryParams, CollisionParams);
+    //APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+    //UWorld* const World = GetWorld();
+    //DrawDebugLine(World,  CurrentStaticMeshComponent->GetComponentLocation(), TraceEnd, FColor::Red, false, 1, 0, 1);
     }
 }
