@@ -95,7 +95,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TitanPunchDamageCollider->SetGenerateOverlapEvents(true);
 	TitanPunchDamageCollider->InitSphereRadius(2.f);
 
-	PlayerClass = EPlayerClassEnum::TITAN;
+	PlayerClass = EPlayerClassEnum::WARLOCK;
 
 	SetClassValue();
 }
@@ -185,6 +185,15 @@ void ADestinyFPSBase::SetClassValue()
 
 		case EPlayerClassEnum::WARLOCK:
 			{
+				ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
+					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Warlock/Meshes/Moira_Ancient_Caller.Moira_Ancient_Caller'"));
+				if(TitanMeshAsset.Succeeded())
+					SelectedMesh = TitanMeshAsset.Object;
+
+				ConstructorHelpers::FClassFinder<UAnimInstance> TitanAnimClassAsset(
+					TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Warlock/Animations/ABP_Warlock.ABP_Warlock_C'"));
+				if(TitanAnimClassAsset.Succeeded())
+					SelectedAnimInstanceClass = TitanAnimClassAsset.Class;
 			}
 		break;
 
