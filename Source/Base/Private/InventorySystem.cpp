@@ -82,7 +82,7 @@ void UInventorySystem::BeginPlay()
 		switch (randomSeed)
 		{
 			case 2:
-				WpnName = FName("Pistol");
+				WpnName = FName("Pistol1");
 				break;
 			case 3:
 				WpnName = FName("Pistol2");
@@ -118,7 +118,7 @@ void UInventorySystem::AddWeaponToInventory()
 	switch (randomSeed)
 	{
 	case 2:
-		PistolName = FName("Pistol");
+		PistolName = FName("Pistol1");
 		break;
 	case 3:
 		PistolName = FName("Pistol2");

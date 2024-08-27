@@ -15,6 +15,9 @@
 #include "Camera/CameraShakeBase.h"
 #include "MyLegacyCameraShake.h"
 
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
+
 #include "Kismet/GameplayStatics.h"
 
 UWeaponComponent::UWeaponComponent()
@@ -22,6 +25,18 @@ UWeaponComponent::UWeaponComponent()
     PrimaryComponentTick.bCanEverTick = true;
 
     Character = Cast<ADestinyFPSBase>(GetOwner());
+
+    static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Sparks/P_Sparks_C.P_Sparks_C'"));
+    if (ParticleAsset.Succeeded())
+    {
+        MuzzleFlash = ParticleAsset.Object;
+    }
+
+    static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset1(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Explosion/P_Explosion_Smoke.P_Explosion_Smoke'"));
+    if (ParticleAsset1.Succeeded())
+    {
+        HitFlash = ParticleAsset1.Object;
+    }
 }
 
 void UWeaponComponent::BeginPlay()
@@ -79,11 +94,25 @@ void UWeaponComponent::Fire()
     }
 		const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
         FVector MuzzleLocation;
+
         if(CurrentStaticMeshComponent)
         {
-            MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 100.0f);
+            if(bIsAiming)
+                MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation();
+            else
+                MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 100.0f);
         }
-        
+ 
+        UE_LOG(LogTemp, Warning, TEXT("PlayerController is null.%f"),CurrentStaticMeshComponent->GetComponentLocation().X);
+
+        if (MuzzleFlash)
+        {
+            FVector LeftOffset = -SpawnRotation.RotateVector(FVector::RightVector) * 10.0f;
+            FVector UpOffset = SpawnRotation.RotateVector(FVector::UpVector) * 5.0f;
+            FVector MuzzleFlashLocation = MuzzleLocation + LeftOffset + UpOffset;
+            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleFlashLocation, FRotator(-90.0f, 0.0f, 0.0f));
+        }
+
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
@@ -106,6 +135,8 @@ void UWeaponComponent::Fire()
 		
         FCollisionObjectQueryParams ObjectQueryParams;
         ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+        ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+        ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 		//bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
         bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, ObjectQueryParams, CollisionParams);
 		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
@@ -131,9 +162,12 @@ void UWeaponComponent::Fire()
 
 		if (bHit)
 		{
+            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location, FRotator(0.0f, 0.0f, 0.0f));
+            ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();
+            DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
             if (HitResult.GetActor()->ActorHasTag("Enemy"))
             {
-                DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+                
 			    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
 			    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
                 if(CurrentWeapon.Linetracing)
@@ -144,8 +178,7 @@ void UWeaponComponent::Fire()
                     return;
                 }
                 
-            }
-			ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
+            } 			
 		}
         if (Projectile)
         {
@@ -577,6 +610,25 @@ void UWeaponComponent::FillAmmo()
     //AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
 }
 
+void UWeaponComponent::ChangePistolPose(bool inbool)
+{
+    FVector MeshLocation;
+    FRotator MeshRotation;
+    if(inbool)
+    {
+        MeshLocation = FVector(-35, 15, -160);
+        MeshRotation = FRotator(0, 0, 0);
+    }
+    else
+    {
+        MeshLocation = FVector(-20, 0, -145);
+        MeshRotation = FRotator(0, 0, 0);
+    }
+    Character->GetFppMesh()->SetRelativeLocation(MeshLocation);
+    Character->GetFppMesh()->SetRelativeRotation(MeshRotation);
+}
+
+
 void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
 {
     Character = TargetCharacter;
@@ -633,9 +685,15 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
         CurrentStaticMeshComponent->SetStaticMesh(StaticMesh);
         FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
         if(CurrentWeapon.GunType != GunTypeList::PISTOL)
+        {
+            //ChangePistolPose(false);
             CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPoint")));
+        }
         else
+        {
+            ChangePistolPose(true);
             CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPointPistol")));
+        }
         CurrentStaticMeshComponent->RegisterComponent();
 
         UE_LOG(LogTemp, Warning, TEXT("StaticMesh"));
@@ -742,6 +800,8 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         FVector TargetLocation;
         FRotator TargetRotation;
 
+        
+
         if (bIsAiming)
         {
             CurrentScopeSize = FMath::FInterpTo(CurrentScopeSize, 1.0f, DeltaTime, ScopeZoomSpeed);
@@ -762,11 +822,15 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 FVector RightVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Y);
                 FVector UpVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Z);
 
-                // 총의 목표 위치를 카메라의 위치에서 전방으로 이동한 위치로 설정합니다.
-                TargetLocation = CameraLocation + (ForwardVector * 50.0f); // 카메라 앞쪽으로 100 유닛 이동
-                
-                // 카메라의 아래쪽으로 약간의 오프셋을 추가합니다.
-                TargetLocation -= UpVector * 20.0f; // 카메라의 아래쪽으로 20 유닛 이동
+
+                TargetLocation = CameraLocation + (ForwardVector * 50.0f); 
+                TargetLocation -= UpVector * 20.0f; 
+
+                if(CurrentWeapon.GunType == GunTypeList::PISTOL)
+                {
+                    TargetLocation = CameraLocation + (ForwardVector * 150.0f); 
+                    TargetLocation -= UpVector * 10.0f;
+                }
 
                 FQuat QuatRotation = FQuat(CameraRotation);
 
@@ -787,8 +851,17 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
             FRotator HandRotation;
             if (Character->GetFppMesh())
             {
-                HandLocation = Character->GetFppMesh()->GetSocketLocation(FName(TEXT("GripPoint")));
-                HandRotation = Character->GetFppMesh()->GetSocketRotation(FName(TEXT("GripPoint")));
+                if(CurrentWeapon.GunType != GunTypeList::PISTOL)
+                {
+                    HandLocation = Character->GetFppMesh()->GetSocketLocation(FName(TEXT("GripPoint")));
+                    HandRotation = Character->GetFppMesh()->GetSocketRotation(FName(TEXT("GripPoint")));
+                }
+                else
+                {
+                    HandLocation = Character->GetFppMesh()->GetSocketLocation(FName(TEXT("GripPointPistol")));
+                    HandRotation = Character->GetFppMesh()->GetSocketRotation(FName(TEXT("GripPointPistol")));
+                }
+                
             }
             TargetLocation = HandLocation + DefaultOffset; 
             TargetRotation = HandRotation + DefaultRotation;
@@ -815,5 +888,13 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
     
     CurrentStaticMeshComponent->SetWorldLocation(NewLocation);
     CurrentStaticMeshComponent->SetWorldRotation(NewRotation);
+
+    //FHitResult HitResult;
+
+    FVector TraceEnd = CurrentStaticMeshComponent->GetComponentLocation() + PlayerCameraManager->GetForwardVector()*1000.0f;
+    //bool bHit = World->LineTraceSingleByObjectType(HitResult, CurrentStaticMeshComponent->GetComponentLocation(), TraceEnd, ObjectQueryParams, CollisionParams);
+    APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+    UWorld* const World = GetWorld();
+    DrawDebugLine(World,  CurrentStaticMeshComponent->GetComponentLocation(), TraceEnd, FColor::Red, false, 1, 0, 1);
     }
 }

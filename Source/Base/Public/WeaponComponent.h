@@ -135,6 +135,8 @@ public:
     int CurrentAmmo();
     int StoredAmmo();
 
+    void ChangePistolPose(bool inbool);
+
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
     
@@ -177,4 +179,7 @@ private:
     float CurrentScopeX = 1.0f;
 
     bool IsReloading = false;
+
+    UParticleSystem* MuzzleFlash;
+    UParticleSystem* HitFlash;
 };
