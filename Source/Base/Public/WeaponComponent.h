@@ -16,6 +16,7 @@ class USkeletalMesh;
 class AFpsCppProjectile;
 class ATitan_Skill_Grenade;
 
+
 //UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BASE_API UWeaponComponent : public UActorComponent
@@ -135,8 +136,10 @@ public:
     int CurrentAmmo();
     int StoredAmmo();
 
-    void ChangePistolPose(bool inbool);
+    void ChangeGunPose(int inbool);
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
+    bool bIsAiming;
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
     
@@ -160,7 +163,7 @@ private:
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
-    bool bIsAiming = false;
+   
     bool bIsFiring = false;                
 
     FVector DefaultOffset;

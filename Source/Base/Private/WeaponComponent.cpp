@@ -65,8 +65,8 @@ void UWeaponComponent::BeginPlay()
     if (PlayerCharacter != nullptr)
     {
         Slot1Weapon = FName(TEXT("Rifle3"));
-        Slot2Weapon = FName(TEXT("Pistol1"));
-        Slot3Weapon = FName(TEXT("Sniper3"));
+        Slot2Weapon = FName(TEXT("Sniper3"));
+        Slot3Weapon = FName(TEXT("Launcher1"));
 
         EquipWeapon1();
     }
@@ -98,7 +98,7 @@ void UWeaponComponent::Fire()
         if(CurrentStaticMeshComponent)
         {
             if(bIsAiming)
-                MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation();
+                MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + SpawnRotation.Vector() * 300.0f;
             else
                 MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 100.0f);
         }
@@ -110,7 +110,7 @@ void UWeaponComponent::Fire()
             FVector LeftOffset = -SpawnRotation.RotateVector(FVector::RightVector) * 10.0f;
             FVector UpOffset = SpawnRotation.RotateVector(FVector::UpVector) * 5.0f;
             FVector MuzzleFlashLocation = MuzzleLocation + LeftOffset + UpOffset;
-            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleFlashLocation, FRotator(-90.0f, 0.0f, 0.0f));
+            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleFlashLocation);
         }
 
 		FActorSpawnParameters ActorSpawnParams;
@@ -120,7 +120,8 @@ void UWeaponComponent::Fire()
         if(!CurrentWeapon.Linetracing)
         {
 		    Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
-            Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
+            if(Projectile)
+                Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
         }
         
 		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
@@ -161,17 +162,16 @@ void UWeaponComponent::Fire()
    		}
 
 		if (bHit)
-		{
-            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location, FRotator(0.0f, 0.0f, 0.0f));
+		{    
             ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();
             DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
             if (HitResult.GetActor()->ActorHasTag("Enemy"))
             {
-                
 			    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
 			    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
                 if(CurrentWeapon.Linetracing)
                 {
+                    UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location, FRotator(0.0f, 0.0f, 0.0f));
                     UE_LOG(LogTemp, Warning, TEXT("linetracing"));
                     UE_LOG(LogTemp, Warning, TEXT("Damage : %f"),CurrentWeapon.GunDamage);
                     UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
@@ -184,7 +184,6 @@ void UWeaponComponent::Fire()
         {
             Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
         }
-       
 	}
 }
 
@@ -293,12 +292,12 @@ void UWeaponComponent::FireLauncher()
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
-        ATitan_Skill_Grenade* Projectile = nullptr;
+        ATitan_Skill_Grenade* Grenade = nullptr;
         if(!CurrentWeapon.Linetracing)
         {
-		    Projectile = World->SpawnActor<ATitan_Skill_Grenade>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
-            Projectile->SetProjectile(true);
-            Projectile->SetGrenadeDamage(100.0f);
+		    Grenade = World->SpawnActor<ATitan_Skill_Grenade>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
+            Grenade->SetProjectile(true);
+            Grenade->SetGrenadeDamage(100.0f);
         }
         
 		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
@@ -309,13 +308,16 @@ void UWeaponComponent::FireLauncher()
 		FCollisionQueryParams CollisionParams;
 		CollisionParams.AddIgnoredActor(GetOwner());
         if(!CurrentWeapon.Linetracing)
-		    CollisionParams.AddIgnoredActor(Projectile);
+		    CollisionParams.AddIgnoredActor(Grenade);
 		
         FCollisionObjectQueryParams ObjectQueryParams;
         ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+        ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+        ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 		//bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
         bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, ObjectQueryParams, CollisionParams);
 		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
+        DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
         if (FireAnimation != nullptr && !bIsAiming)
@@ -340,7 +342,6 @@ void UWeaponComponent::FireLauncher()
 		{
             if (HitResult.GetActor()->ActorHasTag("Enemy"))
             {
-                DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
 			    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
 			    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
                 if(CurrentWeapon.Linetracing)
@@ -355,9 +356,9 @@ void UWeaponComponent::FireLauncher()
             
 			ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
 		}
-        if (Projectile)
+        if (Grenade)
         {
-            Projectile->SetThrowDirection(ProjectileDirection);
+            Grenade->SetThrowDirection(ProjectileDirection);
         }
        
 	}
@@ -426,6 +427,7 @@ void UWeaponComponent::StartAiming()
     UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
     bIsAiming = true;
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+    //Character->GetFppMesh()->SetPlayRate(0.0f);
 }
 
 void UWeaponComponent::StopAiming()
@@ -433,6 +435,7 @@ void UWeaponComponent::StopAiming()
     UE_LOG(LogTemp, Warning, TEXT("StopAiming"));
     bIsAiming = false;
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+    
 }
 
 void UWeaponComponent::EquipWeapon1()
@@ -610,19 +613,29 @@ void UWeaponComponent::FillAmmo()
     //AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
 }
 
-void UWeaponComponent::ChangePistolPose(bool inbool)
+void UWeaponComponent::ChangeGunPose(int inbool)
 {
     FVector MeshLocation;
     FRotator MeshRotation;
-    if(inbool)
+    if(inbool == int(GunTypeList::PISTOL))
     {
         MeshLocation = FVector(-35, 15, -160);
         MeshRotation = FRotator(0, 0, 0);
+        Character->GetFppMesh()->SetVisibility(true);
     }
+
+    else if(inbool == int(GunTypeList::LAUNCHER))
+    {
+        MeshLocation = FVector(-20, 10, -130);
+        MeshRotation = FRotator(0, 0, 0);
+        Character->GetFppMesh()->SetVisibility(false);
+    }
+
     else
     {
-        MeshLocation = FVector(-20, 0, -145);
+        MeshLocation = FVector(-20, 0, -150);
         MeshRotation = FRotator(0, 0, 0);
+        Character->GetFppMesh()->SetVisibility(true);
     }
     Character->GetFppMesh()->SetRelativeLocation(MeshLocation);
     Character->GetFppMesh()->SetRelativeRotation(MeshRotation);
@@ -644,7 +657,7 @@ void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
             //EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::Fire);
             EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::StartFiring);
             EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UWeaponComponent::StopFiring);
-            EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &UWeaponComponent::StartAiming);
+            EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &UWeaponComponent::StartAiming);
             EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &UWeaponComponent::StopAiming);
             EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &UWeaponComponent::Reload);
             EnhancedInputComponent->BindAction(Equip1Action, ETriggerEvent::Started, this, &UWeaponComponent::EquipWeapon1);
@@ -684,15 +697,21 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
         CurrentStaticMeshComponent = NewObject<UStaticMeshComponent>(Character);
         CurrentStaticMeshComponent->SetStaticMesh(StaticMesh);
         FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-        if(CurrentWeapon.GunType != GunTypeList::PISTOL)
+        if(CurrentWeapon.GunType == GunTypeList::PISTOL)
         {
-            //ChangePistolPose(false);
+            ChangeGunPose(int(GunTypeList::PISTOL));
+            CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPointPistol")));
+        }
+
+        else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
+        {
+            ChangeGunPose(int(GunTypeList::LAUNCHER));
             CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPoint")));
         }
         else
         {
-            ChangePistolPose(true);
-            CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPointPistol")));
+            ChangeGunPose(int(GunTypeList::RIFLE));
+            CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPoint")));
         }
         CurrentStaticMeshComponent->RegisterComponent();
 
@@ -800,16 +819,30 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         FVector TargetLocation;
         FRotator TargetRotation;
 
-        
+        FVector MeshTargetLocation = Character->GetFppMesh()->GetRelativeLocation();
+        FRotator MeshTargetRotation;
 
         if (bIsAiming)
         {
+            MeshTargetLocation.Y = CurrentWeapon.AimLocation;
+            MeshTargetLocation.Z = -160.0f - 1.0f;
+            MeshTargetRotation.Yaw = CurrentWeapon.AimRotation;
+
             CurrentScopeSize = FMath::FInterpTo(CurrentScopeSize, 1.0f, DeltaTime, ScopeZoomSpeed);
             CurrentScopeX = FMath::FInterpTo(CurrentScopeX, 0.0f, DeltaTime, ScopeZoomSpeed);
-            if (AmmoWidget && CurrentWeapon.GunType == GunTypeList::SNIPER)
+
+            if (AmmoWidget)
             {
-                AmmoWidget->SetScopeSize(CurrentScopeSize);
-                AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent);
+                if(CurrentWeapon.GunType == GunTypeList::SNIPER)
+                {
+                    AmmoWidget->SetScopeSize(CurrentScopeSize);
+                    AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                }
+                else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
+                {
+                    AmmoWidget->SetScopeSize(CurrentScopeSize);
+                    AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                } 
             }
 
 
@@ -822,31 +855,30 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 FVector RightVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Y);
                 FVector UpVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Z);
 
+                
 
                 TargetLocation = CameraLocation + (ForwardVector * 50.0f); 
-                TargetLocation -= UpVector * 20.0f; 
-
-                if(CurrentWeapon.GunType == GunTypeList::PISTOL)
-                {
-                    TargetLocation = CameraLocation + (ForwardVector * 150.0f); 
-                    TargetLocation -= UpVector * 10.0f;
-                }
+        
+                TargetLocation -= UpVector * CurrentWeapon.AimLocation; 
 
                 FQuat QuatRotation = FQuat(CameraRotation);
 
                 TargetRotation = QuatRotation.Rotator();
-                QuatRotation = QuatRotation * FQuat(FRotator(0.0f, -77.5f, 0.0f)); // 기존 Yaw 조정 부분을 쿼터니언으로 처리
+                QuatRotation = QuatRotation * FQuat(FRotator(0.0f, CurrentWeapon.AimRotation, 0.0f)); // 기존 Yaw 조정 부분을 쿼터니언으로 처리
                 TargetRotation = QuatRotation.Rotator();
-
+                
                 
                 float CurrentFOV = PlayerController->PlayerCameraManager->GetFOVAngle();
-                float TargetFOV = 30.0f;
+                float TargetFOV = CurrentWeapon.CameraZoom;
                 float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, 5.0f);
                 PlayerController->PlayerCameraManager->SetFOV(NewFOV);
             }
         }
         else
         {
+            MeshTargetLocation.Y = 15.0f;
+            MeshTargetLocation.Z = -160.0f;
+            MeshTargetRotation.Yaw = 0.0f;
             FVector HandLocation;
             FRotator HandRotation;
             if (Character->GetFppMesh())
@@ -874,20 +906,42 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 PlayerController->PlayerCameraManager->SetFOV(NewFOV);
             }
 
-            if (AmmoWidget && CurrentWeapon.GunType == GunTypeList::SNIPER)
+            if (AmmoWidget)
             {
-                CurrentScopeSize = 0.5f;
-                CurrentScopeX = 600.0f;
-                AmmoWidget->SetScopeSize(CurrentScopeSize);
-                AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent);
+                if(CurrentWeapon.GunType == GunTypeList::SNIPER)
+                {
+                    CurrentScopeSize = 0.5f;
+                    CurrentScopeX = 600.0f;
+                    AmmoWidget->SetScopeSize(CurrentScopeSize);
+                    AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                }
+                else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
+                {
+                    CurrentScopeSize = 0.5f;
+                    CurrentScopeX = 600.0f;
+                    AmmoWidget->SetScopeSize(CurrentScopeSize);
+                    AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                } 
             }
         }
 
     FVector NewLocation = FMath::VInterpTo(CurrentStaticMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
     FRotator NewRotation = FMath::RInterpTo(CurrentStaticMeshComponent->GetComponentRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+
+    FVector MeshNewLocation = FMath::VInterpTo(Character->GetFppMesh()->GetRelativeLocation(), MeshTargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+    FRotator MeshNewRotation = FMath::RInterpTo(Character->GetFppMesh()->GetRelativeRotation(), MeshTargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+    if(CurrentWeapon.GunType == GunTypeList::PISTOL)
+    {
+        Character->GetFppMesh()->SetRelativeLocation(MeshNewLocation);
+        Character->GetFppMesh()->SetRelativeRotation(MeshNewRotation);
+    }
+    else
+    {
+        CurrentStaticMeshComponent->SetWorldLocation(NewLocation);
+        CurrentStaticMeshComponent->SetWorldRotation(NewRotation);
+    }
     
-    CurrentStaticMeshComponent->SetWorldLocation(NewLocation);
-    CurrentStaticMeshComponent->SetWorldRotation(NewRotation);
+    
 
     //FHitResult HitResult;
 
