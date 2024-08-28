@@ -184,6 +184,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* TitanUltimateTrailParticle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* WarlockSkillStartParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* WarlockSkillLandParticle;
+
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
 
@@ -231,7 +237,10 @@ public:
 	void EndUltimate();
 
 	UFUNCTION(BlueprintCallable)
-	void Shield();
+	void SpawnShield();
+
+	UFUNCTION(BlueprintCallable)
+	void EndShield();
 
 	UFUNCTION(BlueprintCallable)
 	void CameraShake(float Scale);
@@ -253,6 +262,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void TitanSmashEnd(float DelayTime);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockSkillStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockSkillFall(float ZDirection, float LaunchStrength, float GravityScale);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockSkillLand();
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockSkillEnd();
 
 	UFUNCTION(BlueprintCallable)
 	void SwitchToFirstPerson();
