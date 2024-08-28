@@ -29,7 +29,7 @@ protected:
 	//UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	//class USphereComponent* Collider;
 
-	virtual void ObjAction();
+	virtual void ObjAction(ADestinyFPSBase* Player);
 
 	//UFUNCTION()
 	//void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -37,6 +37,18 @@ protected:
 	//UFUNCTION()
 	// void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
+	int32 MinItemValue = 1;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
+	int32 MaxItemValue = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+    TArray<TSubclassOf<AActor>> ItemsToSpawn;
+
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	void ItemDrop(int32 ItemCount);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -440,9 +440,7 @@ void ADestinyFPSBase::StartInteract(const FInputActionValue &Value)
 		bIsInteractComplete = true;
 		InteractTime = 0.0f;
 		bPlayerInteractable = false;
-	} 
-		
-
+	}
 
 }
 

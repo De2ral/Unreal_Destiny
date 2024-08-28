@@ -198,6 +198,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool GetIsPlayerAlive() {return bIsPlayerAlive;}
+
+	UFUNCTION(BlueprintCallable)
+	void TakeDamageDestinyPlayer(float Value) { HP -= Value; }
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
@@ -209,6 +212,7 @@ private:
 	FVector LastPlayerPos;
 	float PosTickCoolTime = 400.0f;
 	bool bIsPlayerAlive = true;
+	bool bIsPlayerCarrying = false;
 
 	float HP = 100.0f;
 };

@@ -53,9 +53,13 @@ void ACarriableObject::BeginPlay()
 //	}
 //}
 
-void ACarriableObject::ObjAction()
+void ACarriableObject::ObjAction(ADestinyFPSBase* Player)
 {
 	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> Carriable.ObjAction()"));
+
+	Player->SwitchToThirdPerson();
+	
+	Destroy();
 
 }
 

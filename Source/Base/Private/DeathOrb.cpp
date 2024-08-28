@@ -22,7 +22,7 @@ void ADeathOrb::BeginPlay()
 	
 }
 
-void ADeathOrb::ObjAction()
+void ADeathOrb::ObjAction(ADestinyFPSBase* Player)
 {
 	GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Red,TEXT("InteractableObj -> DeathOrb.ObjAction"));
 	Destroy();

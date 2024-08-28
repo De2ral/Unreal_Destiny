@@ -62,7 +62,7 @@ void AInteractableObject::Tick(float DeltaTime)
 
 	if(APlayer && APlayer->bIsInteractComplete) 
 	{
-		ObjAction();
+		ObjAction(APlayer);
 		APlayer->bIsInteractComplete = false;
 	}
 	

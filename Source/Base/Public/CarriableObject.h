@@ -26,7 +26,7 @@ protected:
 	//UPROPERTY(EditAnywhere)
 	//class UStaticMeshComponent* CarriableMesh;
 
-	virtual void ObjAction();
+	virtual void ObjAction(ADestinyFPSBase* Player);
 
 	//UFUNCTION()
 	//void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

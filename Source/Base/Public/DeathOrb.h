@@ -34,7 +34,7 @@ protected:
 	//UFUNCTION()
 	//void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	virtual void ObjAction();
+	virtual void ObjAction(ADestinyFPSBase* Player);
 
 public:	
 	// Called every frame

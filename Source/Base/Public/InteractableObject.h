@@ -45,6 +45,6 @@ public:
 	float ObjInteractTime = 0.0f;
 
 	UFUNCTION()
-	virtual void ObjAction() {};
+	virtual void ObjAction(ADestinyFPSBase* Player) {};
 
 };
