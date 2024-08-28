@@ -47,4 +47,7 @@ public:
 	UFUNCTION()
 	virtual void ObjAction(ADestinyFPSBase* Player) {};
 
+	UFUNCTION()
+	UStaticMeshComponent* GetObjMesh() { return ObjMesh; }
+
 };

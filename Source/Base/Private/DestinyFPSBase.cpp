@@ -16,6 +16,7 @@
 #include "InputAction.h"
 #include "Titan_Skill_Barrier.h"
 #include "Titan_Skill_Grenade.h"
+#include "CarriableObject.h"
 
 
 // Sets default values
@@ -27,7 +28,6 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 	TppMesh->SetOwnerNoSee(true);
 	TppMesh->SetupAttachment(RootComponent);
-
 
 	TppSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPPSpringArm"));
 	TppSpringArm->TargetArmLength = 300.0f;
@@ -249,9 +249,7 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 
 		AddMovementInput(FowardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
-
 	}
-
 
 }
 
@@ -348,6 +346,69 @@ void ADestinyFPSBase::SwitchToThirdPerson()
 		TppMesh->SetOnlyOwnerSee(false);
 		TppMesh->SetOwnerNoSee(false);
 	}
+}
+
+void ADestinyFPSBase::PlayerCarryingStart(ACarriableObject* CarriableObject)
+{
+	 if (!CarriableObject)
+    {
+        return; // 운반할 대상이 없으면 종료
+    }
+
+    bIsCarrying = true;
+
+    // CarriableObject의 메쉬 정보를 가져옴
+	UStaticMesh* CarriableMesh = CarriableObject->GetObjMesh()->GetStaticMesh();
+
+    // UStaticMeshComponent 생성
+    CarriedMeshComponent = NewObject<UStaticMeshComponent>(this);
+    if (CarriedMeshComponent)
+    {
+        // 가져온 메쉬를 컴포넌트에 설정
+        CarriedMeshComponent->SetStaticMesh(CarriableMesh);
+
+        // 생성된 컴포넌트를 액터에 부착
+        CarriedMeshComponent->AttachToComponent(TppMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("CarriableSocket"));
+        
+		// 스케일 조정 (예: 절반 크기로 줄임)
+        FVector DesiredScale(0.4f, 0.4f, 0.4f); // 원하는 스케일로 설정
+        CarriedMeshComponent->SetWorldScale3D(DesiredScale);
+
+        // 컴포넌트 활성화 및 렌더링 설정
+        CarriedMeshComponent->RegisterComponent();
+        CarriedMeshComponent->SetVisibility(true);
+    }
+
+}
+
+void ADestinyFPSBase::PlayerCarryingEnd()
+{
+	 if (bIsCarrying && CarriedMeshComponent)
+    {
+        bIsCarrying = false;
+
+        // 플레이어 앞쪽 위치 계산
+        FVector PlayerLocation = GetActorLocation();
+        FRotator PlayerRotation = GetActorRotation();
+
+        FVector ForwardVector = PlayerRotation.Vector();
+        FVector DropLocation = PlayerLocation + ForwardVector * 100.0f; // 플레이어 앞쪽 100 유닛
+
+        // ACarriableObject를 플레이어 앞에 스폰
+        FActorSpawnParameters SpawnParams;
+        ACarriableObject* DroppedObject = GetWorld()->SpawnActor<ACarriableObject>(ACarriableObject::StaticClass(), DropLocation, PlayerRotation, SpawnParams);
+
+        // DroppedObject에 원래 메쉬 설정
+        if (DroppedObject && DroppedObject->GetObjMesh())
+        {
+            DroppedObject->GetObjMesh()->SetStaticMesh(CarriedMeshComponent->GetStaticMesh());
+        }
+
+        // 기존에 붙어있던 컴포넌트 삭제
+        CarriedMeshComponent->DestroyComponent();
+        CarriedMeshComponent = nullptr;
+    }
+
 }
 
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)

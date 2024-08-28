@@ -12,6 +12,7 @@
 #include "DestinyFPSBase.generated.h"
 
 class UCharacterMovementComponent;
+class ACarriableObject;
 
 UENUM(BlueprintType)
 enum class EPlayerClassEnum : uint8
@@ -179,6 +180,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
 
+	UPROPERTY(EditAnyWhere)
+	UStaticMeshComponent* CarriedMeshComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasRifle;
 
@@ -193,6 +197,9 @@ public:
 	void SwitchToFirstPerson();
 	void SwitchToThirdPerson();
 
+	void PlayerCarryingStart(ACarriableObject* CarriableObject);
+	void PlayerCarryingEnd();
+
 	UFUNCTION(BlueprintCallable)
 	FVector GetLastPlayerPos() {return LastPlayerPos;};
 
@@ -200,7 +207,11 @@ public:
 	bool GetIsPlayerAlive() {return bIsPlayerAlive;}
 
 	UFUNCTION(BlueprintCallable)
+	bool GetIsPlayerCarrying() {return bIsCarrying;}
+
+	UFUNCTION(BlueprintCallable)
 	void TakeDamageDestinyPlayer(float Value) { HP -= Value; }
+
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
@@ -212,7 +223,7 @@ private:
 	FVector LastPlayerPos;
 	float PosTickCoolTime = 400.0f;
 	bool bIsPlayerAlive = true;
-	bool bIsPlayerCarrying = false;
+	bool bIsCarrying = false;
 
 	float HP = 100.0f;
 };
