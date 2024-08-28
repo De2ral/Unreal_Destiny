@@ -37,6 +37,7 @@ UWeaponComponent::UWeaponComponent()
     {
         HitFlash = ParticleAsset1.Object;
     }
+
 }
 
 void UWeaponComponent::BeginPlay()
@@ -64,8 +65,8 @@ void UWeaponComponent::BeginPlay()
     }
     if (PlayerCharacter != nullptr)
     {
-        Slot1Weapon = FName(TEXT("Rifle3"));
-        Slot2Weapon = FName(TEXT("Sniper3"));
+        Slot1Weapon = FName(TEXT("Rifle1"));
+        Slot2Weapon = FName(TEXT("Shotgun1"));
         Slot3Weapon = FName(TEXT("Launcher1"));
 
         EquipWeapon1();
@@ -119,7 +120,7 @@ void UWeaponComponent::Fire()
         AFpsCppProjectile* Projectile = nullptr;
         if(!CurrentWeapon.Linetracing)
         {
-		    Projectile = World->SpawnActor<AFpsCppProjectile>(ProjectileClass, MuzzleLocation, SpawnRotation, ActorSpawnParams);
+		    Projectile = World->SpawnActor<AFpsCppProjectile>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
             if(Projectile)
                 Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
         }
@@ -165,19 +166,19 @@ void UWeaponComponent::Fire()
 		{    
             ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();
             DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location);
             if (HitResult.GetActor()->ActorHasTag("Enemy"))
             {
 			    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
 			    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
                 if(CurrentWeapon.Linetracing)
                 {
-                    UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location, FRotator(0.0f, 0.0f, 0.0f));
+                   
                     UE_LOG(LogTemp, Warning, TEXT("linetracing"));
                     UE_LOG(LogTemp, Warning, TEXT("Damage : %f"),CurrentWeapon.GunDamage);
                     UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
                     return;
                 }
-                
             } 			
 		}
         if (Projectile)
@@ -211,6 +212,46 @@ void UWeaponComponent::FireInRange()
 
         for (int32 i = 0; i < NumPellets; ++i)
         {
+            FTimerHandle TimerHandle;
+            GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, i, SpawnRotation, TraceStart, SpreadAngle, World, PlayerController]()
+            {
+                // 발사 방향을 랜덤하게 조정 (앞 방향 기준)
+                float RandomHorizontalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
+                float RandomVerticalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
+
+                // 발사 방향을 계산
+                FRotator PelletRotation = SpawnRotation;
+                PelletRotation.Yaw += RandomHorizontalSpread;   // 가로 스프레드
+                PelletRotation.Pitch += RandomVerticalSpread;   // 세로 스프레드
+
+                FVector ShotDirection = PelletRotation.Vector();
+                FVector PelletEnd = TraceStart + (ShotDirection * 1000000.0f);
+
+                FHitResult HitResult;
+                FCollisionQueryParams CollisionParams;
+                CollisionParams.AddIgnoredActor(GetOwner());
+                CollisionParams.bTraceComplex = true;
+
+                FCollisionObjectQueryParams ObjectQueryParams;
+                ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+                bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
+                DrawDebugLine(World, TraceStart, PelletEnd, FColor::Red, false, 1, 0, 1);
+
+                if (bHit)
+                {
+                    if (HitResult.GetActor()->ActorHasTag("Enemy"))
+                    {
+                        DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+                        UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+                        UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
+
+                        UE_LOG(LogTemp, Warning, TEXT("Headshot! %s"), *HitResult.BoneName.ToString());
+                        UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage * 0.1f, PlayerController, GetOwner(), UDamageType::StaticClass());
+                    }
+                }
+            }, i * 0.01f, false);
+
+            /*
             // 발사 방향을 랜덤하게 조정 (앞 방향 기준)
             float RandomHorizontalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
             float RandomVerticalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
@@ -243,10 +284,10 @@ void UWeaponComponent::FireInRange()
                     
                     
                     UE_LOG(LogTemp, Warning, TEXT("Headshot! %s"), *HitResult.BoneName.ToString());
-                    UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
+                    UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage * 0.1f, PlayerController, GetOwner(), UDamageType::StaticClass());
                 }
             }
-
+            */
         }
         
 

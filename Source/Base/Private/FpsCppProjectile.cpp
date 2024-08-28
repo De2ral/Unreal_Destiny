@@ -69,11 +69,10 @@ AFpsCppProjectile::AFpsCppProjectile()
         HitFlash = ParticleAsset.Object;
     }
 }
+
 void AFpsCppProjectile::BeginPlay()
 {
     Super::BeginPlay();
-
-	
 }
 
 
@@ -118,14 +117,6 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
             Destroy();
         }
     }
-
-	// Only add impulse and destroy projectile if we hit a physics
-	//if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
-	//{
-	//	OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-	//	
-	//	Destroy();
-	//}
 }
 
 void AFpsCppProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

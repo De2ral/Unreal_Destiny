@@ -30,7 +30,7 @@ public:
 public:
 	AFpsCppProjectile();
 
-	 virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
 
 	void FireInDirection(const FVector& ShootDirection);
 
@@ -55,7 +55,7 @@ private:
 	float Damage;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	float ExplosionRadius = 300.0f;
+	float ExplosionRadius = 1000.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	bool bExplodeOnImpact = true;
