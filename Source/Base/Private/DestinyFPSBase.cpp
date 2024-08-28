@@ -336,6 +336,7 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 	{
 		CurSkillCoolTime = 0.f;
 		isSkill = true;
+		SwitchToThirdPerson();
 	}
 }
 

@@ -227,9 +227,11 @@ public:
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
 
-	void Shield();
 	void Throw();
 	void EndUltimate();
+
+	UFUNCTION(BlueprintCallable)
+	void Shield();
 
 	UFUNCTION(BlueprintCallable)
 	void CameraShake(float Scale);
