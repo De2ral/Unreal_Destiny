@@ -13,7 +13,7 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "Titan_Skill_Barrier.h"
-#include "Titan_Skill_Grenade.h"
+#include "Grenade.h"
 #include "Animation/AnimInstance.h"
 #include "MyLegacyCameraShake.h"
 #include "Particles/ParticleSystem.h"
@@ -186,7 +186,7 @@ void ADestinyFPSBase::SetClassValue()
 		case EPlayerClassEnum::WARLOCK:
 			{
 				ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
-					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Warlock/Meshes/Moira_Ancient_Caller.Moira_Ancient_Caller'"));
+					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Warlock/Meshes/Warlock.Warlock'"));
 				if(TitanMeshAsset.Succeeded())
 					SelectedMesh = TitanMeshAsset.Object;
 
@@ -335,7 +335,7 @@ void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 	if(CurSkillCoolTime >= SkillCoolTime)
 	{
 		CurSkillCoolTime = 0.f;
-		isShield = true;
+		isSkill = true;
 	}
 }
 
@@ -375,7 +375,7 @@ void ADestinyFPSBase::Throw()
 		FVector SpawnLocation = FppMesh->GetSocketLocation("GripPoint");
 		SpawnLocation.Z -= 50.f; 
 		FRotator SpawnRotation = this->GetActorRotation();
-		ATitan_Skill_Grenade* grenadeObject = GetWorld()->SpawnActor<ATitan_Skill_Grenade>(GrenadeClass, SpawnLocation, SpawnRotation, SpawnParams);
+		AGrenade* grenadeObject = GetWorld()->SpawnActor<AGrenade>(GrenadeClass, SpawnLocation, SpawnRotation, SpawnParams);
 		grenadeObject->SetThrowDirection(PlayerController->GetControlRotation().Vector() + this->GetActorUpVector() / 10.f);
 	}
 }

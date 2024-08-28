@@ -119,7 +119,7 @@ public:
 
 	// Skill Variable
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool isShield = false;
+	bool isSkill = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isGrenade = false;
@@ -191,7 +191,7 @@ public:
     UHUDWidget* HUDWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-	TSubclassOf<class ATitan_Skill_Grenade> GrenadeClass;
+	TSubclassOf<class AGrenade> GrenadeClass;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
