@@ -90,6 +90,12 @@ void UInventorySystem::BeginPlay()
 			case 4:
 				WpnName = FName("Pistol3");
 				break;
+			case 5:
+				WpnName = FName("Rifle3");
+				break;
+			case 6:
+				WpnName = FName("Sniper3");
+				break;
 			default:
 				break;
 		}
@@ -113,18 +119,24 @@ void UInventorySystem::AddWeaponToInventory()
 	if(WpnArrayIndex >= MaxInvenSize) return;
 
 	uint8 randomSeed;
-	randomSeed = FMath::RandRange(2,4);
+	randomSeed = FMath::RandRange(2,6);
 	FName PistolName;
 	switch (randomSeed)
 	{
 	case 2:
-		PistolName = FName("Pistol");
+		PistolName = FName("Pistol1");
 		break;
 	case 3:
 		PistolName = FName("Pistol2");
 		break;
 	case 4:
 		PistolName = FName("Pistol3");
+		break;
+	case 5:
+		PistolName = FName("Rifle3");
+		break;
+	case 6:
+		PistolName = FName("Sniper3");
 		break;
 	default:
 		break;
