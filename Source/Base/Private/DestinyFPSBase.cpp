@@ -192,7 +192,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 	if (Input != nullptr)
 	{
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
-		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::DeathRevive);
+		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::PlayerCarryingEnd);
 
 		if(bIsPlayerAlive)
 		{
@@ -356,6 +356,7 @@ void ADestinyFPSBase::PlayerCarryingStart(ACarriableObject* CarriableObject)
     }
 
     bIsCarrying = true;
+	SwitchToThirdPerson();
 
     // CarriableObject의 메쉬 정보를 가져옴
 	UStaticMesh* CarriableMesh = CarriableObject->GetObjMesh()->GetStaticMesh();
@@ -386,6 +387,8 @@ void ADestinyFPSBase::PlayerCarryingEnd()
 	 if (bIsCarrying && CarriedMeshComponent)
     {
         bIsCarrying = false;
+
+		SwitchToFirstPerson();
 
         // 플레이어 앞쪽 위치 계산
         FVector PlayerLocation = GetActorLocation();

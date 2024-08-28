@@ -27,10 +27,7 @@ void ACarriableObject::ObjAction(ADestinyFPSBase* Player)
 {
 	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> Carriable.ObjAction()"));
 
-	Player->SwitchToThirdPerson();
-
 	if(!Player->GetIsPlayerCarrying()) Player->PlayerCarryingStart(this);
-	else if(Player->GetIsPlayerCarrying()) Player->PlayerCarryingEnd();
 	
 	Destroy();
 
