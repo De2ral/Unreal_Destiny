@@ -484,6 +484,10 @@ void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 		bIsSliding = true;
 		GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedScale;
 		GetCapsuleComponent()->SetCapsuleHalfHeight(SlideCapsuleHeight);
+		if(bIsCarrying)
+		{
+			PlayerCarryingEnd();
+		}
 	}
 
 }
