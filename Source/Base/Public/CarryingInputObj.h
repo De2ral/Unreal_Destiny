@@ -5,18 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "InteractableObject.h"
-#include "DeathOrb.generated.h"
-
-class UPrimitiveComponent;
+#include "CarryingInputObj.generated.h"
 
 UCLASS()
-class BASE_API ADeathOrb : public AInteractableObject
+class BASE_API ACarryingInputObj : public AInteractableObject
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ADeathOrb();
+	ACarryingInputObj();
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,8 +22,16 @@ protected:
 
 	virtual void ObjAction(ADestinyFPSBase* Player);
 
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* AfterInteractMesh;
+
+	bool bIsFill = false;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable)
+	bool GetObjIsFill() {return bIsFill; }
 
 };
