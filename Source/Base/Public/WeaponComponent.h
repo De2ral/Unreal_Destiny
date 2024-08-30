@@ -183,6 +183,10 @@ private:
 
     bool IsReloading = false;
 
-    UParticleSystem* MuzzleFlash;
+    UParticleSystem* PistolFlash;
+    UParticleSystem* RifleFlash;
+    UParticleSystem* SniperFlash;
+    UParticleSystem* LauncherFlash;
+    
     UParticleSystem* HitFlash;
 };

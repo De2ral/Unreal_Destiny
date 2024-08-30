@@ -29,7 +29,7 @@ UWeaponComponent::UWeaponComponent()
     static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Sparks/P_Sparks_C.P_Sparks_C'"));
     if (ParticleAsset.Succeeded())
     {
-        MuzzleFlash = ParticleAsset.Object;
+        RifleFlash = ParticleAsset.Object;
     }
 
     static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset1(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Explosion/P_Explosion_Smoke.P_Explosion_Smoke'"));
@@ -106,12 +106,12 @@ void UWeaponComponent::Fire()
  
         UE_LOG(LogTemp, Warning, TEXT("PlayerController is null.%f"),CurrentStaticMeshComponent->GetComponentLocation().X);
 
-        if (MuzzleFlash)
+        if (RifleFlash)
         {
             FVector LeftOffset = -SpawnRotation.RotateVector(FVector::RightVector) * 10.0f;
             FVector UpOffset = SpawnRotation.RotateVector(FVector::UpVector) * 5.0f;
             FVector MuzzleFlashLocation = MuzzleLocation + LeftOffset + UpOffset;
-            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleFlashLocation);
+            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RifleFlash, MuzzleFlashLocation, FRotator(0.0f,0.0f, -30.0f),FVector(0.5f,0.5f,0.5f));
         }
 
 		FActorSpawnParameters ActorSpawnParams;
@@ -251,43 +251,7 @@ void UWeaponComponent::FireInRange()
                 }
             }, i * 0.01f, false);
 
-            /*
-            // 발사 방향을 랜덤하게 조정 (앞 방향 기준)
-            float RandomHorizontalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
-            float RandomVerticalSpread = FMath::RandRange(-SpreadAngle, SpreadAngle);
-
-            // 발사 방향을 계산
-            FRotator PelletRotation = SpawnRotation;
-            PelletRotation.Yaw += RandomHorizontalSpread;   // 가로 스프레드
-            PelletRotation.Pitch += RandomVerticalSpread;   // 세로 스프레드
-
-            FVector ShotDirection = PelletRotation.Vector();
-            FVector PelletEnd = TraceStart + (ShotDirection * 1000000.0f);
-
-            FHitResult HitResult;
-            FCollisionQueryParams CollisionParams;
-            CollisionParams.AddIgnoredActor(GetOwner());
-            CollisionParams.bTraceComplex = true; 
-
-            FCollisionObjectQueryParams ObjectQueryParams;
-            ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
-            bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
-            DrawDebugLine(World, TraceStart, PelletEnd, FColor::Red, false, 1, 0, 1);
-
-            if (bHit)
-            {
-                if (HitResult.GetActor()->ActorHasTag("Enemy"))
-                {
-                    DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
-                    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
-                    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
-                    
-                    
-                    UE_LOG(LogTemp, Warning, TEXT("Headshot! %s"), *HitResult.BoneName.ToString());
-                    UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage * 0.1f, PlayerController, GetOwner(), UDamageType::StaticClass());
-                }
-            }
-            */
+            
         }
         
 
@@ -333,12 +297,15 @@ void UWeaponComponent::FireLauncher()
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
-        ATitan_Skill_Grenade* Grenade = nullptr;
+        AFpsCppProjectile* Projectile = nullptr;
         if(!CurrentWeapon.Linetracing)
         {
-		    Grenade = World->SpawnActor<ATitan_Skill_Grenade>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
-            Grenade->SetProjectile(true);
-            Grenade->SetGrenadeDamage(100.0f);
+		    Projectile = World->SpawnActor<AFpsCppProjectile>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
+            if(Projectile)
+            {
+                Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
+                Projectile->SetbExplodeOnImpact(true);
+            }
         }
         
 		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
@@ -349,7 +316,7 @@ void UWeaponComponent::FireLauncher()
 		FCollisionQueryParams CollisionParams;
 		CollisionParams.AddIgnoredActor(GetOwner());
         if(!CurrentWeapon.Linetracing)
-		    CollisionParams.AddIgnoredActor(Grenade);
+		    CollisionParams.AddIgnoredActor(Projectile);
 		
         FCollisionObjectQueryParams ObjectQueryParams;
         ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
@@ -397,9 +364,9 @@ void UWeaponComponent::FireLauncher()
             
 			ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();			
 		}
-        if (Grenade)
+        if (Projectile)
         {
-            Grenade->SetThrowDirection(ProjectileDirection);
+            Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
         }
        
 	}

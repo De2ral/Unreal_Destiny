@@ -50,6 +50,7 @@ public:
 
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
+	void SetbExplodeOnImpact(bool inbool) {bExplodeOnImpact = inbool;}
 	
 private:
 	float Damage;
@@ -58,7 +59,7 @@ private:
 	float ExplosionRadius = 1000.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	bool bExplodeOnImpact = true;
+	bool bExplodeOnImpact = false;
 
 	UParticleSystem* HitFlash;
 };
