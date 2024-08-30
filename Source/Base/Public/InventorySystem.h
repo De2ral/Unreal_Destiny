@@ -97,6 +97,12 @@ public:
 	int GetCurrRefAmmo() { return CurrRefAmmo; }
 
 	UFUNCTION()
+	float GetWeaponMaxRating() { return MaxWeaponRating; }
+
+	UFUNCTION()
+	void SetWeaponMaxRating(float value) { MaxWeaponRating = value; }
+
+	UFUNCTION()
 	void AddWeaponToInventory();
 
 	bool bIsAmmoFull() {return (CurrAmmo > MaxAmmo) ? true : false; }
@@ -117,5 +123,7 @@ private:
 	ADestinyFPSBase* Character;
 
 	void InvenOpenClose();
+	float MaxWeaponRating = 0.0f;
+
 		
 };

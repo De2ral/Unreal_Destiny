@@ -484,10 +484,7 @@ void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 		bIsSliding = true;
 		GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedScale;
 		GetCapsuleComponent()->SetCapsuleHalfHeight(SlideCapsuleHeight);
-		if(bIsCarrying)
-		{
-			PlayerCarryingEnd();
-		}
+		PlayerCarryingEnd();
 	}
 
 }
@@ -545,6 +542,7 @@ void ADestinyFPSBase::Death()
 		SwitchToThirdPerson();
 		TppMesh->SetOwnerNoSee(true);
 		FppMesh->SetOwnerNoSee(true);
+		if(bIsCarrying) PlayerCarryingEnd();
         
     }
 }

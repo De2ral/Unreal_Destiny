@@ -32,7 +32,10 @@ public:
 
 	virtual void ObjAction(ADestinyFPSBase* Player) override;
 
+	UFUNCTION(BlueprintCallable)
 	void ShowQuestUI();
+
+	UFUNCTION(BlueprintCallable)
 	void HideQuestUI();
 
 };
