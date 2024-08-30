@@ -26,7 +26,7 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	float MaxHP = 100;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	float DamageValue;
 
 	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Enemy")
@@ -85,8 +85,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Physics")
     void EnablePhysicsSimulation();
 
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	UFUNCTION(NetMulticast, Reliable,BlueprintCallable, Category = "Spawn")
 	void ItemDrop(int32 ItemCount);
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
     TArray<TSubclassOf<AActor>> ItemsToSpawn;

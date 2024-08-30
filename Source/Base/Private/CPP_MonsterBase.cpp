@@ -69,6 +69,12 @@ void ACPP_MonsterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &Out
 
     // HP 변수를 리플리케이트하도록 설정
     DOREPLIFETIME(ACPP_MonsterBase, HP);    
+    DOREPLIFETIME(ACPP_MonsterBase, isDead);    
+    DOREPLIFETIME(ACPP_MonsterBase, isAttack);    
+    DOREPLIFETIME(ACPP_MonsterBase, bIsCriticalTextColor);    
+    DOREPLIFETIME(ACPP_MonsterBase, MinItemValue);    
+    DOREPLIFETIME(ACPP_MonsterBase, MaxItemValue);    
+    DOREPLIFETIME(ACPP_MonsterBase, DamageValue);    
 }
 
 void ACPP_MonsterBase::OnRep_HP()
@@ -88,8 +94,9 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
     }
     else
     {
-        // 클라이언트에서 서버로 HP 감소 요청
+        // 클라이언트에서 서버로 HP 감소 요청        
         ServerTakeDamage(DamageAmount);
+        //UGameplayStatics::ApplyDamage(this, DamageAmount, GetController(), this, UDamageType::StaticClass());
         //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Client is requesting,Damage Amount : %f HP : %f"),DamageAmount,HP));
 
     }
@@ -102,7 +109,8 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
 
 void ACPP_MonsterBase::MulticastTakeDamage_Implementation(float DamageAmount)
 {
-      if(bIsCriticalHit)
+
+    if(bIsCriticalHit)
     {
         DamageAmount *= 2.0f;
         bIsCriticalTextColor = true;
@@ -134,36 +142,45 @@ void ACPP_MonsterBase::MulticastTakeDamage_Implementation(float DamageAmount)
 }
 
 void ACPP_MonsterBase::ServerTakeDamage_Implementation(float DamageAmount)
-{
-     if(bIsCriticalHit)
-    {
-        DamageAmount *= 2.0f;
-        bIsCriticalTextColor = true;
-    }
-    //if(HasAuthority())
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("ServerTakeDamage in - Server")));
-    //else
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("ServerTakeDamage in - Client")));
+{ 
+        //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Client is requesting,Damage Amount : %f HP : %f"),DamageAmount,HP));
 
-    // 서버에서만 HP를 감소시킴
-    HP -= DamageAmount;
-
-    DamageValue = DamageAmount;
     
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Server HP decreased by %f. New HP: %f"), DamageAmount, HP));
+    MulticastTakeDamage(DamageAmount);
 
-    if(HP <= 0.0f && !isDead)
-    {
-        isDead = true;
-		int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
-        ItemDrop(ItemCount);
-        EnablePhysicsSimulation();              
-        GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &ACPP_MonsterBase::DestroyActor, 5.0f, false);
-    }
-    FTimerHandle UnusedHandle; 
-    //GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_MonsterBase::ResetDamageCoolDown, DamageCooldownTime, false);
+    //  if(bIsCriticalHit)
+    // {
+    //     DamageAmount *= 2.0f;
+    //     bIsCriticalTextColor = true;
+    // }
+    // //if(HasAuthority())
+    // //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("ServerTakeDamage in - Server")));
+    // //else
+    // //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("ServerTakeDamage in - Client")));
+
+    // // 서버에서만 HP를 감소시킴
+    // HP -= DamageAmount;
+
+    // DamageValue = DamageAmount;
     
-    bIsCriticalHit = false;
+    // //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Server HP decreased by %f. New HP: %f"), DamageAmount, HP));
+
+    // if(HP <= 0.0f && !isDead)
+    // {
+    //     isDead = true;
+	// 	int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
+        
+    //     if (HasAuthority())  // 서버에서만 실행
+    //     {
+    //         ItemDrop(ItemCount);  // 서버와 모든 클라이언트에서 MulticastFunction 실행
+    //     }
+    //     EnablePhysicsSimulation();              
+    //     GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &ACPP_MonsterBase::DestroyActor, 5.0f, false);
+    // }
+    // FTimerHandle UnusedHandle; 
+    // //GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_MonsterBase::ResetDamageCoolDown, DamageCooldownTime, false);
+    
+    // bIsCriticalHit = false;
     // 변경된 HP 값이 자동으로 클라이언트에 리플리케이트됨
     //MulticastTakeDamage(DamageAmount);
 }
@@ -221,7 +238,8 @@ void ACPP_MonsterBase::EnablePhysicsSimulation()
     //this->GetMesh()->SetSimulatePhysics(true);
 }
 
-void ACPP_MonsterBase::ItemDrop(int32 ItemCount)
+
+void ACPP_MonsterBase::ItemDrop_Implementation(int32 ItemCount)
 {
 	//if(!ItemsToSpawn) return;
 
@@ -242,6 +260,8 @@ void ACPP_MonsterBase::ItemDrop(int32 ItemCount)
 	}
 	
 }
+
+
 
 void ACPP_MonsterBase::OnCriticalHitBoxOverlap(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
