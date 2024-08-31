@@ -110,6 +110,11 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TitanPunchDamageCollider->SetGenerateOverlapEvents(true);
 	TitanPunchDamageCollider->InitSphereRadius(2.f);
 
+	WarlockSkillCollider = CreateDefaultSubobject<USphereComponent>(TEXT("WarlockSkillCollider"));
+    WarlockSkillCollider->SetupAttachment(TppMesh, TEXT("GroundSocket"));
+	WarlockSkillCollider->SetGenerateOverlapEvents(true);
+    WarlockSkillCollider->InitSphereRadius(5.0f); 
+
 	PlayerClass = EPlayerClassEnum::WARLOCK;
 
 	SetClassValue();
@@ -244,9 +249,6 @@ void ADestinyFPSBase::SetClassValue()
 void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if(bIsPlayerAlive && HP <= 0.0f) Death();
-	else if (!bIsPlayerAlive && HP > 0.0f) Revive();
 
 	if (CurSkillCoolTime < SkillCoolTime)
 	{
@@ -776,7 +778,7 @@ void ADestinyFPSBase::TitanSmashDown()
 	for (AActor* Actor : OverlappingActors)
 	{
 		if (!Actor->IsA(ADestinyFPSBase::StaticClass()))
-			UGameplayStatics::ApplyDamage(Actor, UltimateDamage, GetInstigatorController(), this, nullptr);
+			UGameplayStatics::ApplyDamage(Actor, TitanUltimateDamage, GetInstigatorController(), this, nullptr);
 	}
 }
 
@@ -790,6 +792,8 @@ void ADestinyFPSBase::TitanSmashEnd(float DelayTime)
 
 void ADestinyFPSBase::WarlockSkillStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation)
 {
+	isWarlockSkill = false;
+
 	FVector LaunchDirection = GetActorRotation().Vector();
 	LaunchDirection.Z += ZDirection;
 	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
@@ -837,6 +841,43 @@ void ADestinyFPSBase::WarlockSkillLand()
 		ParticleSpawnRotation,
 		(FVector)((1.5F))
 	);
+
+	WarlockSkillTakeDamageAndHealPlayer(GetActorLocation());
+}
+
+void ADestinyFPSBase::WarlockSkillTakeDamageAndHealPlayer(FVector Origin)
+{
+	if (!isWarlockSkill)
+	{
+		TArray<AActor*> OverlappingActors;
+   		WarlockSkillCollider->GetOverlappingActors(OverlappingActors);
+
+		for (AActor* Actor : OverlappingActors)
+		{
+			if (Actor)
+			{
+				// 액터가 플레이어 클래스인지 확인
+				if (Actor->IsA(ADestinyFPSBase::StaticClass()))
+				{
+					// 플레이어 클래스의 경우 체력 회복
+					ADestinyFPSBase* Player = Cast<ADestinyFPSBase>(Actor);
+					if (Player)
+						UGameplayStatics::ApplyDamage(Player, -WarlockSkillHealAmount, GetInstigatorController(), this, nullptr);
+				}
+				else
+				{
+					// 일반 액터에게 데미지 적용
+					UGameplayStatics::ApplyDamage(
+						Actor,
+						WarlockSkillDamage,
+						GetInstigatorController(),
+						this,
+						UDamageType::StaticClass()
+					);
+				}
+			}
+		}
+	}
 }
 
 void ADestinyFPSBase::WarlockSkillEnd()
@@ -1081,6 +1122,21 @@ void ADestinyFPSBase::TitanPunchCollisionEvents()
 		}
 	}
 }
+
+float ADestinyFPSBase::TakeDamage(float DamageAmount, FDamageEvent const &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
+{	
+    //if(!bCanTakeDamage) return 0.0f;
+    
+	float Damage = Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
+
+    HP -= (bIsInWarlockAura && DamageAmount > 0) ? (DamageAmount * 0.8) : DamageAmount;
+    
+	if(bIsPlayerAlive && HP <= 0.0f) Death();
+	else if (!bIsPlayerAlive && HP > 0.0f) Revive();
+
+    return Damage;
+}
+
 void ADestinyFPSBase::DeathRevive(const FInputActionValue &Value)
 {
 	if(HP > 0.0f) HP = 0.0f;

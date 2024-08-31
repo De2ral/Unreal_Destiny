@@ -23,9 +23,24 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(VisibleAnywhere)
+    class USphereComponent* AuraComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* StartParticle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* AuraParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HealAmount = 5.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	float HealInterval = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	float lifeTime = 30.f;
+
+	void ApplyHealing();
+	void DestroySkill();
 };
