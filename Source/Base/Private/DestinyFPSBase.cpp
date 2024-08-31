@@ -18,6 +18,7 @@
 #include "MyLegacyCameraShake.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Warlock_Skill_Ultimate.h"
 
 // Sets default values
 ADestinyFPSBase::ADestinyFPSBase()
@@ -447,13 +448,13 @@ void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 
 	if (CurUltimateCoolTime >= UltimateCoolTime)
 	{
-		CurUltimateCoolTime = 0.f;
-		CurUltimateDuration = 0.f;
-		isUltimate = true;
-		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-		SwitchToThirdPerson();
 		if (PlayerClass == EPlayerClassEnum::TITAN)
 		{
+			CurUltimateCoolTime = 0.f;
+			CurUltimateDuration = 0.f;
+			isUltimate = true;
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
 			// Titan Ultimate Start
 			if (TitanUltimateFistParticle)
 			{
@@ -466,6 +467,53 @@ void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 					EAttachLocation::SnapToTarget,
 					true
 				);
+			}
+		}
+		else if (PlayerClass == EPlayerClassEnum::WARLOCK)
+		{
+			CheckStartWarlockUltimate();
+		}
+	}
+}
+
+void ADestinyFPSBase::CheckStartWarlockUltimate()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
+	if (PlayerController)
+	{
+		FVector StartLocation;
+		FRotator StartRotation;
+
+		PlayerController->GetPlayerViewPoint(StartLocation, StartRotation);
+		FVector EndLocation = StartLocation + (StartRotation.Vector() * MaxSpawnWarlockUltimateDistance);
+
+		FHitResult HitResult;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+
+		bool bHit = GetWorld()->LineTraceSingleByChannel(
+			HitResult,
+			StartLocation,
+			EndLocation,
+			ECC_Visibility,
+			QueryParams
+		);
+
+		if (bHit)
+		{
+			if (HitResult.ImpactNormal.Z > 0.99f)
+			{
+				float Distance = FVector::Dist(StartLocation, HitResult.Location);
+				if (Distance <= MaxSpawnWarlockUltimateDistance)
+				{
+					CurUltimateCoolTime = 0.f;
+					CurUltimateDuration = 0.f;
+					isUltimate = true;
+					WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+					SwitchToThirdPerson();
+
+					WarlockUltimateSpawnLocation = HitResult.Location;
+				}
 			}
 		}
 	}
@@ -644,6 +692,30 @@ void ADestinyFPSBase::WarlockSkillEnd()
 	GetCharacterMovement()->GravityScale = 1.f;
 	FTimerHandle TimerHandle;
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
+}
+
+void ADestinyFPSBase::WarlockUltimateStart(FVector CameraLocation)
+{
+	TppCamera->SetRelativeLocation(CameraLocation);
+}
+
+void ADestinyFPSBase::WarlockUltimateCast()
+{
+	UWorld* world = GetWorld();
+	if (world)
+	{
+		FActorSpawnParameters SpawnParams;
+		FRotator SpawnRotation = FRotator::ZeroRotator;
+		AWarlock_Skill_Ultimate* WarlockUltimateObject = 
+			GetWorld()->SpawnActor<AWarlock_Skill_Ultimate>(WarlockUltimateClass, WarlockUltimateSpawnLocation, SpawnRotation, SpawnParams);
+	}
+}
+
+void ADestinyFPSBase::WarlockUltimateEnd()
+{
+	isUltimate = false;
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 1.f, false);
 }
 
 void ADestinyFPSBase::EndUltimate()

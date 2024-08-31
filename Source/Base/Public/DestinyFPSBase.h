@@ -157,6 +157,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TitanPunchDamage = 75.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxSpawnWarlockUltimateDistance = 1000.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
 	class USphereComponent* TitanSmashCollider;
 
@@ -199,6 +202,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<class AGrenade> GrenadeClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class AWarlock_Skill_Ultimate> WarlockUltimateClass;
+
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
 	
@@ -236,6 +242,8 @@ public:
 	void Throw();
 	void EndUltimate();
 
+	void CheckStartWarlockUltimate();
+	
 	UFUNCTION(BlueprintCallable)
 	void SpawnShield();
 
@@ -276,6 +284,15 @@ public:
 	void WarlockSkillEnd();
 
 	UFUNCTION(BlueprintCallable)
+	void WarlockUltimateStart(FVector CameraLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockUltimateCast();
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockUltimateEnd();
+
+	UFUNCTION(BlueprintCallable)
 	void SwitchToFirstPerson();
 
 	UFUNCTION(BlueprintCallable)
@@ -296,4 +313,6 @@ private:
 
 	USkeletalMesh* SelectedMesh = nullptr;
 	TSubclassOf<UAnimInstance> SelectedAnimInstanceClass = nullptr;
+
+	FVector WarlockUltimateSpawnLocation;
 };
