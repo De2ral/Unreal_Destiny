@@ -110,6 +110,11 @@ ADestinyFPSBase::ADestinyFPSBase()
 	TitanPunchDamageCollider->SetGenerateOverlapEvents(true);
 	TitanPunchDamageCollider->InitSphereRadius(2.f);
 
+	WarlockSkillCollider = CreateDefaultSubobject<USphereComponent>(TEXT("WarlockSkillCollider"));
+    WarlockSkillCollider->SetupAttachment(TppMesh, TEXT("GroundSocket"));
+	WarlockSkillCollider->SetGenerateOverlapEvents(true);
+    WarlockSkillCollider->InitSphereRadius(5.0f); 
+
 	PlayerClass = EPlayerClassEnum::WARLOCK;
 
 	SetClassValue();
@@ -776,7 +781,7 @@ void ADestinyFPSBase::TitanSmashDown()
 	for (AActor* Actor : OverlappingActors)
 	{
 		if (!Actor->IsA(ADestinyFPSBase::StaticClass()))
-			UGameplayStatics::ApplyDamage(Actor, UltimateDamage, GetInstigatorController(), this, nullptr);
+			UGameplayStatics::ApplyDamage(Actor, TitanUltimateDamage, GetInstigatorController(), this, nullptr);
 	}
 }
 
@@ -790,6 +795,8 @@ void ADestinyFPSBase::TitanSmashEnd(float DelayTime)
 
 void ADestinyFPSBase::WarlockSkillStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation)
 {
+	isWarlockSkill = false;
+
 	FVector LaunchDirection = GetActorRotation().Vector();
 	LaunchDirection.Z += ZDirection;
 	FVector LaunchVelocity = LaunchDirection * LaunchStrength;
@@ -837,6 +844,43 @@ void ADestinyFPSBase::WarlockSkillLand()
 		ParticleSpawnRotation,
 		(FVector)((1.5F))
 	);
+
+	WarlockSkillTakeDamageAndHealPlayer(GetActorLocation());
+}
+
+void ADestinyFPSBase::WarlockSkillTakeDamageAndHealPlayer(FVector Origin)
+{
+	if (!isWarlockSkill)
+	{
+		TArray<AActor*> OverlappingActors;
+   		WarlockSkillCollider->GetOverlappingActors(OverlappingActors);
+
+		for (AActor* Actor : OverlappingActors)
+		{
+			if (Actor)
+			{
+				// 액터가 플레이어 클래스인지 확인
+				if (Actor->IsA(ADestinyFPSBase::StaticClass()))
+				{
+					// 플레이어 클래스의 경우 체력 회복
+					ADestinyFPSBase* Player = Cast<ADestinyFPSBase>(Actor);
+					if (Player)
+						Player->TakeDamageDestinyPlayer(-WarlockSkillHealAmount);  // 체력 회복, ModifyHealth는 플레이어 클래스에 맞게 조정
+				}
+				else
+				{
+					// 일반 액터에게 데미지 적용
+					UGameplayStatics::ApplyDamage(
+						Actor,
+						WarlockSkillDamage,
+						GetInstigatorController(),
+						this,
+						UDamageType::StaticClass()
+					);
+				}
+			}
+		}
+	}
 }
 
 void ADestinyFPSBase::WarlockSkillEnd()

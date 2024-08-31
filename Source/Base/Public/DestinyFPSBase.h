@@ -161,13 +161,22 @@ public:
 	float MeleeAttackCoolTime = 2.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float UltimateDamage = 100.f;
+	float TitanUltimateDamage = 100.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TitanPunchDamage = 75.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxSpawnWarlockUltimateDistance = 1000.f;
+	float MaxSpawnWarlockUltimateDistance = 3000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WarlockSkillDamage = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WarlockSkillHealAmount = 120.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WarlockSkillRadius = 200.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
 	class USphereComponent* TitanSmashCollider;
@@ -177,6 +186,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
 	class USphereComponent* TitanPunchDamageCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* WarlockSkillCollider;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* TitanPunchStartParticle;
@@ -268,6 +280,7 @@ public:
 	void EndUltimate();
 
 	void CheckStartWarlockUltimate();
+	void WarlockSkillTakeDamageAndHealPlayer(FVector Origin);
 	
 	UFUNCTION(BlueprintCallable)
 	void SpawnShield();
@@ -338,7 +351,9 @@ public:
 	bool GetIsPlayerCarrying() {return bIsCarrying;}
 
 	UFUNCTION(BlueprintCallable)
-	void TakeDamageDestinyPlayer(float Value) { HP -= Value; }
+	void TakeDamageDestinyPlayer(float Value) { HP -= (bIsInWarlockAura && Value > 0) ? (Value * 0.8) : Value; }
+
+	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
@@ -349,6 +364,7 @@ private:
 	float CurMeleeAttackCoolTime = MeleeAttackCoolTime;
 
 	bool isTitanPunch = false;
+	bool isWarlockSkill = false;
 
 	USkeletalMesh* SelectedMesh = nullptr;
 	TSubclassOf<UAnimInstance> SelectedAnimInstanceClass = nullptr;
@@ -363,6 +379,7 @@ private:
 	float PosTickCoolTime = 400.0f;
 	bool bIsPlayerAlive = true;
 	bool bIsCarrying = false;
+	bool bIsInWarlockAura = false;
 
 	float HP = 100.0f;
 };
