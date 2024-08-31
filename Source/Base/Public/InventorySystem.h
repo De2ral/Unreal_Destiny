@@ -23,6 +23,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	void AddMapping(ADestinyFPSBase* TargetCharacter);
+
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int CurrAmmo = 0;
 
@@ -41,19 +43,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int MaxRefAmmo = 180;
 
-	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
-	TArray<FGunInfo> WeaponArray;
-
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int WpnArrayIndex = 0;
 
-	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	int MaxInvenSize = 30;
 	
 	UPROPERTY(EditDefaultsOnly)
 	class UTexture2D* GunImg;
 
-
+	
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	// class UInputAction* InventoryAction;
 
@@ -66,25 +65,45 @@ protected:
 
 	// UPROPERTY(EditDefaultsOnly)
 	// bool bIsInvenOpen = false;
-	
-
 
 public:	
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION()
 	void AddCurrAmmo(int value) { CurrAmmo += value; }
 
 	UFUNCTION()
+	void MinusCurrAmmo(int value) { CurrAmmo -= value; }
+
+	UFUNCTION()
 	void AddCurrSpecialAmmo(int value) { CurrSpecialAmmo += value; }
+
+	UFUNCTION()
+	void MinusCurrSpecialAmmo(int value) { CurrSpecialAmmo -= value; }
 
 	UFUNCTION()
 	void AddCurrRefAmmo(int value) { CurrRefAmmo += value; }
 
 	UFUNCTION()
+	void MinusCurrRefAmmo(int value) { CurrRefAmmo -= value; }
+
+	UFUNCTION()
+	int GetCurrAmmo() { return CurrAmmo; }
+
+	UFUNCTION()
+	int GetCurrSpecialAmmo() { return CurrSpecialAmmo; }
+
+	UFUNCTION()
+	int GetCurrRefAmmo() { return CurrRefAmmo; }
+
+	UFUNCTION()
+	float GetWeaponMaxRating() { return MaxWeaponRating; }
+
+	UFUNCTION()
+	void SetWeaponMaxRating(float value) { MaxWeaponRating = value; }
+
+	UFUNCTION()
 	void AddWeaponToInventory();
-	
 
 	bool bIsAmmoFull() {return (CurrAmmo > MaxAmmo) ? true : false; }
 
@@ -92,7 +111,19 @@ public:
 
 	bool bIsRefAmmoFull() {return (CurrRefAmmo > MaxRefAmmo) ? true : false; }
 
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FGunInfo> WeaponArray;
 
+	//UPROPERTY(BlueprintReadWrite)
+	//TArray<FGunInfo> EQWeaponArray;
+
+
+
+private:
+	ADestinyFPSBase* Character;
+
+	void InvenOpenClose();
+	float MaxWeaponRating = 0.0f;
 
 		
 };

@@ -28,13 +28,26 @@ AGrenade::AGrenade()
 
 	if(!ProjectileMovementComponent)
 	{
-		ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-		ProjectileMovementComponent->InitialSpeed = 4000.0f;
-		ProjectileMovementComponent->MaxSpeed = 4000.0f;
-		ProjectileMovementComponent->bRotationFollowsVelocity = true;
-		ProjectileMovementComponent->bShouldBounce = true;
-		ProjectileMovementComponent->Bounciness = 0.3f;
-		ProjectileMovementComponent->ProjectileGravityScale = 1.f;
+		if(!IsProjectile)
+		{
+			ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+			ProjectileMovementComponent->InitialSpeed = 4000.0f;
+			ProjectileMovementComponent->MaxSpeed = 4000.0f;
+			ProjectileMovementComponent->bRotationFollowsVelocity = true;
+			ProjectileMovementComponent->bShouldBounce = true;
+			ProjectileMovementComponent->Bounciness = 0.3f;
+			ProjectileMovementComponent->ProjectileGravityScale = 1.f;
+		}
+
+		else
+		{
+			ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+			ProjectileMovementComponent->InitialSpeed = 4000.0f;
+			ProjectileMovementComponent->MaxSpeed = 4000.0f;
+			ProjectileMovementComponent->bRotationFollowsVelocity = true;
+			ProjectileMovementComponent->bShouldBounce = false;
+			ProjectileMovementComponent->ProjectileGravityScale = 0.f;
+		}
 	}
 
 

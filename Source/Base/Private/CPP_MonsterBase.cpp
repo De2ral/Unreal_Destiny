@@ -8,6 +8,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/UnrealMathUtility.h"
+#include "Components/SphereComponent.h"
 #include "HitDamageEvent.h"
 #include "Components/CapsuleComponent.h"
 
@@ -27,6 +28,15 @@ ACPP_MonsterBase::ACPP_MonsterBase()
             GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("캐스팅 실패")));
 
     }
+
+    CriticalHitBox = CreateDefaultSubobject<USphereComponent>(TEXT("CriticalHitBox"));
+    CriticalHitBox->SetupAttachment(RootComponent);
+    
+    CriticalHitBox->SetCollisionProfileName(TEXT("Trigger"));
+    CriticalHitBox->OnComponentBeginOverlap.AddDynamic(this, &ACPP_MonsterBase::OnCriticalHitBoxOverlap);
+
+    bIsCriticalHit = false;
+
 
 }
 
@@ -53,7 +63,13 @@ void ACPP_MonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
 {	
-    if(!bCanTakeDamage) return 0.0f;
+    //if(!bCanTakeDamage) return 0.0f;
+
+    if(bIsCriticalHit)
+    {
+        DamageAmount *= 2.0f;
+        bIsCriticalTextColor = true;
+    }
     
 	float Damage = Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
 
@@ -71,8 +87,10 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
         GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &ACPP_MonsterBase::DestroyActor, 5.0f, false);
     }
     FTimerHandle UnusedHandle; 
-    GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_MonsterBase::ResetDamageCoolDown, DamageCooldownTime, false);
+    //GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_MonsterBase::ResetDamageCoolDown, DamageCooldownTime, false);
     
+    bIsCriticalHit = false;
+
     return Damage;
     
 }
@@ -80,6 +98,7 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
 void ACPP_MonsterBase::ResetDamageCoolDown()
 {
 	bCanTakeDamage = true;
+
 }
 
 void ACPP_MonsterBase::EnablePhysicsSimulation()
@@ -140,6 +159,14 @@ void ACPP_MonsterBase::ItemDrop(int32 ItemCount)
     }
 	}
 	
+}
+
+void ACPP_MonsterBase::OnCriticalHitBoxOverlap(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
+{
+    if (OtherActor && OtherActor != this)
+    {        
+        bIsCriticalHit = true;
+    }
 }
 
 void ACPP_MonsterBase::DestroyActor()

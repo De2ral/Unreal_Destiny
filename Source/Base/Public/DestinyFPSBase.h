@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-
 #include "WeaponComponent.h"
 #include "SkillWidget.h"
 #include "HUDWidget.h"
@@ -13,6 +12,7 @@
 #include "DestinyFPSBase.generated.h"
 
 class UCharacterMovementComponent;
+class ACarriableObject;
 
 UENUM(BlueprintType)
 enum class EPlayerClassEnum : uint8
@@ -97,13 +97,16 @@ public:
 	class UInputAction* RightClickAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bIsSliding;
+	class UInputAction* DeathReviveAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsSliding = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bPlayerSprint = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float SlideTime;
+	float SlideTime = 300.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float InteractTime = 0.0f;
@@ -111,8 +114,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxInteractTime = 0.0f;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsInteractComplete = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
+
+	UPROPERTY(EditDefaultsOnly)
+	FVector SlideVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerClassEnum PlayerClass;
@@ -207,6 +216,14 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+	bool bPlayerIsMoving = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<AActor> DeathOrbTest;
+
+	AActor* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
 	void Move(const FInputActionValue& Value);
@@ -214,6 +231,7 @@ public:
 	void Skill(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
 	void jump(const FInputActionValue& Value);
+	void jumpEnd(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
 
 	void Sprint(const FInputActionValue& Value);
@@ -227,11 +245,18 @@ public:
 
 	void LeftClickFunction(const FInputActionValue& Value);
 	void RightClickFunction(const FInputActionValue& Value);
+	void DeathRevive(const FInputActionValue& Value);
+
+	void Death();
+	void Revive();
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	UPROPERTY(EditAnyWhere)
+	UStaticMeshComponent* CarriedMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasRifle;
 
 	UFUNCTION(BlueprintCallable, Category = Weapon)
@@ -300,6 +325,20 @@ public:
 
 	void SetClassValue();
 	void TitanPunchCollisionEvents();
+	void PlayerCarryingStart(ACarriableObject* CarriableObject);
+	void PlayerCarryingEnd();
+
+	UFUNCTION(BlueprintCallable)
+	FVector GetLastPlayerPos() {return LastPlayerPos;};
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsPlayerAlive() {return bIsPlayerAlive;}
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsPlayerCarrying() {return bIsCarrying;}
+
+	UFUNCTION(BlueprintCallable)
+	void TakeDamageDestinyPlayer(float Value) { HP -= Value; }
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
@@ -315,4 +354,15 @@ private:
 	TSubclassOf<UAnimInstance> SelectedAnimInstanceClass = nullptr;
 
 	FVector WarlockUltimateSpawnLocation;
+	
+	int jumpCount = 0;
+	float DefaultCapsuleHeight;
+    float SlideCapsuleHeight;
+	float SlideSpeedScale = 2.3f;
+	FVector LastPlayerPos;
+	float PosTickCoolTime = 400.0f;
+	bool bIsPlayerAlive = true;
+	bool bIsCarrying = false;
+
+	float HP = 100.0f;
 };

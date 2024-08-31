@@ -6,10 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "WeaponWidget.generated.h"
 
-
-/**
- * 
- */
 UCLASS()
 class BASE_API UWeaponWidget : public UUserWidget
 {
@@ -20,9 +16,11 @@ public:
 
     void SetScopeSize(float NewSize);
 
-    void ImageMove(float NewX, USkeletalMeshComponent* Object);
+    void ImageMove(float NewX, UStaticMeshComponent* Object);
 
     void UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo);
+
+    void SetTextureBasedOnGunType(int GunType, bool isAiming);
 
 protected:
     UPROPERTY(meta = (BindWidget))
@@ -33,4 +31,5 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     class UImage* ScopeCrossImage;
+
 };
