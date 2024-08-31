@@ -53,6 +53,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void LoadWeaponByName(FName WeaponName);
 
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void SetCurrentWeaponMeshVisibility(bool isVisible);
+
     void RemoveCurrentWeaponModel();
 
     // 키 입력 추가

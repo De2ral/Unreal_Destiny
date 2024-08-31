@@ -334,41 +334,44 @@ void UWeaponComponent::StartFiring()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
     UseAmmo();
-    if(!IsReloading)
+    if (!Character->isUltimate)
     {
-        if (!bIsFiring)
+        if (!IsReloading)
         {
-            bIsFiring = true;
+            if (!bIsFiring)
+            {
+                bIsFiring = true;
 
-            if (CurrentWeapon.AutoFire)
-            {
-                if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+                if (CurrentWeapon.AutoFire)
                 {
-                    FireInRange();
-                    GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::FireInRange, CurrentWeapon.FireRate, true);
+                    if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+                    {
+                        FireInRange();
+                        GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::FireInRange, CurrentWeapon.FireRate, true);
+                    }
+                    else
+                    {
+                        Fire(); // 첫 발사
+                        GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+                    }
+                    UE_LOG(LogTemp, Warning, TEXT("autofire"));
                 }
                 else
                 {
-                    Fire(); // 첫 발사
-                    GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+                    if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+                    {
+                        FireInRange();
+                    }
+                    else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
+                    {
+                        FireLauncher();
+                    }
+                    else
+                    {
+                        Fire(); // 단발 발사
+                    }
+                    UE_LOG(LogTemp, Warning, TEXT("onefire"));
                 }
-                UE_LOG(LogTemp, Warning, TEXT("autofire"));
-            }
-            else
-            {
-                if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
-                {
-                    FireInRange();
-                }
-                else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
-                {
-                    FireLauncher();
-                }
-                else
-                {
-                    Fire(); // 단발 발사
-                }
-                UE_LOG(LogTemp, Warning, TEXT("onefire"));
             }
         }
     }
@@ -390,9 +393,12 @@ void UWeaponComponent::StopFiring()
 
 void UWeaponComponent::StartAiming()
 {
-    UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
-    bIsAiming = true;
-    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+    if (!Character->isUltimate)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
+        bIsAiming = true;
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+    }
 }
 
 void UWeaponComponent::StopAiming()
@@ -715,6 +721,14 @@ void UWeaponComponent::LoadWeaponByName(FName WeaponName)
     {
         UE_LOG(LogTemp, Warning, TEXT("WeaponDataTable is null."));
     }
+}
+
+void UWeaponComponent::SetCurrentWeaponMeshVisibility(bool isVisible)
+{
+    if(CurrentSkeletalMeshComponent)
+        CurrentSkeletalMeshComponent->SetVisibility(isVisible);
+    if(CurrentStaticMeshComponent)
+        CurrentStaticMeshComponent->SetVisibility(isVisible);
 }
 
 void UWeaponComponent::RemoveCurrentWeaponModel()
