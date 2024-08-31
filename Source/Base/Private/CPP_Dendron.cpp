@@ -18,10 +18,11 @@ void ACPP_Dendron::BeginPlay()
 void ACPP_Dendron::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    if (bIsLineTraceActive)
-    {
-        PerformLineTrace();
-    }
+    
+    //if (bIsLineTraceActive)
+    //{
+    //    PerformLineTrace();
+    //}
     // else
     // {
     //     LastPoint = EndPoint;
