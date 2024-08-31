@@ -21,7 +21,6 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Warlock_Skill_Ultimate.h"
-#include "Titan_Skill_Grenade.h"
 #include "CarriableObject.h"
 
 
@@ -823,6 +822,13 @@ void ADestinyFPSBase::WarlockSkillLand()
 {
 	CameraShake(1.5f);
 	FVector ParticleSpawnLocation = TppMesh->GetSocketLocation(TEXT("GroundSocket"));
+
+	FVector Start = FVector(ParticleSpawnLocation.X, ParticleSpawnLocation.Y, 10000.0f);
+    FVector End = FVector(ParticleSpawnLocation.X, ParticleSpawnLocation.Y, -10000.0f);
+    FHitResult HitResult;
+    FCollisionQueryParams Params;
+    if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params))
+        ParticleSpawnLocation.Z = HitResult.Location.Z;
 	FRotator ParticleSpawnRotation = FRotator(0.f, 0.f, 0.f);
 	UGameplayStatics::SpawnEmitterAtLocation(
 		GetWorld(),
@@ -879,7 +885,7 @@ void ADestinyFPSBase::jump(const FInputActionValue& Value)
 	ACharacter::Jump();
 	UE_LOG(LogTemp, Warning, TEXT("jump")); 
 
-	if(PlayerClass == EPlayerClassEnum::Warlock)
+	if(PlayerClass == EPlayerClassEnum::WARLOCK)
 	{
 		if(GetCharacterMovement()->IsFalling())
 		{
@@ -893,7 +899,7 @@ void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
 {
 	ACharacter::StopJumping();
 
-	if(PlayerClass == EPlayerClassEnum::Warlock)
+	if(PlayerClass == EPlayerClassEnum::WARLOCK)
 	{
 		if(GetCharacterMovement()->IsFalling())
 		{
@@ -1006,6 +1012,8 @@ void ADestinyFPSBase::RightClickFunction(const FInputActionValue &Value)
 			}
 		}
 	}
+}
+
 void ADestinyFPSBase::Death()
 {
 	bIsPlayerAlive = false;

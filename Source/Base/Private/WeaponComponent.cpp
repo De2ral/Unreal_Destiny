@@ -10,7 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "FpsCppProjectile.h"
-#include "Titan_Skill_Grenade.h"
+#include "Grenade.h"
 
 #include "Camera/CameraShakeBase.h"
 #include "MyLegacyCameraShake.h"
@@ -260,10 +260,10 @@ void UWeaponComponent::FireLauncher()
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
-        ATitan_Skill_Grenade* Projectile = nullptr;
+        AGrenade* Projectile = nullptr;
         if(!CurrentWeapon.Linetracing)
         {
-		    Projectile = World->SpawnActor<ATitan_Skill_Grenade>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
+		    Projectile = World->SpawnActor<AGrenade>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
             Projectile->SetProjectile(true);
             Projectile->SetGrenadeDamage(100.0f);
         }

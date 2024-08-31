@@ -14,7 +14,7 @@ class ADestinyFPSBase;
 class UStaticMesh;
 class USkeletalMesh;
 class AFpsCppProjectile;
-class ATitan_Skill_Grenade;
+class AGrenade;
 
 //UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
