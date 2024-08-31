@@ -337,7 +337,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 	if (Input != nullptr)
 	{
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
-		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::PlayerUltimateColliderOnOff);
+		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::HPDamageTest);
 
 		if(bIsPlayerAlive)
 		{
@@ -1089,8 +1089,8 @@ void ADestinyFPSBase::TitanPunchCollisionEvents()
 		}
 	}
 }
-void ADestinyFPSBase::DeathRevive(const FInputActionValue &Value)
+void ADestinyFPSBase::HPDamageTest(const FInputActionValue &Value)
 {
-	if(HP > 0.0f) HP = 0.0f;
-	else if(HP <= 0.0f) HP = 100.0f;
+	if(HP > 0.0f) HP -= 10.0f;
+	else if(HP <= 0.0f) HP = MaxHp;
 }
