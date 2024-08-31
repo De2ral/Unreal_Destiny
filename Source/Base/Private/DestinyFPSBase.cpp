@@ -339,7 +339,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 	if (Input != nullptr)
 	{
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
-		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::PlayerUltimateColliderOnOff);
+		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::PlayerSkillColliderOnOff);
 
 		if(bIsPlayerAlive)
 		{
@@ -591,11 +591,13 @@ void ADestinyFPSBase::PlayerCarryingEnd()
 
 }
 
-void ADestinyFPSBase::PlayerUltimateColliderOnOff()
+void ADestinyFPSBase::PlayerSkillColliderOnOff()
 {
 	if(TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(false);
 	else if(!TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(true);
 
+	if(WarlockSkillCollider->GetGenerateOverlapEvents())WarlockSkillCollider->SetGenerateOverlapEvents(false);
+	else if(!WarlockSkillCollider->GetGenerateOverlapEvents())WarlockSkillCollider->SetGenerateOverlapEvents(true);
 }
 
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
