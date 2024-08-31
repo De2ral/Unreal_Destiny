@@ -250,9 +250,6 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(bIsPlayerAlive && HP <= 0.0f) Death();
-	else if (!bIsPlayerAlive && HP > 0.0f) Revive();
-
 	if (CurSkillCoolTime < SkillCoolTime)
 	{
 		CurSkillCoolTime += DeltaTime;
@@ -865,7 +862,7 @@ void ADestinyFPSBase::WarlockSkillTakeDamageAndHealPlayer(FVector Origin)
 					// 플레이어 클래스의 경우 체력 회복
 					ADestinyFPSBase* Player = Cast<ADestinyFPSBase>(Actor);
 					if (Player)
-						Player->TakeDamageDestinyPlayer(-WarlockSkillHealAmount);  // 체력 회복, ModifyHealth는 플레이어 클래스에 맞게 조정
+						UGameplayStatics::ApplyDamage(Player, -WarlockSkillHealAmount, GetInstigatorController(), this, nullptr);
 				}
 				else
 				{
@@ -1125,6 +1122,21 @@ void ADestinyFPSBase::TitanPunchCollisionEvents()
 		}
 	}
 }
+
+float ADestinyFPSBase::TakeDamage(float DamageAmount, FDamageEvent const &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
+{	
+    //if(!bCanTakeDamage) return 0.0f;
+    
+	float Damage = Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
+
+    HP -= (bIsInWarlockAura && DamageAmount > 0) ? (DamageAmount * 0.8) : DamageAmount;
+    
+	if(bIsPlayerAlive && HP <= 0.0f) Death();
+	else if (!bIsPlayerAlive && HP > 0.0f) Revive();
+
+    return Damage;
+}
+
 void ADestinyFPSBase::DeathRevive(const FInputActionValue &Value)
 {
 	if(HP > 0.0f) HP = 0.0f;

@@ -58,6 +58,9 @@ void AWarlock_Skill_Ultimate::BeginPlay()
         );
     }
 
+    FTimerHandle HealTimerHandle;
+	FTimerHandle DestroyTimerHandle;
+
 	GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &AWarlock_Skill_Ultimate::ApplyHealing, HealInterval, true);
 	GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &AWarlock_Skill_Ultimate::DestroySkill, HealInterval, true);
 }
@@ -79,8 +82,8 @@ void AWarlock_Skill_Ultimate::ApplyHealing()
         ADestinyFPSBase* Player = Cast<ADestinyFPSBase>(Actor);
         if (Player)
         {
-            Player->TakeDamageDestinyPlayer(-HealAmount);  // 체력 회복
-            Player->SetIsInWarlockAura(true);  // isInAura 값을 true로 설정
+            UGameplayStatics::ApplyDamage(Player, -HealAmount, GetInstigatorController(), this, nullptr);
+            Player->SetIsInWarlockAura(true);
         }
     }
 }

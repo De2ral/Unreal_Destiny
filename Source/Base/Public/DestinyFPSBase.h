@@ -350,8 +350,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsPlayerCarrying() {return bIsCarrying;}
 
-	UFUNCTION(BlueprintCallable)
-	void TakeDamageDestinyPlayer(float Value) { HP -= (bIsInWarlockAura && Value > 0) ? (Value * 0.8) : Value; }
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	virtual float TakeDamage(float DamageAmount, 
+    FDamageEvent const& DamageEvent, 
+    AController* EventInstigator, 
+    AActor* DamageCauser)override;
 
 	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
 	

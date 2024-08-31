@@ -41,9 +41,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	float lifeTime = 30.f;
 
-	class FTimerHandle HealTimerHandle;
-	class FTimerHandle DestroyTimerHandle;
-
 	void ApplyHealing();
 	void DestroySkill();
-}
+};
