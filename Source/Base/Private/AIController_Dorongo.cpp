@@ -31,8 +31,8 @@ void AAIController_Dorongo::OnPossess(APawn *InPawn)
 void AAIController_Dorongo::BeginPlay()
 {
     Super::BeginPlay();
-    UpdateRandomPlayerPawn();
-	FindClosestPlayer();
+    //UpdateRandomPlayerPawn();
+	//FindClosestPlayer();
     if(AIBehavior != nullptr)
 	{
 		RunBehaviorTree(AIBehavior);
@@ -99,7 +99,7 @@ void AAIController_Dorongo::HandleDeath()
 
 void AAIController_Dorongo::UpdateRandomPlayerPawn()
 {
-	SelectRandomPlayerPawn();
+	//SelectRandomPlayerPawn();
 }
 
 void AAIController_Dorongo::SelectRandomPlayerPawn()
