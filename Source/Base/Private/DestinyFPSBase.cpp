@@ -10,6 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -355,7 +356,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 	if (Input != nullptr)
 	{
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
-		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::PlayerCarryingEnd);
+		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::HPDamageTest);
 
 		if(bIsPlayerAlive)
 		{
@@ -620,6 +621,15 @@ void ADestinyFPSBase::MeleeAttack(const FInputActionValue& Value)
 		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 		SwitchToThirdPerson();
 	}
+}
+
+void ADestinyFPSBase::PlayerSkillColliderOnOff()
+{
+	if(TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(false);
+	else if(!TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(true);
+
+	if(WarlockSkillCollider->GetGenerateOverlapEvents())WarlockSkillCollider->SetGenerateOverlapEvents(false);
+	else if(!WarlockSkillCollider->GetGenerateOverlapEvents())WarlockSkillCollider->SetGenerateOverlapEvents(true);
 }
 
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
@@ -1210,8 +1220,8 @@ float ADestinyFPSBase::TakeDamage(float DamageAmount, FDamageEvent const &Damage
     return Damage;
 }
 
-void ADestinyFPSBase::DeathRevive(const FInputActionValue &Value)
+void ADestinyFPSBase::HPDamageTest(const FInputActionValue &Value)
 {
-	if(HP > 0.0f) HP = 0.0f;
-	else if(HP <= 0.0f) HP = 100.0f;
+	if(HP > 0.0f) HP -= 10.0f;
+	else if(HP <= 0.0f) HP = MaxHp;
 }

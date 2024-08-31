@@ -61,35 +61,43 @@ void UInventorySystem::BeginPlay()
 void UInventorySystem::AddWeaponToInventory()
 {	
 
-	if(WpnArrayIndex >= MaxInvenSize) return;
-
-	uint8 randomSeed;
-	randomSeed = FMath::RandRange(2,6);
-	FName PistolName;
+	uint8 randomSeed = FMath::RandRange(2, 6);
+	FName wpnName;
 	switch (randomSeed)
 	{
 	case 2:
-		PistolName = FName("Pistol1");
-		break;
+	    wpnName = FName("Pistol1");
+	    break;
 	case 3:
-		PistolName = FName("Pistol2");
-		break;
+	    wpnName = FName("Pistol2");
+	    break;
 	case 4:
-		PistolName = FName("Pistol3");
-		break;
+	    wpnName = FName("Pistol3");
+	    break;
 	case 5:
-		PistolName = FName("Rifle3");
-		break;
+	    wpnName = FName("Rifle3");
+	    break;
 	case 6:
-		PistolName = FName("Sniper3");
-		break;
+	    wpnName = FName("Sniper3");
+	    break;
 	default:
-		break;
+	    break;
 	}
-	WeaponArray[WpnArrayIndex].GunName = PistolName;
+
+	WeaponArray[WpnArrayIndex].GunName = wpnName;
+    float CurrentFireRate = WeaponArray[WpnArrayIndex].FireRate;
+    float CurrentGunDamage = WeaponArray[WpnArrayIndex].GunDamage;
+    float CurrentTotalDamage = (60.0f / CurrentFireRate) * CurrentGunDamage;
+    if (CurrentTotalDamage > MaxTotalRating)
+    {
+        MaxTotalRating = CurrentTotalDamage;
+    }
+	// 무기 생성 시 더 높은 공격력을 가지도록 설정
+	float NewGunDamage = MaxGunDamage + FMath::RandRange(1.0f, 10.0f); // 무기 데미지를 일정 범위 내에서 증가
+
+	WeaponArray[WpnArrayIndex].GunDamage = NewGunDamage;
+
+	// 무기 배열 인덱스 증가
 	WpnArrayIndex++;
 
-
 }
-
-

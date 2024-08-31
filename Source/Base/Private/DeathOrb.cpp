@@ -29,32 +29,6 @@ void ADeathOrb::ObjAction(ADestinyFPSBase* Player)
 
 }
 
-// void ADeathOrb::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
-// {
-// 	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
-// 	{
-// 		ADestinyFPSBase* APlayer = Cast<ADestinyFPSBase>(OtherActor);
-// 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - DeathOrb OverlapBegin"));
-//  		APlayer->bPlayerInteractable = true;
-// 		APlayer->MaxInteractTime = 180.0f;
-
-// 	}
-
-// }
-
-// void ADeathOrb::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex)
-// {
-
-// 	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
-// 	{
-// 		ADestinyFPSBase* APlayer = Cast<ADestinyFPSBase>(OtherActor);
-//  		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - DeathOrb OverlapEnd"));
-//  		APlayer->bPlayerInteractable = false;
-
-// 	}
-
-// }
-
 // Called every frame
 void ADeathOrb::Tick(float DeltaTime)
 {
