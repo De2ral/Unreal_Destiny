@@ -114,6 +114,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxInteractTime = 0.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float HP = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float MaxHp = 100.0f;
+
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsInteractComplete = false;
 
@@ -257,7 +263,7 @@ public:
 
 	void LeftClickFunction(const FInputActionValue& Value);
 	void RightClickFunction(const FInputActionValue& Value);
-	void DeathRevive(const FInputActionValue& Value);
+	void HPDamageTest(const FInputActionValue& Value);
 
 	void Death();
 	void Revive();
@@ -385,5 +391,4 @@ private:
 	bool bIsCarrying = false;
 	bool bIsInWarlockAura = false;
 
-	float HP = 100.0f;
 };
