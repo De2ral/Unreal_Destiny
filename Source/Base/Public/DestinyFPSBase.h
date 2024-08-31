@@ -327,6 +327,7 @@ public:
 	void TitanPunchCollisionEvents();
 	void PlayerCarryingStart(ACarriableObject* CarriableObject);
 	void PlayerCarryingEnd();
+	void PlayerUltimateColliderOnOff();
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetLastPlayerPos() {return LastPlayerPos;};

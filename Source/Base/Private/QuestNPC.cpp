@@ -46,10 +46,12 @@ void AQuestNPC::ObjAction(ADestinyFPSBase* Player)
 
 void AQuestNPC::ShowQuestUI()
 {
-	if (QuestUIInstance && !QuestUIInstance->IsInViewport())
-	{
-		QuestUIInstance->AddToViewport();
-	}
+	//if (QuestUIInstance && !QuestUIInstance->IsInViewport())
+	//{
+	//	QuestUIInstance->AddToViewport();
+	//}
+
+	QuestUIInstance->AddToViewport();
 }
 
 void AQuestNPC::HideQuestUI()

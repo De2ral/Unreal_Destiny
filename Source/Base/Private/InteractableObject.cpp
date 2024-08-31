@@ -2,6 +2,7 @@
 
 
 #include "InteractableObject.h"
+#include "Components/CapsuleComponent.h"
 #include "DestinyFPSBase.h"
 
 // Sets default values
@@ -30,28 +31,35 @@ void AInteractableObject::BeginPlay()
 
 void AInteractableObject::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
-	{
-		APlayer = Cast<ADestinyFPSBase>(OtherActor);
-		if(APlayer->GetIsPlayerAlive())
-		{
-			APlayer->bPlayerInteractable = true;
-			APlayer->MaxInteractTime = ObjInteractTime;
-		}
-		//GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - DeathOrb OverlapBegin"));
-	}	
-	
+    if (OtherActor->ActorHasTag("DestinyPlayer"))
+    {
+		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Yellow,TEXT("isPlayer"));
+        APlayer = Cast<ADestinyFPSBase>(OtherActor);
 
+        if (APlayer->GetIsPlayerAlive())
+        {
+            APlayer->bPlayerInteractable = true;
+            APlayer->MaxInteractTime = ObjInteractTime;
+        }
+        
+    }
 }
 
 void AInteractableObject::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex)
 {
-	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
-	{
-		APlayer = Cast<ADestinyFPSBase>(OtherActor);
- 		//GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - DeathOrb OverlapEnd"));
- 		APlayer->bPlayerInteractable = false;
+	
+	if (OtherActor->ActorHasTag("DestinyPlayer"))
+    {
+		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Yellow,TEXT("isPlayer"));
+        APlayer = Cast<ADestinyFPSBase>(OtherActor);
+	
+	    if (APlayer->GetIsPlayerAlive())
+	    {
+	        APlayer->bPlayerInteractable = false;
+	    }
+	
 	}
+	
 }
 
 

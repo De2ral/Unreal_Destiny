@@ -10,6 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -336,7 +337,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 	if (Input != nullptr)
 	{
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
-		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::PlayerCarryingEnd);
+		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::PlayerUltimateColliderOnOff);
 
 		if(bIsPlayerAlive)
 		{
@@ -585,6 +586,13 @@ void ADestinyFPSBase::PlayerCarryingEnd()
 
         
     }
+
+}
+
+void ADestinyFPSBase::PlayerUltimateColliderOnOff()
+{
+	if(TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(false);
+	else if(!TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(true);
 
 }
 
