@@ -101,6 +101,6 @@ void AWarlock_Melee_Fireball::PlayExlodeParticle()
 		ExplodeParticle,
 		ParticleSpawnLocation,
 		ParticleSpawnRotation,
-		(FVector)((1.5F))
+		(FVector)((0.5F))
 	);
 }

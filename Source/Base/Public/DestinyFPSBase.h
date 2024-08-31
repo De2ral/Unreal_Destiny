@@ -338,6 +338,9 @@ public:
 	void WarlockSkillEnd();
 
 	UFUNCTION(BlueprintCallable)
+	void WarlockMeleeStart(FVector CameraLocation);
+
+	UFUNCTION(BlueprintCallable)
 	void WarlockMeleeFire();
 
 	UFUNCTION(BlueprintCallable)

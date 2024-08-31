@@ -931,22 +931,27 @@ void ADestinyFPSBase::WarlockSkillEnd()
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
 }
 
+void ADestinyFPSBase::WarlockMeleeStart(FVector CameraLocation)
+{
+	TppCamera->SetRelativeLocation(CameraLocation);
+}
+
 void ADestinyFPSBase::WarlockMeleeFire()
 {
 	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;  // 플레이어 앞에서 스폰
 
     TArray<float> Angles = { -30.f, -15.f, 0.f, 15.f, 30.f };
 
-    APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
+    /*APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
     if (!PlayerController) return;
 
 	ADestinyFPSBase* Player = Cast<ADestinyFPSBase>(PlayerController->GetPawn());
     if (!Player) return;
 
 	UCameraComponent* CameraComponent = Player->FindComponentByClass<UCameraComponent>();
-    if (!CameraComponent) return;
+    if (!CameraComponent) return;*/
 
-	FVector CameraForward = CameraComponent->GetForwardVector();
+	FVector CameraForward = FppCamera->GetForwardVector();
 
     for (float Angle : Angles)
     {
