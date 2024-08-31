@@ -73,6 +73,9 @@ public:
 	class UInputAction* GrenadeAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* MeleeAttackAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* UltimateAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -155,7 +158,7 @@ public:
 	float GrenadeCoolTime = 3.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float UltimateCoolTime = 25.f;
+	float UltimateCoolTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float UltimateDuration = 20.f;
@@ -164,7 +167,7 @@ public:
 	float SmashCoolTime = 7.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MeleeAttackCoolTime = 2.f;
+	float MeleeAttackCoolTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TitanUltimateDamage = 100.f;
@@ -232,6 +235,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<class AWarlock_Skill_Ultimate> WarlockUltimateClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class AWarlock_Melee_Fireball> WarlockFireballClass;
+
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
 
@@ -244,10 +250,14 @@ public:
 	AActor* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
+
 	void Move(const FInputActionValue& Value);
+
 	void Look(const FInputActionValue& Value);
 	void Skill(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
+	void MeleeAttack(const FInputActionValue& Value);
+
 	void jump(const FInputActionValue& Value);
 	void jumpEnd(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
@@ -328,6 +338,12 @@ public:
 	void WarlockSkillEnd();
 
 	UFUNCTION(BlueprintCallable)
+	void WarlockMeleeFire();
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockMeleeEnd();
+
+	UFUNCTION(BlueprintCallable)
 	void WarlockUltimateStart(FVector CameraLocation);
 
 	UFUNCTION(BlueprintCallable)
@@ -368,10 +384,10 @@ public:
 private:
 	float CurSkillCoolTime = SkillCoolTime;
 	float CurGrenadeCoolTime = GrenadeCoolTime;
-	float CurUltimateCoolTime = UltimateCoolTime;
+	float CurUltimateCoolTime;
 	float CurUltimateDuration = UltimateDuration;
 	float CurSmashCoolTime = SmashCoolTime;
-	float CurMeleeAttackCoolTime = MeleeAttackCoolTime;
+	float CurMeleeAttackCoolTime;
 
 	bool isTitanPunch = false;
 	bool isWarlockSkill = false;

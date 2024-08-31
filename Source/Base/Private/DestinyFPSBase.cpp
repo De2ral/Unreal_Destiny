@@ -21,6 +21,7 @@
 #include "MyLegacyCameraShake.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Warlock_Melee_Fireball.h"
 #include "Warlock_Skill_Ultimate.h"
 #include "CarriableObject.h"
 
@@ -187,6 +188,7 @@ void ADestinyFPSBase::SetClassValue()
 	{
 		case EPlayerClassEnum::HUNTER:
 			{
+				// Set Character Mesh & Anim Blueprint by Class
 				ConstructorHelpers::FObjectFinder<USkeletalMesh> HunterMeshAsset(
 					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Hunter/Meshes/Genji_Street_Runner.Genji_Street_Runner'"));
 				if(HunterMeshAsset.Succeeded())
@@ -201,11 +203,15 @@ void ADestinyFPSBase::SetClassValue()
 
 				// Set Character Movement by Player Class
 				this->JumpMaxCount = 2;
+
+				// Set Character Skill Value by Player Class
+				
 			}
 		break;
 
 		case EPlayerClassEnum::TITAN:
 			{
+				// Set Character Mesh & Anim Blueprint by Class
 				ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
 					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Titan/Meshes/Omega_Knight.Omega_Knight'"));
 				if(TitanMeshAsset.Succeeded())
@@ -218,11 +224,16 @@ void ADestinyFPSBase::SetClassValue()
 
 				// Set Character Movement by Player Class
 				this->JumpMaxCount = 1;
+
+				// Set Character Skill Value by Player Class
+				MeleeAttackCoolTime = 8.f;
+				UltimateCoolTime = 40.f;
 			}
 		break;
 
 		case EPlayerClassEnum::WARLOCK:
 			{
+				// Set Character Mesh & Anim Blueprint by Class
 				ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
 					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Warlock/Meshes/Warlock.Warlock'"));
 				if(TitanMeshAsset.Succeeded())
@@ -236,6 +247,10 @@ void ADestinyFPSBase::SetClassValue()
 				// Set Character Movement by Player Class
 				this->JumpMaxCount = 1;
 				GetCharacterMovement()->JumpZVelocity = 800.0f;
+
+				// Set Character Skill Value by Player Class
+				MeleeAttackCoolTime = 10.f;
+				UltimateCoolTime = 60.f;
 			}
 		break;
 
@@ -245,6 +260,8 @@ void ADestinyFPSBase::SetClassValue()
 			}
 		break;
 	}
+	CurMeleeAttackCoolTime = MeleeAttackCoolTime;
+	CurUltimateCoolTime = UltimateCoolTime;
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
@@ -344,9 +361,12 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		if(bIsPlayerAlive)
 		{
 			Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
+
 			Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
 			Input->BindAction(GrenadeAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Grenade);
+			Input->BindAction(MeleeAttackAction, ETriggerEvent::Started, this, &ADestinyFPSBase::MeleeAttack);
 			Input->BindAction(UltimateAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Ultimate);
+			
 			Input->BindAction(JumpAction, ETriggerEvent::Started, this, &ADestinyFPSBase::jump);
 			Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::jumpEnd);
 
@@ -591,6 +611,18 @@ void ADestinyFPSBase::PlayerCarryingEnd()
 
 }
 
+void ADestinyFPSBase::MeleeAttack(const FInputActionValue& Value)
+{
+	if (CurMeleeAttackCoolTime >= MeleeAttackCoolTime)
+	{
+		CurUltimateCoolTime = 0.f;
+		CurUltimateDuration = 0.f;
+		isMeleeAttack = true;
+		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+		SwitchToThirdPerson();
+	}
+}
+
 void ADestinyFPSBase::PlayerSkillColliderOnOff()
 {
 	if(TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(false);
@@ -611,6 +643,7 @@ void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 			CurUltimateCoolTime = 0.f;
 			CurUltimateDuration = 0.f;
 			isUltimate = true;
+			MeleeAttackCoolTime = 2.f;
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
 			// Titan Ultimate Start
@@ -898,6 +931,45 @@ void ADestinyFPSBase::WarlockSkillEnd()
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
 }
 
+void ADestinyFPSBase::WarlockMeleeFire()
+{
+	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;  // 플레이어 앞에서 스폰
+
+    TArray<float> Angles = { -30.f, -15.f, 0.f, 15.f, 30.f };
+
+    APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
+    if (!PlayerController) return;
+
+	ADestinyFPSBase* Player = Cast<ADestinyFPSBase>(PlayerController->GetPawn());
+    if (!Player) return;
+
+	UCameraComponent* CameraComponent = Player->FindComponentByClass<UCameraComponent>();
+    if (!CameraComponent) return;
+
+	FVector CameraForward = CameraComponent->GetForwardVector();
+
+    for (float Angle : Angles)
+    {
+        FRotator ShootRotation = CameraForward.Rotation();
+        ShootRotation.Yaw += Angle;
+
+        AWarlock_Melee_Fireball* Fireball = GetWorld()->SpawnActor<AWarlock_Melee_Fireball>(WarlockFireballClass, SpawnLocation, ShootRotation);
+
+        if (Fireball)
+        {
+            FVector ShootDirection = ShootRotation.Vector(); 
+            Fireball->SetFireballDirection(ShootDirection);
+        }
+    }
+}
+
+void ADestinyFPSBase::WarlockMeleeEnd()
+{
+	isMeleeAttack = false;
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
+}
+
 void ADestinyFPSBase::WarlockUltimateStart(FVector CameraLocation)
 {
 	TppCamera->SetRelativeLocation(CameraLocation);
@@ -927,6 +999,7 @@ void ADestinyFPSBase::EndUltimate()
 	isUltimate = false;
 	isMeleeAttack = false;
 	isSmash = false;
+	MeleeAttackCoolTime = 8.f;
 	SwitchToFirstPerson();
 	WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 }
