@@ -73,14 +73,37 @@ public:
 	void AddCurrAmmo(int value) { CurrAmmo += value; }
 
 	UFUNCTION()
+	void MinusCurrAmmo(int value) { CurrAmmo -= value; }
+
+	UFUNCTION()
 	void AddCurrSpecialAmmo(int value) { CurrSpecialAmmo += value; }
+
+	UFUNCTION()
+	void MinusCurrSpecialAmmo(int value) { CurrSpecialAmmo -= value; }
 
 	UFUNCTION()
 	void AddCurrRefAmmo(int value) { CurrRefAmmo += value; }
 
 	UFUNCTION()
+	void MinusCurrRefAmmo(int value) { CurrRefAmmo -= value; }
+
+	UFUNCTION()
+	int GetCurrAmmo() { return CurrAmmo; }
+
+	UFUNCTION()
+	int GetCurrSpecialAmmo() { return CurrSpecialAmmo; }
+
+	UFUNCTION()
+	int GetCurrRefAmmo() { return CurrRefAmmo; }
+
+	UFUNCTION()
+	float GetWeaponMaxRating() { return MaxWeaponRating; }
+
+	UFUNCTION()
+	void SetWeaponMaxRating(float value) { MaxWeaponRating = value; }
+
+	UFUNCTION()
 	void AddWeaponToInventory();
-	
 
 	bool bIsAmmoFull() {return (CurrAmmo > MaxAmmo) ? true : false; }
 
@@ -91,8 +114,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FGunInfo> WeaponArray;
 
-	UPROPERTY(BlueprintReadWrite)
-	TArray<FGunInfo> EQWeaponArray;
+	//UPROPERTY(BlueprintReadWrite)
+	//TArray<FGunInfo> EQWeaponArray;
 
 
 
@@ -100,5 +123,7 @@ private:
 	ADestinyFPSBase* Character;
 
 	void InvenOpenClose();
+	float MaxWeaponRating = 0.0f;
+
 		
 };

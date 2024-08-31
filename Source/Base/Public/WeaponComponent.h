@@ -132,8 +132,18 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetSlot3Weapon(FName inweapon);
 
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    FName GetSlot1Weapon() {return Slot1Weapon;}
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    FName GetSlot2Weapon() {return Slot2Weapon;}
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    FName GetSlot3Weapon() {return Slot3Weapon;}
+
     int CurrentAmmo();
     int StoredAmmo();
+
+    UPROPERTY(BlueprintReadWrite)
+	TArray<FGunInfo> EQWeaponArray;
 
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
