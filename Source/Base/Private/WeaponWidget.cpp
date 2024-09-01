@@ -9,8 +9,9 @@ void UWeaponWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    ScopeCrossImage->SetVisibility(ESlateVisibility::Hidden);
     BaseCrossImage->SetVisibility(ESlateVisibility::Visible);
+    ScopeCrossImage->SetVisibility(ESlateVisibility::Hidden);
+    ScopeCrossImage2->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UWeaponWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
@@ -25,31 +26,57 @@ void UWeaponWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
 
 void UWeaponWidget::SetScopeSize(float NewSize)
 {
-    if (ScopeCrossImage)
+    if (ScopeCrossImage || ScopeCrossImage2)
     {
        ScopeCrossImage->SetRenderScale(FVector2D(NewSize, NewSize));
+       ScopeCrossImage2->SetRenderScale(FVector2D(NewSize, NewSize));
     }
 }
 
 
-void UWeaponWidget::ImageMove(float NewX, UStaticMeshComponent* Object)
+void UWeaponWidget::ImageMove(float NewX, UStaticMeshComponent* Object, bool IsRifle)
 {
     FVector2D TempPosition = FVector2D(NewX,0.5f);
-    if (ScopeCrossImage && Object)
+    if ((ScopeCrossImage || ScopeCrossImage2) && Object)
     {
         ScopeCrossImage->SetRenderTranslation(TempPosition);
-        if(TempPosition.X > 400.0f)
+
+        if(IsRifle)
         {
-            ScopeCrossImage->SetVisibility(ESlateVisibility::Hidden);
-            BaseCrossImage->SetVisibility(ESlateVisibility::Visible);
-            Object->SetVisibility(true);
+            if(TempPosition.X > 400.0f)
+            {
+                BaseCrossImage->SetVisibility(ESlateVisibility::Visible);
+                ScopeCrossImage->SetVisibility(ESlateVisibility::Hidden);
+                ScopeCrossImage2->SetVisibility(ESlateVisibility::Hidden);
+                Object->SetVisibility(true);
+            }
+            else
+            {
+                BaseCrossImage->SetVisibility(ESlateVisibility::Hidden);
+                ScopeCrossImage->SetVisibility(ESlateVisibility::Visible);
+                ScopeCrossImage2->SetVisibility(ESlateVisibility::Hidden);
+                Object->SetVisibility(false);
+            }
         }
         else
         {
-            ScopeCrossImage->SetVisibility(ESlateVisibility::Visible);
-            BaseCrossImage->SetVisibility(ESlateVisibility::Hidden);
-            Object->SetVisibility(false);
+            if(TempPosition.X > 400.0f)
+            {
+                BaseCrossImage->SetVisibility(ESlateVisibility::Visible);
+                ScopeCrossImage->SetVisibility(ESlateVisibility::Hidden);
+                ScopeCrossImage2->SetVisibility(ESlateVisibility::Hidden);
+                Object->SetVisibility(true);
+            }
+            else
+            {
+                BaseCrossImage->SetVisibility(ESlateVisibility::Hidden);
+                ScopeCrossImage->SetVisibility(ESlateVisibility::Hidden);
+                ScopeCrossImage2->SetVisibility(ESlateVisibility::Visible);
+                Object->SetVisibility(false);
+            }
         }
+
+        
     }
 
 }

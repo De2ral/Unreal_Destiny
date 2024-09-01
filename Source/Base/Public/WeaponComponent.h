@@ -14,7 +14,8 @@ class ADestinyFPSBase;
 class UStaticMesh;
 class USkeletalMesh;
 class AFpsCppProjectile;
-class AGrenade;
+class ATitan_Skill_Grenade;
+
 
 //UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -53,9 +54,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void LoadWeaponByName(FName WeaponName);
 
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    void SetCurrentWeaponMeshVisibility(bool isVisible);
-
     void RemoveCurrentWeaponModel();
 
     // 키 입력 추가
@@ -74,7 +72,14 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
+
+
     
+    //UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Weapon")
+	//float DamageAmount;
+
+  
+
 protected:
     virtual void BeginPlay() override;
 
@@ -135,21 +140,18 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetSlot3Weapon(FName inweapon);
 
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    FName GetSlot1Weapon() {return Slot1Weapon;}
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    FName GetSlot2Weapon() {return Slot2Weapon;}
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    FName GetSlot3Weapon() {return Slot3Weapon;}
-
     int CurrentAmmo();
     int StoredAmmo();
 
-    UPROPERTY(BlueprintReadWrite)
-	TArray<FGunInfo> EQWeaponArray;
+    void ChangeGunPose(int inbool);
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
+    bool bIsAiming;
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFire();
     
 private:
     ADestinyFPSBase* Character;
@@ -171,7 +173,7 @@ private:
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
-    bool bIsAiming = false;
+   
     bool bIsFiring = false;                
 
     FVector DefaultOffset;
@@ -190,4 +192,11 @@ private:
     float CurrentScopeX = 1.0f;
 
     bool IsReloading = false;
+
+    UParticleSystem* PistolFlash;
+    UParticleSystem* RifleFlash;
+    UParticleSystem* SniperFlash;
+    UParticleSystem* LauncherFlash;
+    
+    UParticleSystem* HitFlash;
 };

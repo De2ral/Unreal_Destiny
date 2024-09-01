@@ -9,12 +9,14 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class UNiagaraSystem;
 
 UCLASS(config=Game)
 class AFpsCppProjectile : public AActor
 {
 	GENERATED_BODY()
 
+public:
 	/** Sphere collision component */
 	UPROPERTY(VisibleDefaultsOnly, Category=Projectile)
 	USphereComponent* CollisionComp;
@@ -29,30 +31,49 @@ class AFpsCppProjectile : public AActor
 public:
 	AFpsCppProjectile();
 
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Tick(float DeltaTime) override;
+
 	void FireInDirection(const FVector& ShootDirection);
 
 	void SetProjectile(UStaticMesh* NewMesh, float speed, float damage);
 
 	void SetProjectileMesh(UStaticMesh* NewMesh);
 
+	void AttachTrailEffect(bool isRifle);
+
 	/** called when projectile hits something */
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	//UFUNCTION()
-    //void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
 
 	UFUNCTION()
     void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	/** Returns CollisionComp subobject **/
 	USphereComponent* GetCollisionComp() const { return CollisionComp; }
-	/** Returns ProjectileMovement subobject **/
+
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
+	void SetbExplodeOnImpact(bool inbool) {bExplodeOnImpact = inbool;}
 
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 private:
 	float Damage;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float ExplosionRadius = 1000.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	bool bExplodeOnImpact = false;
+
+	UParticleSystem* HitFlash;
+	UParticleSystem* HitFlash_Launcher;
+
+	FTimerHandle TrailTimerHandle;
+	UNiagaraSystem* TrailEffect;
+
+	UNiagaraSystem* TrailEffect_Launcher;
 };
 
