@@ -38,16 +38,16 @@ void AAIController_Kallari::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);	
+    //APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);	
     
-	GetBlackboardComponent()->SetValueAsVector(TEXT("TargetLocation"), PlayerPawn->GetActorLocation());		
+	//GetBlackboardComponent()->SetValueAsVector(TEXT("TargetLocation"), PlayerPawn->GetActorLocation());		
 
-	if (GetPawn()->GetDistanceTo(PlayerPawn) <= 300)
-	{
-		GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), true);
-	}
-	else
-		GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), false);
+	//if (GetPawn()->GetDistanceTo(PlayerPawn) <= 300)
+	//{
+	//	GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), true);
+	//}
+	//else
+	//	GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), false);
 }
 
 void AAIController_Kallari::SetBlackboardValue(const FName &KeyName, bool Value)

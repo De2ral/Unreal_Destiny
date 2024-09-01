@@ -12,13 +12,14 @@
 #include "DestinyFPSBase.generated.h"
 
 class UCharacterMovementComponent;
+class ACarriableObject;
 
 UENUM(BlueprintType)
 enum class EPlayerClassEnum : uint8
 {
-	Hunter UMETA(DisplayName = "Hunter"),
-	Warlock UMETA(DisplayName = "Warlock"),
-	Titan UMETA(DisplayName = "Titan")
+	HUNTER UMETA(DisplayName = "Hunter"),
+	TITAN UMETA(DisplayName = "Titan"),
+	WARLOCK UMETA(DisplayName = "Warlock")
 };
 
 UCLASS()
@@ -41,6 +42,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent* TppSpringArm;
 
@@ -50,11 +53,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* TppCamera;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* FppMesh;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* TppMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* SpearMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputMappingContext* DefaultMappingContext;
@@ -70,6 +76,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* GrenadeAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* MeleeAttackAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* UltimateAction;
@@ -90,6 +99,12 @@ public:
 	class UInputAction* InventoryAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* LeftClickAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UInputAction* RightClickAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* DeathReviveAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -107,6 +122,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxInteractTime = 0.0f;
 
+	UPROPERTY(Replicated,EditDefaultsOnly, BlueprintReadOnly)
+	float HP = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float MaxHp = 100.0f;
+
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsInteractComplete = false;
 
@@ -121,16 +142,97 @@ public:
 
 	// Skill Variable
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool isShield = false;
+	bool isSkill = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isGrenade = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isUltimate = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isSmash = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isMeleeAttack = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SkillCoolTime = 3.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GrenadeCoolTime = 3.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float UltimateCoolTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float UltimateDuration = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SmashCoolTime = 7.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MeleeAttackCoolTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TitanUltimateDamage = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TitanPunchDamage = 75.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxSpawnWarlockUltimateDistance = 3000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WarlockSkillDamage = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WarlockSkillHealAmount = 120.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WarlockSkillRadius = 200.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HunterUltimateAttackDamage = 40.f;
+
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* HunterComboMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* TitanSmashCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* TitanPunchCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* TitanPunchDamageCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
+	class USphereComponent* WarlockSkillCollider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanPunchStartParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanPunchParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanUltimateSmashParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanUltimateFistParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanUltimateLaunchParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* TitanUltimateTrailParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* WarlockSkillStartParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* WarlockSkillLandParticle;
 
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
@@ -139,7 +241,13 @@ public:
     UHUDWidget* HUDWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-	TSubclassOf<class ATitan_Skill_Grenade> GrenadeClass;
+	TSubclassOf<class AGrenade> GrenadeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class AWarlock_Skill_Ultimate> WarlockUltimateClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class AWarlock_Melee_Fireball> WarlockFireballClass;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
@@ -153,10 +261,14 @@ public:
 	AActor* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
+
 	void Move(const FInputActionValue& Value);
+
 	void Look(const FInputActionValue& Value);
 	void Skill(const FInputActionValue& Value);
 	void Grenade(const FInputActionValue& Value);
+	void MeleeAttack(const FInputActionValue& Value);
+
 	void jump(const FInputActionValue& Value);
 	void jumpEnd(const FInputActionValue& Value);
 	void Ultimate(const FInputActionValue& Value);
@@ -170,14 +282,18 @@ public:
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
 
-	void DeathRevive(const FInputActionValue& Value);
+	void LeftClickFunction(const FInputActionValue& Value);
+	void RightClickFunction(const FInputActionValue& Value);
+	void HPDamageTest(const FInputActionValue& Value);
 
 	void Death();
-
 	void Revive();
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
+
+	UPROPERTY(EditAnyWhere)
+	UStaticMeshComponent* CarriedMeshComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasRifle;
@@ -187,21 +303,135 @@ public:
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
 
-	void Shield();
 	void Throw();
+	void EndUltimate();
 
+	void CheckStartWarlockUltimate();
+	void WarlockSkillTakeDamageAndHealPlayer(FVector Origin);
+	
+	UFUNCTION(BlueprintCallable)
+	void SpawnShield();
+
+	UFUNCTION(BlueprintCallable)
+	void EndShield();
+
+	UFUNCTION(BlueprintCallable)
+	void CameraShake(float Scale);
+
+	UFUNCTION(BlueprintCallable)
+	void TitanMeleeAttackStart(float ZDirection, float LaunchStrength);
+
+	UFUNCTION(BlueprintCallable)
+	void TitanMeleeAttackEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void TitanSmashStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void TitanSmashTop(float ZDirection, float LaunchStrength, float GravityScale);
+
+	UFUNCTION(BlueprintCallable)
+	void TitanSmashDown();
+
+	UFUNCTION(BlueprintCallable)
+	void TitanSmashEnd(float DelayTime);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockSkillStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockSkillFall(float ZDirection, float LaunchStrength, float GravityScale);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockSkillLand();
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockSkillEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockMeleeStart(FVector CameraLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockMeleeFire();
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockMeleeEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockUltimateStart(FVector CameraLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockUltimateCast();
+
+	UFUNCTION(BlueprintCallable)
+	void WarlockUltimateEnd();
+
+	UFUNCTION(BlueprintCallable)
 	void SwitchToFirstPerson();
+
+	UFUNCTION(BlueprintCallable)
 	void SwitchToThirdPerson();
+
+	void SetClassValue();
+	void TitanPunchCollisionEvents();
+	void PlayerCarryingStart(ACarriableObject* CarriableObject);
+	void PlayerCarryingEnd();
+	void PlayerSkillColliderOnOff();
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetLastPlayerPos() {return LastPlayerPos;};
 
 	UFUNCTION(BlueprintCallable)
 	bool GetIsPlayerAlive() {return bIsPlayerAlive;}
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsPlayerCarrying() {return bIsCarrying;}
+
+	UFUNCTION(BlueprintCallable, Category = "HP")
+	virtual float TakeDamage(float DamageAmount, 
+    FDamageEvent const& DamageEvent, 
+    AController* EventInstigator, 
+    AActor* DamageCauser)override;
+
+	UFUNCTION()
+    void OnSpearOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+                             bool bFromSweep, const FHitResult& SweepResult);
+
+	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
+
+	void PerformComboAttack();
+	void ResetCombo();
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
 	float CurGrenadeCoolTime = GrenadeCoolTime;
+	float CurUltimateCoolTime;
+	float CurUltimateDuration = UltimateDuration;
+	float CurSmashCoolTime = SmashCoolTime;
+	float CurMeleeAttackCoolTime;
+	
+	float CurComboAttackDelay = 0.f;
+	float ComboAttackDelay = 0.4f;
+
+	bool isTitanPunch = false;
+	bool isWarlockSkill = false;
+
+	USkeletalMesh* HunterMesh;
+	USkeletalMesh* TitanMesh;
+	USkeletalMesh* WarlockMesh;
+
+	UStaticMesh* HunterSpearMesh;
+
+	TSubclassOf<UAnimInstance> HunterAnimInstanceClass;
+	TSubclassOf<UAnimInstance> TitanAnimInstanceClass;
+	TSubclassOf<UAnimInstance> WarlockAnimInstanceClass;
+
+	USkeletalMesh* SelectedMesh = nullptr;
+	TSubclassOf<UAnimInstance> SelectedAnimInstanceClass = nullptr;
+
+	FVector WarlockUltimateSpawnLocation;
+	
 	int jumpCount = 0;
 	float DefaultCapsuleHeight;
     float SlideCapsuleHeight;
@@ -209,6 +439,12 @@ private:
 	FVector LastPlayerPos;
 	float PosTickCoolTime = 400.0f;
 	bool bIsPlayerAlive = true;
+	bool bIsCarrying = false;
+	bool bIsInWarlockAura = false;
 
-	float HP = 100.0f;
+	int32 HunterComboStage;
+	bool bIsHunterAttacking;
+	bool bHasNextComboQueued;
+	float ComboInputWindow;
+	FTimerHandle ComboResetTimer;
 };
