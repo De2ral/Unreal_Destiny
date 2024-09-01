@@ -18,6 +18,10 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 
+#include "Net/UnrealNetwork.h"
+
+
+
 #include "Kismet/GameplayStatics.h"
 
 UWeaponComponent::UWeaponComponent()
@@ -66,7 +70,7 @@ void UWeaponComponent::BeginPlay()
     if (PlayerCharacter != nullptr)
     {
         Slot1Weapon = FName(TEXT("Rifle1"));
-        Slot2Weapon = FName(TEXT("Shotgun1"));
+        Slot2Weapon = FName(TEXT("Pistol1"));
         Slot3Weapon = FName(TEXT("Launcher1"));
 
         EquipWeapon1();
@@ -82,7 +86,9 @@ void UWeaponComponent::BeginPlay()
 
 void UWeaponComponent::Fire()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Fire"));
+    if (GetOwner()->HasAuthority())  // 서버에서 실행되는지 확인
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Fire"));
 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -143,7 +149,7 @@ void UWeaponComponent::Fire()
 		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
-        if (FireAnimation != nullptr && !bIsAiming)
+        if (FireAnimation != nullptr && !bIsAiming && (CurrentWeapon.GunType == GunTypeList::RIFLE))
 	    {
 	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
 	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
@@ -181,7 +187,26 @@ void UWeaponComponent::Fire()
             Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
         }
 	}
+    }
+    else
+    {
+        ServerFire();  // 클라이언트에서 호출 시 서버로 전달
+    }
+
+
+    
 }
+
+void UWeaponComponent::ServerFire_Implementation()
+{
+    Fire();
+}
+
+bool UWeaponComponent::ServerFire_Validate()
+{
+    return true;  // 보통 추가 검증이 필요할 수 있음
+}
+
 
 void UWeaponComponent::FireInRange()
 {

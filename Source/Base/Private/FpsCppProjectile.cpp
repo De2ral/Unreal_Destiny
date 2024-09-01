@@ -10,10 +10,21 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 
+#include "Net/UnrealNetwork.h" 
+
+
 #include "Kismet/GameplayStatics.h"
 
 AFpsCppProjectile::AFpsCppProjectile() 
 {
+    PrimaryActorTick.bCanEverTick = true;
+
+    // 네트워크 복제 설정
+    bReplicates = true; 
+    SetReplicateMovement(true);
+
+
+
 	// Use a sphere as a simple collision representation
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	CollisionComp->InitSphereRadius(5.0f);
@@ -32,7 +43,7 @@ AFpsCppProjectile::AFpsCppProjectile()
 	// Players can't walk on it
 	//CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	//CollisionComp->CanCharacterStepUpOn = ECB_No;
-
+    CollisionComp->SetIsReplicated(true); // 콜리전 컴포넌트 복제 설정
 	// Set as root component
 	RootComponent = CollisionComp;
 
@@ -49,8 +60,11 @@ AFpsCppProjectile::AFpsCppProjectile()
 	InitialLifeSpan = 10.0f;
 
 	// 메쉬 컴포넌트 생성 및 설정
+
+
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
 	Mesh->SetupAttachment(RootComponent);
+    Mesh->SetIsReplicated(true); // 메쉬 컴포넌트도 복제되도록 설정
 
 	// 메쉬의 충돌 설정을 비활성화
 	//Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -89,6 +103,8 @@ AFpsCppProjectile::AFpsCppProjectile()
     {
         TrailEffect_Launcher = TrailNiagaraAsset1.Object;
     }
+
+
 }
 
 void AFpsCppProjectile::BeginPlay()
@@ -217,4 +233,15 @@ void AFpsCppProjectile::AttachTrailEffect(bool isRifle)
             TrailNiagaraComponent->SetRelativeScale3D(FVector(2.0f, 0.25f, 0.25f)); // 크기 조절 (옵션)
         }
     }
+}
+
+void AFpsCppProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    // Mesh 컴포넌트의 복제 설정
+    //DOREPLIFETIME(AFpsCppProjectile, Mesh);
+
+    // 필요시 다른 변수도 복제 설정 가능
+    //DOREPLIFETIME(AFpsCppProjectile, Damage);
 }

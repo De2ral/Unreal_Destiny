@@ -149,6 +149,9 @@ public:
     bool bIsAiming;
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFire();
     
 private:
     ADestinyFPSBase* Character;

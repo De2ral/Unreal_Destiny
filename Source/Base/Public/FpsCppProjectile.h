@@ -56,6 +56,8 @@ public:
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
 	void SetbExplodeOnImpact(bool inbool) {bExplodeOnImpact = inbool;}
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 private:
 	float Damage;
