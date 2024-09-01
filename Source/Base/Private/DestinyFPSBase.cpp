@@ -165,7 +165,8 @@ ADestinyFPSBase::ADestinyFPSBase()
 	bHasNextComboQueued = false;
 	ComboInputWindow = 0.6f;
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> HunterMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/ThirdPerson/Characters/Hunter/Animations/Ultimate_Attack.Ultimate_Attack'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> HunterMontageAsset(
+		TEXT("/Script/Engine.AnimMontage'/Game/ThirdPerson/Characters/Hunter/Animations/Ultimate_Attack.Ultimate_Attack'"));
     if (HunterMontageAsset.Succeeded())
         HunterComboMontage = HunterMontageAsset.Object;
 }

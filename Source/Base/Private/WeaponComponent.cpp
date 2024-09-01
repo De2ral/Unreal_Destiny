@@ -397,39 +397,42 @@ void UWeaponComponent::FireLauncher()
 void UWeaponComponent::StartFiring()
 {
     UseAmmo();
-    if(!IsReloading)
+    if(!Character->isUltimate && !Character->isMeleeAttack && !Character->isGrenade)
     {
-        if (!bIsFiring)
+        if(!IsReloading)
         {
-            bIsFiring = true;
+            if (!bIsFiring)
+            {
+                bIsFiring = true;
 
-            if (CurrentWeapon.AutoFire)
-            {
-                if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+                if (CurrentWeapon.AutoFire)
                 {
-                    FireInRange();
-                    GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::FireInRange, CurrentWeapon.FireRate, true);
+                    if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+                    {
+                        FireInRange();
+                        GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::FireInRange, CurrentWeapon.FireRate, true);
+                    }
+                    else
+                    {
+                        Fire(); // 첫 발사
+                        GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
+                    }
+                    UE_LOG(LogTemp, Warning, TEXT("autofire"));
                 }
                 else
                 {
-                    Fire(); // 첫 발사
-                    GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWeaponComponent::Fire, CurrentWeapon.FireRate, true);
-                }
-                UE_LOG(LogTemp, Warning, TEXT("autofire"));
-            }
-            else
-            {
-                if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
-                {
-                    FireInRange();
-                }
-                else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
-                {
-                    FireLauncher();
-                }
-                else
-                {
-                    Fire(); // 단발 발사
+                    if(CurrentWeapon.GunType == GunTypeList::SHOTGUN)
+                    {
+                        FireInRange();
+                    }
+                    else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
+                    {
+                        FireLauncher();
+                    }
+                    else
+                    {
+                        Fire(); // 단발 발사
+                    }
                 }
             }
         }
@@ -584,18 +587,21 @@ void UWeaponComponent::UseAmmo()
 
 void UWeaponComponent::Reload()
 {
-    if(!IsReloading)
+    if(!Character->isUltimate && !Character->isMeleeAttack && !Character->isGrenade)
     {
-        IsReloading = true;
-        if (ReloadAnimation != nullptr)
-	    {
-	    	ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
-	    	UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
-	    	if (AnimInstance != nullptr)
-	    	{
-	    		AnimInstance->Montage_Play(ReloadAnimation, 1.f);
-	    	}
-	    }
+        if(!IsReloading)
+        {
+            IsReloading = true;
+            if (ReloadAnimation != nullptr)
+            {
+                ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
+                UAnimInstance* AnimInstance = PlayerCharacter->GetFppMesh()->GetAnimInstance();
+                if (AnimInstance != nullptr)
+                {
+                    AnimInstance->Montage_Play(ReloadAnimation, 1.f);
+                }
+            }
+        }
     }
 }
 
