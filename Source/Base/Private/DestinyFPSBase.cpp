@@ -381,7 +381,8 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 
 			PosTickCoolTime = 400.0f;
 
-			//if(DeathOrbTest) GetWorld()->SpawnActor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+			//if(DeathOrbTest) GetWorld()->
+			Actor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
 
 		}
 	} 
@@ -1408,7 +1409,8 @@ void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedCompone
 
 void ADestinyFPSBase::Server_Skill_Implementation()
 {
-    Skill();
+	if(HasAuthority())
+    	Skill();
 }
 
 bool ADestinyFPSBase::Server_Skill_Validate()
@@ -1418,7 +1420,8 @@ bool ADestinyFPSBase::Server_Skill_Validate()
 
 void ADestinyFPSBase::Server_Ultimate_Implementation()
 {
-    Ultimate();
+	if(HasAuthority())
+    	Ultimate();
 }
 
 bool ADestinyFPSBase::Server_Ultimate_Validate()
@@ -1428,7 +1431,8 @@ bool ADestinyFPSBase::Server_Ultimate_Validate()
 
 void ADestinyFPSBase::Server_MeleeAttack_Implementation()
 {
-    MeleeAttack();
+	if(HasAuthority())
+    	MeleeAttack();
 }
 
 bool ADestinyFPSBase::Server_MeleeAttack_Validate()
@@ -1438,7 +1442,8 @@ bool ADestinyFPSBase::Server_MeleeAttack_Validate()
 
 void ADestinyFPSBase::Server_Grenade_Implementation()
 {
-    Grenade();
+	if(HasAuthority())
+    	Grenade();
 }
 
 bool ADestinyFPSBase::Server_Grenade_Validate()
