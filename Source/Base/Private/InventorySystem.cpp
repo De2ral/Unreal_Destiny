@@ -84,18 +84,32 @@ void UInventorySystem::AddWeaponToInventory()
 	    break;
 	}
 
-	WeaponArray[WpnArrayIndex].GunName = wpnName;
-    float CurrentFireRate = WeaponArray[WpnArrayIndex].FireRate;
-    float CurrentGunDamage = WeaponArray[WpnArrayIndex].GunDamage;
-    float CurrentTotalDamage = (60.0f / CurrentFireRate) * CurrentGunDamage;
-    if (CurrentTotalDamage > MaxTotalRating)
-    {
-        MaxTotalRating = CurrentTotalDamage;
-    }
-	// 무기 생성 시 더 높은 공격력을 가지도록 설정
-	float NewGunDamage = MaxGunDamage + FMath::RandRange(1.0f, 10.0f); // 무기 데미지를 일정 범위 내에서 증가
+	UDataTable* DataTable = LoadObject<UDataTable>(nullptr, TEXT("/Script/Engine.DataTable'/Game/Weapon/WeaponData.WeaponData'"));
 
-	WeaponArray[WpnArrayIndex].GunDamage = NewGunDamage;
+	if(DataTable)
+	{
+    	FGunInfo* Row = DataTable->FindRow<FGunInfo>(wpnName, TEXT(""));
+
+		//행을 가져왔다 그리고 넣어줬다. (기초적인 성분들이 있는 상황)
+		WeaponArray[WpnArrayIndex] = *Row;
+
+		float CurrentFireRate = WeaponArray[WpnArrayIndex].FireRate;
+		float CurrentTotalDamage = (60.0f / CurrentFireRate) * WeaponArray[WpnArrayIndex].GunDamage;
+
+		// 습득한 무기가 제일 전투력이 높은 상황 -> 그러면 전투력 이걸로 바꾸고 아무것도 하지마
+		if (CurrentTotalDamage > MaxTotalDamage)
+        {
+            MaxTotalDamage = CurrentTotalDamage;
+        }
+		//습득한 무기가 기준보다 전투력이 낮다! -> 높혀줘야지
+		else if (CurrentTotalDamage <= MaxTotalDamage)
+		{
+			  // 새로운 무기의 총 공격력이 기존 무기보다 높도록 GunDamage 설정
+    		float NewTotalDamage = MaxTotalDamage + FMath::RandRange(10.0f, 40.0f); // 총 데미지를 기존보다 높게 설정
+    		float NewGunDamage = (NewTotalDamage * CurrentFireRate) / 60.0f;
+			WeaponArray[WpnArrayIndex].GunDamage = NewGunDamage;
+		}
+	}
 
 	// 무기 배열 인덱스 증가
 	WpnArrayIndex++;

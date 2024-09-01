@@ -52,19 +52,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UTexture2D* GunImg;
 
-	
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	// class UInputAction* InventoryAction;
-
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	// class UInputMappingContext* InventoryMappingContext;
-
-	// void InvenOpenClose();
-
-	// void AddMapping();
-
-	// UPROPERTY(EditDefaultsOnly)
-	// bool bIsInvenOpen = false;
 
 public:	
 	// Called every frame
@@ -97,7 +84,7 @@ public:
 	int GetCurrRefAmmo() { return CurrRefAmmo; }
 
 	UFUNCTION()
-	float GetWeaponMaxRating() {return MaxTotalRating; }
+	float GetWeaponMaxDamage() {return MaxTotalDamage; }
 
 
 	UFUNCTION()
@@ -122,7 +109,7 @@ private:
 
 	void InvenOpenClose();
 	float MaxGunDamage = 10.0f;
-	float MaxTotalRating = 100.0f;
+	float MaxTotalDamage = 100.0f;
 
 		
 };

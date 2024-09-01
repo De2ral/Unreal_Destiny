@@ -499,6 +499,9 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 
 void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 {
+
+	if(bIsCarrying) return;
+
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("전용 스킬"));
 
 	if(CurSkillCoolTime >= SkillCoolTime)
@@ -537,6 +540,7 @@ void ADestinyFPSBase::EndShield()
 
 void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 {
+	if(bIsCarrying) return;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
 	if (CurGrenadeCoolTime >= GrenadeCoolTime)
 	{
@@ -674,6 +678,7 @@ void ADestinyFPSBase::PlayerCarryingEnd()
 
 void ADestinyFPSBase::MeleeAttack(const FInputActionValue& Value)
 {
+	if(bIsCarrying) return;
 	if (CurMeleeAttackCoolTime >= MeleeAttackCoolTime)
 	{
 		CurUltimateCoolTime = 0.f;
@@ -695,6 +700,8 @@ void ADestinyFPSBase::PlayerSkillColliderOnOff()
 
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 {
+	if(bIsCarrying) return;
+
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
 
 	if (CurUltimateCoolTime >= UltimateCoolTime)
@@ -1110,6 +1117,8 @@ void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
 
 void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 {
+	if(bIsCarrying) return;
+
 	bPlayerSprint = true;
 	GetCharacterMovement()->MaxWalkSpeed *= 1.5f;
 
@@ -1119,6 +1128,8 @@ void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 
 void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 {
+	if(bIsCarrying) return;
+	
 	bPlayerSprint = false;
 	GetCharacterMovement()->MaxWalkSpeed /= 1.5f;
 
