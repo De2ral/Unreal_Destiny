@@ -52,19 +52,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UTexture2D* GunImg;
 
-	
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	// class UInputAction* InventoryAction;
-
-	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	// class UInputMappingContext* InventoryMappingContext;
-
-	// void InvenOpenClose();
-
-	// void AddMapping();
-
-	// UPROPERTY(EditDefaultsOnly)
-	// bool bIsInvenOpen = false;
 
 public:	
 	// Called every frame

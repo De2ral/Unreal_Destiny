@@ -85,17 +85,16 @@ void UInventorySystem::AddWeaponToInventory()
 	}
 
 	WeaponArray[WpnArrayIndex].GunName = wpnName;
+	WeaponArray[WpnArrayIndex].GunDamage += FMath::RandRange(1.0f, 10.0f);
     float CurrentFireRate = WeaponArray[WpnArrayIndex].FireRate;
     float CurrentGunDamage = WeaponArray[WpnArrayIndex].GunDamage;
     float CurrentTotalDamage = (60.0f / CurrentFireRate) * CurrentGunDamage;
-    if (CurrentTotalDamage > MaxTotalRating)
+
+    if (CurrentTotalDamage >= MaxTotalRating)
     {
         MaxTotalRating = CurrentTotalDamage;
     }
 	// 무기 생성 시 더 높은 공격력을 가지도록 설정
-	float NewGunDamage = MaxGunDamage + FMath::RandRange(1.0f, 10.0f); // 무기 데미지를 일정 범위 내에서 증가
-
-	WeaponArray[WpnArrayIndex].GunDamage = NewGunDamage;
 
 	// 무기 배열 인덱스 증가
 	WpnArrayIndex++;
