@@ -7,6 +7,9 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+
 #include "Kismet/GameplayStatics.h"
 
 AFpsCppProjectile::AFpsCppProjectile() 
@@ -43,7 +46,7 @@ AFpsCppProjectile::AFpsCppProjectile()
 	ProjectileMovement->ProjectileGravityScale = 0.0f;
 	
 	// Die after 3 seconds by default
-	InitialLifeSpan = 3.0f;
+	InitialLifeSpan = 10.0f;
 
 	// 메쉬 컴포넌트 생성 및 설정
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
@@ -66,15 +69,43 @@ AFpsCppProjectile::AFpsCppProjectile()
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Explosion/P_Explosion_Big_B.P_Explosion_Big_B'"));
     if (ParticleAsset.Succeeded())
     {
-        HitFlash = ParticleAsset.Object;
+        HitFlash_Launcher = ParticleAsset.Object;
+    }
+
+    static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset1(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Explosion/P_Explosion_Big_A.P_Explosion_Big_A'"));
+    if (ParticleAsset.Succeeded())
+    {
+        HitFlash = ParticleAsset1.Object;
+    }
+
+   static ConstructorHelpers::FObjectFinder<UNiagaraSystem> TrailNiagaraAsset(TEXT("/Script/Niagara.NiagaraSystem'/Game/MegaMagicVFXBundle/VFX/MagicAuraVFX/VFX/LightningField/Systems/N_LightningField.N_LightningField'"));
+    if (TrailNiagaraAsset.Succeeded())
+    {
+        TrailEffect = TrailNiagaraAsset.Object;
+    }
+
+    static ConstructorHelpers::FObjectFinder<UNiagaraSystem> TrailNiagaraAsset1(TEXT("/Script/Niagara.NiagaraSystem'/Game/MegaMagicVFXBundle/VFX/MagicAuraVFX/VFX/RingOfFlames/Systems/N_RingOfFlames.N_RingOfFlames'"));
+    if (TrailNiagaraAsset1.Succeeded())
+    {
+        TrailEffect_Launcher = TrailNiagaraAsset1.Object;
     }
 }
 
 void AFpsCppProjectile::BeginPlay()
 {
     Super::BeginPlay();
+    
 }
 
+void AFpsCppProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+}
+
+void AFpsCppProjectile::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+}
 
 void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
@@ -98,9 +129,8 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
                 true
             );
 
-            if (HitFlash)
-                UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, Hit.Location);
-
+            if (HitFlash_Launcher)
+                UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash_Launcher, Hit.Location,FRotator(0.0f, 0.0f, 0.0f), FVector(2.0f, 2.0f, 2.0f));
             Destroy();
         }
         else
@@ -114,6 +144,8 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
                 UDamageType::StaticClass()
             );
 
+            if (HitFlash)
+                UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, Hit.Location,FRotator(0.0f, 0.0f, 0.0f), FVector(0.25f, 0.25f, 0.25f));
             Destroy();
         }
     }
@@ -149,4 +181,40 @@ void AFpsCppProjectile::SetProjectile(UStaticMesh* NewMesh, float speed, float d
 	ProjectileMovement->InitialSpeed = speed;
 	ProjectileMovement->MaxSpeed = speed;
 	Damage = damage;
+}
+void AFpsCppProjectile::AttachTrailEffect(bool isRifle)
+{
+    if(isRifle)
+    {
+        if (TrailEffect)
+        {
+            UNiagaraComponent* TrailNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+                TrailEffect,
+                Mesh,
+                NAME_None,
+                FVector::ZeroVector,
+                FRotator::ZeroRotator,
+                EAttachLocation::KeepRelativeOffset,
+                true
+            );
+            TrailNiagaraComponent->SetRelativeScale3D(FVector(2.0f, 0.25f, 0.25f)); // 크기 조절 (옵션)
+        }
+    }
+
+    else
+    {
+        if (TrailEffect_Launcher)
+        {
+            UNiagaraComponent* TrailNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+                TrailEffect_Launcher,
+                Mesh,
+                NAME_None,
+                FVector::ZeroVector,
+                FRotator::ZeroRotator,
+                EAttachLocation::KeepRelativeOffset,
+                true
+            );
+            TrailNiagaraComponent->SetRelativeScale3D(FVector(2.0f, 0.25f, 0.25f)); // 크기 조절 (옵션)
+        }
+    }
 }

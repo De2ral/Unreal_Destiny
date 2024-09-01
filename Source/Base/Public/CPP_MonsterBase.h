@@ -21,7 +21,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	UPROPERTY(ReplicatedUsing = OnRep_HP, BlueprintReadOnly, Category="Enemy", meta = (AllowPrivateAccess = "true"))
 	float HP;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
@@ -55,6 +55,22 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
 	int32 MaxItemValue = 10;
+
+	UPROPERTY(ReplicatedUsing = OnRep_HP)
+	float TestHP;
+
+	// Function to be called when HP changes
+	UFUNCTION()
+	void OnRep_HP();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SetHP(float NewHP);
+	void Server_SetHP_Implementation(float NewHP);
+	bool Server_SetHP_Validate(float NewHP);
+	
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -67,6 +83,8 @@ public:
     FDamageEvent const& DamageEvent, 
     AController* EventInstigator, 
     AActor* DamageCauser)override;
+
+	void TestTakeDamage();
 
 	void ResetDamageCoolDown();
 

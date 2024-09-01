@@ -32,7 +32,7 @@ UWeaponComponent::UWeaponComponent()
         RifleFlash = ParticleAsset.Object;
     }
 
-    static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset1(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Explosion/P_Explosion_Smoke.P_Explosion_Smoke'"));
+    static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset1(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Explosion/P_Explosion_Big_A.P_Explosion_Big_A'"));
     if (ParticleAsset1.Succeeded())
     {
         HitFlash = ParticleAsset1.Object;
@@ -88,11 +88,7 @@ void UWeaponComponent::Fire()
 	if (World != nullptr)
 	{
 		APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-        if (PlayerController == nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("PlayerController is null."));
-        return;
-    }
+        
 		const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
         FVector MuzzleLocation;
 
@@ -104,14 +100,14 @@ void UWeaponComponent::Fire()
                 MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 100.0f);
         }
  
-        UE_LOG(LogTemp, Warning, TEXT("PlayerController is null.%f"),CurrentStaticMeshComponent->GetComponentLocation().X);
+        
 
-        if (RifleFlash)
+        if (RifleFlash && !bIsAiming)
         {
             FVector LeftOffset = -SpawnRotation.RotateVector(FVector::RightVector) * 10.0f;
             FVector UpOffset = SpawnRotation.RotateVector(FVector::UpVector) * 5.0f;
             FVector MuzzleFlashLocation = MuzzleLocation + LeftOffset + UpOffset;
-            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RifleFlash, MuzzleFlashLocation, FRotator(0.0f,0.0f, -30.0f),FVector(0.5f,0.5f,0.5f));
+            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), RifleFlash, MuzzleFlashLocation, FRotator(0.0f,0.0f, -45.0f), FVector(0.5f ,0.5f, 0.5f));
         }
 
 		FActorSpawnParameters ActorSpawnParams;
@@ -122,7 +118,10 @@ void UWeaponComponent::Fire()
         {
 		    Projectile = World->SpawnActor<AFpsCppProjectile>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
             if(Projectile)
+            {
                 Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
+                Projectile->AttachTrailEffect(true);
+            }
         }
         
 		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
@@ -166,16 +165,12 @@ void UWeaponComponent::Fire()
 		{    
             ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();
             DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
-            UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location);
-            if (HitResult.GetActor()->ActorHasTag("Enemy"))
+           
+            if(CurrentWeapon.Linetracing)
             {
-			    UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
-			    UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
-                if(CurrentWeapon.Linetracing)
+                UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location, FRotator(0.0f,0.0f, 0.0f), FVector(0.25f ,0.25f, 0.25f));
+                if (HitResult.GetActor()->ActorHasTag("Enemy"))
                 {
-                   
-                    UE_LOG(LogTemp, Warning, TEXT("linetracing"));
-                    UE_LOG(LogTemp, Warning, TEXT("Damage : %f"),CurrentWeapon.GunDamage);
                     UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage, PlayerController, GetOwner(), UDamageType::StaticClass());
                     return;
                 }
@@ -239,17 +234,19 @@ void UWeaponComponent::FireInRange()
 
                 if (bHit)
                 {
-                    if (HitResult.GetActor()->ActorHasTag("Enemy"))
-                    {
-                        DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
-                        UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
-                        UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
 
-                        UE_LOG(LogTemp, Warning, TEXT("Headshot! %s"), *HitResult.BoneName.ToString());
-                        UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage * 0.1f, PlayerController, GetOwner(), UDamageType::StaticClass());
-                    }
+                    if(CurrentWeapon.Linetracing)
+                    {
+                        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location, FRotator(0.0f,0.0f, 0.0f), FVector(0.25f ,0.25f, 0.25f));
+                        if (HitResult.GetActor()->ActorHasTag("Enemy"))
+                        {
+                            DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+                            UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage * 0.1f, PlayerController, GetOwner(), UDamageType::StaticClass());
+                            return;
+                        }
+                    } 	
                 }
-            }, i * 0.01f, false);
+            }, i * 0.001f, false);
 
             
         }
@@ -291,7 +288,7 @@ void UWeaponComponent::FireLauncher()
         FVector MuzzleLocation;
         if(CurrentStaticMeshComponent)
         {
-            MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 100.0f);
+            MuzzleLocation = CurrentStaticMeshComponent->GetComponentLocation() + (CurrentStaticMeshComponent->GetRightVector() * 300.0f);
         }
         
 		FActorSpawnParameters ActorSpawnParams;
@@ -305,6 +302,7 @@ void UWeaponComponent::FireLauncher()
             {
                 Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
                 Projectile->SetbExplodeOnImpact(true);
+                Projectile->AttachTrailEffect(false);
             }
         }
         
@@ -374,7 +372,6 @@ void UWeaponComponent::FireLauncher()
 
 void UWeaponComponent::StartFiring()
 {
-    UE_LOG(LogTemp, Warning, TEXT("StartFiring"));
     UseAmmo();
     if(!IsReloading)
     {
@@ -410,7 +407,6 @@ void UWeaponComponent::StartFiring()
                 {
                     Fire(); // 단발 발사
                 }
-                UE_LOG(LogTemp, Warning, TEXT("onefire"));
             }
         }
     }
@@ -418,7 +414,6 @@ void UWeaponComponent::StartFiring()
 
 void UWeaponComponent::StopFiring()
 {
-    UE_LOG(LogTemp, Warning, TEXT("StopFiring"));
     if (bIsFiring)
     {
         bIsFiring = false;
@@ -428,6 +423,7 @@ void UWeaponComponent::StopFiring()
             GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
         }
     }
+
 }
 
 void UWeaponComponent::StartAiming()
@@ -435,7 +431,7 @@ void UWeaponComponent::StartAiming()
     UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
     bIsAiming = true;
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
-    //Character->GetFppMesh()->SetPlayRate(0.0f);
+    return;
 }
 
 void UWeaponComponent::StopAiming()
@@ -443,7 +439,7 @@ void UWeaponComponent::StopAiming()
     UE_LOG(LogTemp, Warning, TEXT("StopAiming"));
     bIsAiming = false;
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
-    
+    return;
 }
 
 void UWeaponComponent::EquipWeapon1()
@@ -453,6 +449,7 @@ void UWeaponComponent::EquipWeapon1()
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
     AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    return;
 }
 
 void UWeaponComponent::EquipWeapon2()
@@ -949,14 +946,5 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         CurrentStaticMeshComponent->SetWorldRotation(NewRotation);
     }
     
-    
-
-    //FHitResult HitResult;
-
-    //FVector TraceEnd = CurrentStaticMeshComponent->GetComponentLocation() + PlayerCameraManager->GetForwardVector()*1000.0f;
-    ////bool bHit = World->LineTraceSingleByObjectType(HitResult, CurrentStaticMeshComponent->GetComponentLocation(), TraceEnd, ObjectQueryParams, CollisionParams);
-    //APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-    //UWorld* const World = GetWorld();
-    //DrawDebugLine(World,  CurrentStaticMeshComponent->GetComponentLocation(), TraceEnd, FColor::Red, false, 1, 0, 1);
     }
 }

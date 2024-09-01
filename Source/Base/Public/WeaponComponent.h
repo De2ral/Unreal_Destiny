@@ -72,7 +72,14 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
+
+
     
+    //UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Weapon")
+	//float DamageAmount;
+
+  
+
 protected:
     virtual void BeginPlay() override;
 

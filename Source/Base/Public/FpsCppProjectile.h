@@ -9,6 +9,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class UNiagaraSystem;
 
 UCLASS(config=Game)
 class AFpsCppProjectile : public AActor
@@ -31,12 +32,16 @@ public:
 	AFpsCppProjectile();
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Tick(float DeltaTime) override;
 
 	void FireInDirection(const FVector& ShootDirection);
 
 	void SetProjectile(UStaticMesh* NewMesh, float speed, float damage);
 
 	void SetProjectileMesh(UStaticMesh* NewMesh);
+
+	void AttachTrailEffect(bool isRifle);
 
 	/** called when projectile hits something */
 	UFUNCTION()
@@ -62,5 +67,11 @@ private:
 	bool bExplodeOnImpact = false;
 
 	UParticleSystem* HitFlash;
+	UParticleSystem* HitFlash_Launcher;
+
+	FTimerHandle TrailTimerHandle;
+	UNiagaraSystem* TrailEffect;
+
+	UNiagaraSystem* TrailEffect_Launcher;
 };
 

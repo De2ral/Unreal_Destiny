@@ -11,6 +11,7 @@
 #include "Components/SphereComponent.h"
 #include "HitDamageEvent.h"
 #include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ACPP_MonsterBase::ACPP_MonsterBase()
@@ -75,8 +76,23 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
 
     DamageValue = DamageAmount;
 
-    HP -= DamageAmount;
+
+
     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Damage Amount: %f"),DamageAmount));
+
+    if (HasAuthority())
+	{
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("HasAuthority HP: %f"),HP));
+		HP -= DamageAmount;
+	}
+    else
+	{
+
+		Server_SetHP(HP - DamageAmount);
+        //HP -= DamageAmount;
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("client HP: %f"),HP));
+	}
 
     if(HP <= 0.0f && !isDead)
     {
@@ -94,6 +110,32 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
     return Damage;
     
 }
+
+void ACPP_MonsterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Ensure HP is replicated
+	DOREPLIFETIME(ACPP_MonsterBase, HP);
+}
+
+void ACPP_MonsterBase::OnRep_HP()
+{
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("OnRep_HP: %f"),HP));
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_HP: %f"), HP);
+    return;
+}
+
+
+void ACPP_MonsterBase::Server_SetHP_Implementation(float NewHP)
+{
+	HP = NewHP;
+}
+bool  ACPP_MonsterBase::Server_SetHP_Validate(float NewHP)
+{
+    return true;
+}
+
 
 void ACPP_MonsterBase::ResetDamageCoolDown()
 {
