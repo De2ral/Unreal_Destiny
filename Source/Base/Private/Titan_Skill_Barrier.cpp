@@ -3,6 +3,7 @@
 
 #include "Titan_Skill_Barrier.h"
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 
 // Sets default values
@@ -10,6 +11,7 @@ ATitan_Skill_Barrier::ATitan_Skill_Barrier()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);

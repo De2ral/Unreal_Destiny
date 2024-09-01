@@ -437,6 +437,11 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 
     
     DOREPLIFETIME(ADestinyFPSBase, HP);    
+	DOREPLIFETIME(ADestinyFPSBase, isSkill);   
+	DOREPLIFETIME(ADestinyFPSBase, isGrenade);   
+	DOREPLIFETIME(ADestinyFPSBase, isUltimate);   
+	DOREPLIFETIME(ADestinyFPSBase, isSmash);   
+	DOREPLIFETIME(ADestinyFPSBase, isMeleeAttack);   
 }
 
 void ADestinyFPSBase::InvenOpenClose()
@@ -487,8 +492,13 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 	}
 }
 
-void ADestinyFPSBase::Skill(const FInputActionValue& Value)
+void ADestinyFPSBase::Skill()
 {
+	if(!HasAuthority())
+	{
+		Server_Skill();
+		return;
+	}
 
 	if(bIsCarrying) return;
 
@@ -528,8 +538,13 @@ void ADestinyFPSBase::EndShield()
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
 }
 
-void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
+void ADestinyFPSBase::Grenade()
 {
+	if(!HasAuthority())
+	{
+		Server_Grenade();
+		return;
+	}
 	if(bIsCarrying) return;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
 	if (CurGrenadeCoolTime >= GrenadeCoolTime)
@@ -571,7 +586,6 @@ void ADestinyFPSBase::SwitchToFirstPerson()
 		FppMesh->SetOnlyOwnerSee(true);
 
 		TppMesh->SetOwnerNoSee(true);
-		TppMesh->SetOnlyOwnerSee(false);
 	}
 	WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 }
@@ -590,7 +604,6 @@ void ADestinyFPSBase::SwitchToThirdPerson()
 		FppMesh->SetOnlyOwnerSee(false);
 
 		TppMesh->SetOwnerNoSee(false);
-		TppMesh->SetOnlyOwnerSee(true);
 	}
 }
 
@@ -666,8 +679,13 @@ void ADestinyFPSBase::PlayerCarryingEnd()
 
 }
 
-void ADestinyFPSBase::MeleeAttack(const FInputActionValue& Value)
+void ADestinyFPSBase::MeleeAttack()
 {
+	if (!HasAuthority())
+	{
+		Server_MeleeAttack();
+		return;
+	}
 	if(bIsCarrying) return;
 	if (CurMeleeAttackCoolTime >= MeleeAttackCoolTime)
 	{
@@ -679,8 +697,14 @@ void ADestinyFPSBase::MeleeAttack(const FInputActionValue& Value)
 	}
 }
 
-void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
+void ADestinyFPSBase::Ultimate()
 {
+	if(!HasAuthority())
+	{
+		Server_Ultimate();
+		return;
+	}
+
 	if(bIsCarrying) return;
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
@@ -1380,4 +1404,44 @@ void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedCompone
 	{
 		UGameplayStatics::ApplyDamage(OtherActor, HunterUltimateAttackDamage, GetController(), this, nullptr);
 	}
+}
+
+void ADestinyFPSBase::Server_Skill_Implementation()
+{
+    Skill();
+}
+
+bool ADestinyFPSBase::Server_Skill_Validate()
+{
+    return true;
+}
+
+void ADestinyFPSBase::Server_Ultimate_Implementation()
+{
+    Ultimate();
+}
+
+bool ADestinyFPSBase::Server_Ultimate_Validate()
+{
+    return true;
+}
+
+void ADestinyFPSBase::Server_MeleeAttack_Implementation()
+{
+    MeleeAttack();
+}
+
+bool ADestinyFPSBase::Server_MeleeAttack_Validate()
+{
+    return true;
+}
+
+void ADestinyFPSBase::Server_Grenade_Implementation()
+{
+    Grenade();
+}
+
+bool ADestinyFPSBase::Server_Grenade_Validate()
+{
+    return true;
 }
