@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "COmponents/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "EnhancedInputComponent.h"
@@ -53,6 +54,8 @@ ADestinyFPSBase::ADestinyFPSBase()
 	FppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FPPMesh"));
 	FppMesh->SetOnlyOwnerSee(true);
 	FppMesh->SetupAttachment(FppCamera);
+
+	SpearMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpearMesh"));
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 
@@ -117,10 +120,53 @@ ADestinyFPSBase::ADestinyFPSBase()
 	WarlockSkillCollider->SetGenerateOverlapEvents(true);
     WarlockSkillCollider->InitSphereRadius(5.0f); 
 
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> HunterMeshAsset(
+		TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Hunter/Meshes/Genji_Street_Runner.Genji_Street_Runner'"));
+	if(HunterMeshAsset.Succeeded())
+		HunterMesh = HunterMeshAsset.Object;
+
+	ConstructorHelpers::FClassFinder<UAnimInstance> HunterAnimClassAsset(
+		TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Hunter/Animations/ABP_Hunter.ABP_Hunter_C'"));
+	if (HunterAnimClassAsset.Succeeded())
+		HunterAnimInstanceClass = HunterAnimClassAsset.Class;
+
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
+		TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Titan/Meshes/Omega_Knight.Omega_Knight'"));
+	if(TitanMeshAsset.Succeeded())
+		TitanMesh = TitanMeshAsset.Object;
+
+	ConstructorHelpers::FClassFinder<UAnimInstance> TitanAnimClassAsset(
+		TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Titan/Animations/ABP_Titan.ABP_Titan_C'"));
+	if(TitanAnimClassAsset.Succeeded())
+		TitanAnimInstanceClass = TitanAnimClassAsset.Class;
+
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> WarlockMeshAsset(
+		TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Warlock/Meshes/Warlock.Warlock'"));
+	if(WarlockMeshAsset.Succeeded())
+		WarlockMesh = WarlockMeshAsset.Object;
+
+	ConstructorHelpers::FClassFinder<UAnimInstance> WarlockAnimClassAsset(
+		TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Warlock/Animations/ABP_Warlock.ABP_Warlock_C'"));
+	if(WarlockAnimClassAsset.Succeeded())
+		WarlockAnimInstanceClass = WarlockAnimClassAsset.Class;
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> HunterSpearAsset(
+		TEXT("/Script/Engine.StaticMesh'/Game/Skill/Hunter/Staff/Spear.Spear'"));
+	if(HunterSpearAsset.Succeeded())
+		HunterSpearMesh = HunterSpearAsset.Object;
+
 	PlayerClass = EPlayerClassEnum::WARLOCK;
 
-	SetClassValue();
 	LastPlayerPos = GetActorLocation();
+
+	HunterComboStage = 0;
+	bIsHunterAttacking = false;
+	bHasNextComboQueued = false;
+	ComboInputWindow = 0.6f;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> HunterMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/ThirdPerson/Characters/Hunter/Animations/Ultimate_Attack.Ultimate_Attack'"));
+    if (HunterMontageAsset.Succeeded())
+        HunterComboMontage = HunterMontageAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -128,13 +174,7 @@ void ADestinyFPSBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (TppMesh)
-	{
-		if (SelectedMesh)
-			TppMesh->SetSkeletalMesh(SelectedMesh);
-		if (SelectedAnimInstanceClass)
-			TppMesh->SetAnimInstanceClass(SelectedAnimInstanceClass);
-	}
+	SetClassValue();
 
 	FInputModeGameOnly GameOnly;
 
@@ -189,16 +229,28 @@ void ADestinyFPSBase::SetClassValue()
 		case EPlayerClassEnum::HUNTER:
 			{
 				// Set Character Mesh & Anim Blueprint by Class
-				ConstructorHelpers::FObjectFinder<USkeletalMesh> HunterMeshAsset(
-					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Hunter/Meshes/Genji_Street_Runner.Genji_Street_Runner'"));
-				if(HunterMeshAsset.Succeeded())
-					SelectedMesh = HunterMeshAsset.Object;
-
-				ConstructorHelpers::FClassFinder<UAnimInstance> HunterAnimClassAsset(
-					TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Hunter/Animations/ABP_Hunter.ABP_Hunter_C'"));
-				if (HunterAnimClassAsset.Succeeded())
+				if (TppMesh)
 				{
-					SelectedAnimInstanceClass = HunterAnimClassAsset.Class;
+					if (HunterMesh)
+						TppMesh->SetSkeletalMesh(HunterMesh);
+					if (HunterAnimInstanceClass)
+						TppMesh->SetAnimInstanceClass(HunterAnimInstanceClass);
+				}
+
+				if (SpearMesh)
+				{
+					if (HunterSpearMesh)
+						SpearMesh->SetStaticMesh(HunterSpearMesh);
+					if (TppMesh)
+					{
+						FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+       					SpearMesh->AttachToComponent(TppMesh, AttachmentRules, FName(TEXT("SpearSocket")));
+						SpearMesh->SetVisibility(false);
+					}
+					SpearMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+   					SpearMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+    				SpearMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+					SpearMesh->OnComponentBeginOverlap.AddDynamic(this, &ADestinyFPSBase::OnSpearOverlapBegin);
 				}
 
 				// Set Character Movement by Player Class
@@ -212,15 +264,13 @@ void ADestinyFPSBase::SetClassValue()
 		case EPlayerClassEnum::TITAN:
 			{
 				// Set Character Mesh & Anim Blueprint by Class
-				ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
-					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Titan/Meshes/Omega_Knight.Omega_Knight'"));
-				if(TitanMeshAsset.Succeeded())
-					SelectedMesh = TitanMeshAsset.Object;
-
-				ConstructorHelpers::FClassFinder<UAnimInstance> TitanAnimClassAsset(
-					TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Titan/Animations/ABP_Titan.ABP_Titan_C'"));
-				if(TitanAnimClassAsset.Succeeded())
-					SelectedAnimInstanceClass = TitanAnimClassAsset.Class;
+				if (TppMesh)
+				{
+					if (TitanMesh)
+						TppMesh->SetSkeletalMesh(TitanMesh);
+					if (TitanAnimInstanceClass)
+						TppMesh->SetAnimInstanceClass(TitanAnimInstanceClass);
+				}
 
 				// Set Character Movement by Player Class
 				this->JumpMaxCount = 1;
@@ -234,15 +284,13 @@ void ADestinyFPSBase::SetClassValue()
 		case EPlayerClassEnum::WARLOCK:
 			{
 				// Set Character Mesh & Anim Blueprint by Class
-				ConstructorHelpers::FObjectFinder<USkeletalMesh> TitanMeshAsset(
-					TEXT("/Script/Engine.SkeletalMesh'/Game/ThirdPerson/Characters/Warlock/Meshes/Warlock.Warlock'"));
-				if(TitanMeshAsset.Succeeded())
-					SelectedMesh = TitanMeshAsset.Object;
-
-				ConstructorHelpers::FClassFinder<UAnimInstance> TitanAnimClassAsset(
-					TEXT("/Script/Engine.AnimBlueprint'/Game/ThirdPerson/Characters/Warlock/Animations/ABP_Warlock.ABP_Warlock_C'"));
-				if(TitanAnimClassAsset.Succeeded())
-					SelectedAnimInstanceClass = TitanAnimClassAsset.Class;
+				if (TppMesh)
+				{
+					if (WarlockMesh)
+						TppMesh->SetSkeletalMesh(WarlockMesh);
+					if (WarlockAnimInstanceClass)
+						TppMesh->SetAnimInstanceClass(WarlockAnimInstanceClass);
+				}
 
 				// Set Character Movement by Player Class
 				this->JumpMaxCount = 1;
@@ -323,7 +371,7 @@ void ADestinyFPSBase::Tick(float DeltaTime)
   		GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultCapsuleHeight);
 	}
 
-	//GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf("MaxWalkSpeed = %f",GetCharacterMovement()->MaxWalkSpeed));
+	//->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf("MaxWalkSpeed = %f",GetCharacterMovement()->MaxWalkSpeed));
 
 	if(PosTickCoolTime > 0.0f) PosTickCoolTime -= 1;
 
@@ -345,6 +393,9 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 
 		}
 	} 
+
+	if (CurComboAttackDelay > 0.f)
+		CurComboAttackDelay -= DeltaTime;
 }
 
 void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -410,7 +461,7 @@ void ADestinyFPSBase::Move(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (!isSmash && !isMeleeAttack && !isSkill)
+	if (!isSmash && !isMeleeAttack && !isSkill && !bIsHunterAttacking)
 	{
 		if (Controller != nullptr && !bIsSliding && bIsPlayerAlive)
 		{
@@ -663,6 +714,15 @@ void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 		else if (PlayerClass == EPlayerClassEnum::WARLOCK)
 		{
 			CheckStartWarlockUltimate();
+		}
+		else if (PlayerClass == EPlayerClassEnum::HUNTER)
+		{
+			CurUltimateCoolTime = 0.f;
+			CurUltimateDuration = 0.f;
+			isUltimate = true;
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+			SpearMesh->SetVisibility(true);
 		}
 	}
 }
@@ -1125,6 +1185,18 @@ void ADestinyFPSBase::LeftClickFunction(const FInputActionValue &Value)
 				isMeleeAttack = true;
 			}
 		}
+		if (PlayerClass == EPlayerClassEnum::HUNTER)
+		{
+			if (bIsHunterAttacking && CurComboAttackDelay <= 0.f)
+			{
+				bHasNextComboQueued = true;
+				PerformComboAttack();
+			}
+			else
+			{
+				PerformComboAttack();
+			}
+		}
 	}
 }
 
@@ -1141,6 +1213,54 @@ void ADestinyFPSBase::RightClickFunction(const FInputActionValue &Value)
 			}
 		}
 	}
+}
+
+void ADestinyFPSBase::PerformComboAttack()
+{
+	UAnimInstance* AnimInstance = TppMesh->GetAnimInstance();
+    if (AnimInstance)
+    {
+        // Determine the next combo stage
+        if ((bHasNextComboQueued) && (HunterComboStage < 5))
+        {
+			GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Blue, TEXT("몽타주 콤보 증가."));
+            HunterComboStage++;
+            bHasNextComboQueued = false;
+			CurComboAttackDelay = ComboAttackDelay;
+        }
+        else if (!bIsHunterAttacking)
+        {
+			GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Blue, TEXT("몽타주 시작."));
+            HunterComboStage = 1;
+			CurComboAttackDelay = ComboAttackDelay;
+        }
+        else
+        {
+			GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Blue, TEXT("몽타주 종료."));
+            // If no input was queued, exit the function
+            return;
+        }
+		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Blue, FString::Printf(TEXT("헌터 공격. 콤보 : %d"), HunterComboStage));
+
+        // Play the corresponding montage section
+        FName ComboSectionName = FName(*FString::Printf(TEXT("Combo%d"), HunterComboStage));
+        if (!AnimInstance->Montage_IsPlaying(HunterComboMontage))
+            AnimInstance->Montage_Play(HunterComboMontage, 1.f);
+        AnimInstance->Montage_JumpToSection(ComboSectionName, HunterComboMontage);
+
+        bIsHunterAttacking = true;
+        // Set a timer to allow for the next combo input
+        GetWorldTimerManager().SetTimer(ComboResetTimer, this, &ADestinyFPSBase::ResetCombo, ComboInputWindow, false);
+    }
+}
+
+void ADestinyFPSBase::ResetCombo()
+{
+    // Reset combo variables
+    bIsHunterAttacking = false;
+    HunterComboStage = 0;
+    bHasNextComboQueued = false;
+    GetWorldTimerManager().ClearTimer(ComboResetTimer);
 }
 
 void ADestinyFPSBase::Death()
@@ -1229,4 +1349,14 @@ void ADestinyFPSBase::HPDamageTest(const FInputActionValue &Value)
 {
 	if(HP > 0.0f) HP -= 10.0f;
 	else if(HP <= 0.0f) HP = MaxHp;
+}
+
+void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+                             bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && !OtherActor->IsA(ADestinyFPSBase::StaticClass()))
+	{
+		UGameplayStatics::ApplyDamage(OtherActor, HunterUltimateAttackDamage, GetController(), this, nullptr);
+	}
 }

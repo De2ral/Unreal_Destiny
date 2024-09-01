@@ -57,6 +57,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* TppMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* SpearMesh;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputMappingContext* DefaultMappingContext;
 
@@ -186,6 +189,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float WarlockSkillRadius = 200.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HunterUltimateAttackDamage = 40.f;
+
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* HunterComboMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
 	class USphereComponent* TitanSmashCollider;
@@ -382,7 +391,15 @@ public:
     AController* EventInstigator, 
     AActor* DamageCauser)override;
 
+	UFUNCTION()
+    void OnSpearOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+                             bool bFromSweep, const FHitResult& SweepResult);
+
 	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
+
+	void PerformComboAttack();
+	void ResetCombo();
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
@@ -391,9 +408,22 @@ private:
 	float CurUltimateDuration = UltimateDuration;
 	float CurSmashCoolTime = SmashCoolTime;
 	float CurMeleeAttackCoolTime;
+	
+	float CurComboAttackDelay = 0.f;
+	float ComboAttackDelay = 0.4f;
 
 	bool isTitanPunch = false;
 	bool isWarlockSkill = false;
+
+	USkeletalMesh* HunterMesh;
+	USkeletalMesh* TitanMesh;
+	USkeletalMesh* WarlockMesh;
+
+	UStaticMesh* HunterSpearMesh;
+
+	TSubclassOf<UAnimInstance> HunterAnimInstanceClass;
+	TSubclassOf<UAnimInstance> TitanAnimInstanceClass;
+	TSubclassOf<UAnimInstance> WarlockAnimInstanceClass;
 
 	USkeletalMesh* SelectedMesh = nullptr;
 	TSubclassOf<UAnimInstance> SelectedAnimInstanceClass = nullptr;
@@ -410,4 +440,9 @@ private:
 	bool bIsCarrying = false;
 	bool bIsInWarlockAura = false;
 
+	int32 HunterComboStage;
+	bool bIsHunterAttacking;
+	bool bHasNextComboQueued;
+	float ComboInputWindow;
+	FTimerHandle ComboResetTimer;
 };
