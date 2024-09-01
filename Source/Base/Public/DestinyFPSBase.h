@@ -42,6 +42,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent* TppSpringArm;
 
@@ -120,7 +122,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxInteractTime = 0.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(Replicated,EditDefaultsOnly, BlueprintReadOnly)
 	float HP = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

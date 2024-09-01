@@ -47,4 +47,27 @@ public:
 
 	bool CanLookTarget = false;
 
+public:
+    AActor* GetRandomPlayerPawn();
+
+	UPROPERTY(BlueprintReadOnly, Category = "Target")
+    APawn* CurrentRandomPlayerPawn;
+
+    UFUNCTION(BlueprintCallable, Category = "Target")
+    void UpdateRandomPlayerPawn();
+public:	
+    TArray<APawn*> GetAllPlayerPawns();
+	void SelectRandomPlayerPawn();
+	
+
+UPROPERTY(BlueprintReadOnly, Category = "Target")
+    APawn* ClosestPlayerPawn;
+
+    // 블루프린트에서 호출할 수 있는 함수
+    UFUNCTION(BlueprintCallable, Category = "Target")
+    void FindClosestPlayer();
+
+private:
+    APawn* GetClosestPlayerPawn();
+
 };

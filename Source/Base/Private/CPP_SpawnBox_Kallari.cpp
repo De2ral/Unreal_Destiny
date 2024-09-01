@@ -51,6 +51,8 @@ FVector ACPP_SpawnBox_Kallari::GetTargetLocation_() const
 
 void ACPP_SpawnBox_Kallari::SpawnEnemy()
 {
+	if(HasAuthority())
+	{
 	 if (EnemyClass)
      {
         FVector SpawnLocation = FMath::RandPointInBox(SpawnBox->Bounds.GetBox());
@@ -86,6 +88,7 @@ void ACPP_SpawnBox_Kallari::SpawnEnemy()
 		}
 
     }
+	}
 }
 
 void ACPP_SpawnBox_Kallari::OnSpawnTimerElapsed()

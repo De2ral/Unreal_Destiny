@@ -2,6 +2,7 @@
 
 
 #include "CPP_MonsterBase.h"
+#include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/Engine.h"
 #include "AIController.h"
@@ -17,7 +18,8 @@ ACPP_MonsterBase::ACPP_MonsterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;	
-    
+    bReplicates = true; 
+
 	Tags.Add(FName("Enemy"));
     if(GetMesh())
     {
@@ -61,22 +63,71 @@ void ACPP_MonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
+void ACPP_MonsterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    // HP 변수를 리플리케이트하도록 설정
+    DOREPLIFETIME(ACPP_MonsterBase, HP);    
+    DOREPLIFETIME(ACPP_MonsterBase, isDead);    
+    DOREPLIFETIME(ACPP_MonsterBase, isAttack);    
+    DOREPLIFETIME(ACPP_MonsterBase, bIsCriticalTextColor);    
+    DOREPLIFETIME(ACPP_MonsterBase, MinItemValue);    
+    DOREPLIFETIME(ACPP_MonsterBase, MaxItemValue);    
+    DOREPLIFETIME(ACPP_MonsterBase, DamageValue);    
+    DOREPLIFETIME(ACPP_MonsterBase, isSuperPower);    
+}
+
+void ACPP_MonsterBase::OnRep_HP()
+{
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage OnRep")));
+
+}
+
 float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
 {	
     //if(!bCanTakeDamage) return 0.0f;
+    if(isSuperPower) return 0.0f;
+    
+    if (HasAuthority())
+    {
+        // 서버에서 HP 감소
+        ServerTakeDamage(DamageAmount);
+    }
+    else
+    {
+        // 클라이언트에서 서버로 HP 감소 요청        
+        ServerTakeDamage(DamageAmount);
+        //UGameplayStatics::ApplyDamage(this, DamageAmount, GetController(), this, UDamageType::StaticClass());
+        //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Client is requesting,Damage Amount : %f HP : %f"),DamageAmount,HP));
+
+    }
+    
+	//float Damage = Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
+    //return Damage;
+     return Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
+    
+}
+
+void ACPP_MonsterBase::MulticastTakeDamage_Implementation(float DamageAmount)
+{
 
     if(bIsCriticalHit)
     {
         DamageAmount *= 2.0f;
         bIsCriticalTextColor = true;
     }
-    
-	float Damage = Super::TakeDamage(DamageAmount,DamageEvent,EventInstigator, DamageCauser);
+    //if(HasAuthority())
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("ServerTakeDamage in - Server")));
+    //else
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("ServerTakeDamage in - Client")));
+
+    // 서버에서만 HP를 감소시킴
+    HP -= DamageAmount;
 
     DamageValue = DamageAmount;
-
-    HP -= DamageAmount;
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("TakeDamage")));
+    
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Server HP decreased by %f. New HP: %f"), DamageAmount, HP));
 
     if(HP <= 0.0f && !isDead)
     {
@@ -90,10 +141,60 @@ float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &Damag
     //GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_MonsterBase::ResetDamageCoolDown, DamageCooldownTime, false);
     
     bIsCriticalHit = false;
-
-    return Damage;
-    
 }
+
+void ACPP_MonsterBase::ServerTakeDamage_Implementation(float DamageAmount)
+{ 
+        //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Client is requesting,Damage Amount : %f HP : %f"),DamageAmount,HP));
+
+    
+    MulticastTakeDamage(DamageAmount);
+
+    //  if(bIsCriticalHit)
+    // {
+    //     DamageAmount *= 2.0f;
+    //     bIsCriticalTextColor = true;
+    // }
+    // //if(HasAuthority())
+    // //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("ServerTakeDamage in - Server")));
+    // //else
+    // //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("ServerTakeDamage in - Client")));
+
+    // // 서버에서만 HP를 감소시킴
+    // HP -= DamageAmount;
+
+    // DamageValue = DamageAmount;
+    
+    // //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Server HP decreased by %f. New HP: %f"), DamageAmount, HP));
+
+    // if(HP <= 0.0f && !isDead)
+    // {
+    //     isDead = true;
+	// 	int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
+        
+    //     if (HasAuthority())  // 서버에서만 실행
+    //     {
+    //         ItemDrop(ItemCount);  // 서버와 모든 클라이언트에서 MulticastFunction 실행
+    //     }
+    //     EnablePhysicsSimulation();              
+    //     GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &ACPP_MonsterBase::DestroyActor, 5.0f, false);
+    // }
+    // FTimerHandle UnusedHandle; 
+    // //GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ACPP_MonsterBase::ResetDamageCoolDown, DamageCooldownTime, false);
+    
+    // bIsCriticalHit = false;
+    // 변경된 HP 값이 자동으로 클라이언트에 리플리케이트됨
+    //MulticastTakeDamage(DamageAmount);
+}
+
+
+
+bool ACPP_MonsterBase::ServerTakeDamage_Validate(float DamageAmount)
+{
+    // 유효성 검사 (필요 시 구현)
+    return true;
+}
+
 
 void ACPP_MonsterBase::ResetDamageCoolDown()
 {
@@ -139,7 +240,8 @@ void ACPP_MonsterBase::EnablePhysicsSimulation()
     //this->GetMesh()->SetSimulatePhysics(true);
 }
 
-void ACPP_MonsterBase::ItemDrop(int32 ItemCount)
+
+void ACPP_MonsterBase::ItemDrop_Implementation(int32 ItemCount)
 {
 	//if(!ItemsToSpawn) return;
 
@@ -160,6 +262,8 @@ void ACPP_MonsterBase::ItemDrop(int32 ItemCount)
 	}
 	
 }
+
+
 
 void ACPP_MonsterBase::OnCriticalHitBoxOverlap(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
