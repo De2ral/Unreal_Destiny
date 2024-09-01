@@ -16,7 +16,7 @@ public:
 
     void SetScopeSize(float NewSize);
 
-    void ImageMove(float NewX, UStaticMeshComponent* Object);
+    void ImageMove(float NewX, UStaticMeshComponent* Object, bool IsRifle);
 
     void UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo);
 
@@ -32,4 +32,6 @@ protected:
     UPROPERTY(meta = (BindWidget))
     class UImage* ScopeCrossImage;
 
+    UPROPERTY(meta = (BindWidget))
+    class UImage* ScopeCrossImage2;
 };
