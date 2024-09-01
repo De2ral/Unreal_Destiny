@@ -107,10 +107,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* DeathReviveAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Replicated)
 	bool bIsSliding = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Replicated)
 	bool bPlayerSprint = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -134,7 +134,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly,Replicated)
 	FVector SlideVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -194,6 +194,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HunterUltimateAttackDamage = 40.f;
+
+	UPROPERTY(Replicated)
+	float SlideSpeedScale = 2.3f;
+
+	UPROPERTY(Replicated)
+	float SlideCapsuleHeight = 0.0f;
 
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* HunterComboMontage;
@@ -277,7 +283,8 @@ public:
 	void SprintEnd(const FInputActionValue& Value);
 
 	void Slide(const FInputActionValue& Value);
-	void SlideEnd(const FInputActionValue& Value);
+	
+	void OnRep_Slide();
 
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
@@ -434,8 +441,6 @@ private:
 	
 	int jumpCount = 0;
 	float DefaultCapsuleHeight;
-    float SlideCapsuleHeight;
-	float SlideSpeedScale = 2.3f;
 	FVector LastPlayerPos;
 	float PosTickCoolTime = 400.0f;
 	bool bIsPlayerAlive = true;

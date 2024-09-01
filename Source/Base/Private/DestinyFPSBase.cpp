@@ -171,11 +171,15 @@ ADestinyFPSBase::ADestinyFPSBase()
         HunterComboMontage = HunterMontageAsset.Object;
 }
 
+
 // Called when the game starts or when spawned
 void ADestinyFPSBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+	if(TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(false);
+	if(WarlockSkillCollider->GetGenerateOverlapEvents()) WarlockSkillCollider->SetGenerateOverlapEvents(false);
 	SetClassValue();
 
 	FInputModeGameOnly GameOnly;
@@ -445,8 +449,11 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    
     DOREPLIFETIME(ADestinyFPSBase, HP);    
+	DOREPLIFETIME(ADestinyFPSBase, bIsSliding);
+    DOREPLIFETIME(ADestinyFPSBase, SlideVector);
+    DOREPLIFETIME(ADestinyFPSBase, SlideSpeedScale);
+    DOREPLIFETIME(ADestinyFPSBase, SlideCapsuleHeight);
 }
 
 void ADestinyFPSBase::InvenOpenClose()
@@ -500,7 +507,7 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 void ADestinyFPSBase::Skill(const FInputActionValue& Value)
 {
 
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("전용 스킬"));
 
@@ -540,7 +547,7 @@ void ADestinyFPSBase::EndShield()
 
 void ADestinyFPSBase::Grenade(const FInputActionValue& Value)
 {
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
 	if (CurGrenadeCoolTime >= GrenadeCoolTime)
 	{
@@ -700,7 +707,7 @@ void ADestinyFPSBase::PlayerSkillColliderOnOff()
 
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 {
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
 
@@ -1088,6 +1095,9 @@ void ADestinyFPSBase::EndUltimate()
 
 void ADestinyFPSBase::jump(const FInputActionValue& Value)
 {
+
+	if(!bIsPlayerAlive) return;
+
 	ACharacter::Jump();
 	UE_LOG(LogTemp, Warning, TEXT("jump")); 
 
@@ -1103,6 +1113,8 @@ void ADestinyFPSBase::jump(const FInputActionValue& Value)
 
 void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
 {
+	if(!bIsPlayerAlive) return;
+
 	ACharacter::StopJumping();
 
 	if(PlayerClass == EPlayerClassEnum::WARLOCK)
@@ -1117,7 +1129,7 @@ void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
 
 void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 {
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 
 	bPlayerSprint = true;
 	GetCharacterMovement()->MaxWalkSpeed *= 1.5f;
@@ -1128,7 +1140,7 @@ void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 
 void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 {
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 	
 	bPlayerSprint = false;
 	GetCharacterMovement()->MaxWalkSpeed /= 1.5f;
@@ -1140,16 +1152,31 @@ void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 {
 	//SlidingTime만큼 슬라이딩 시작
-	
-	if(!bIsSliding)
+	if (HasAuthority())
 	{
-		SlideVector = FppCamera->GetForwardVector();
-		bIsSliding = true;
-		GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedScale;
-		GetCapsuleComponent()->SetCapsuleHalfHeight(SlideCapsuleHeight);
-		PlayerCarryingEnd();
+			if(!bIsSliding || !bIsPlayerAlive)
+		{
+			SlideVector = FppCamera->GetForwardVector();
+			bIsSliding = true;
+			GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedScale;
+			GetCapsuleComponent()->SetCapsuleHalfHeight(SlideCapsuleHeight);
+			PlayerCarryingEnd();
+		}
+	
+		OnRep_Slide();
+
 	}
 
+}
+
+void ADestinyFPSBase::OnRep_Slide()
+{
+    // 클라이언트에서 슬라이딩 상태 동기화
+    if (bIsSliding)
+    {
+        GetCharacterMovement()->MaxWalkSpeed *= SlideSpeedScale;
+        GetCapsuleComponent()->SetCapsuleHalfHeight(SlideCapsuleHeight);
+    }
 }
 
  //void ADestinyFPSBase::SlideEnd(const FInputActionValue& Value)
@@ -1369,7 +1396,7 @@ float ADestinyFPSBase::TakeDamage(float DamageAmount, FDamageEvent const &Damage
 void ADestinyFPSBase::HPDamageTest(const FInputActionValue &Value)
 {
 	if(HP > 0.0f) HP -= 10.0f;
-	else if(HP <= 0.0f) HP = MaxHp;
+	else if(HP <= 0.0f) Death();
 }
 
 void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 

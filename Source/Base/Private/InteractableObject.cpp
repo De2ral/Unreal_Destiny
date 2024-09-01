@@ -3,6 +3,7 @@
 
 #include "InteractableObject.h"
 #include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "DestinyFPSBase.h"
 
 // Sets default values
@@ -10,6 +11,8 @@ AInteractableObject::AInteractableObject()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	bReplicates = true;
 
 	ObjCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ObjCollider"));
 	ObjMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ObjMesh"));
@@ -62,6 +65,13 @@ void AInteractableObject::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AAct
 	
 }
 
+void AInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AInteractableObject, ObjCollider);
+	DOREPLIFETIME(AInteractableObject, ObjMesh);
+}
 
 // Called every frame
 void AInteractableObject::Tick(float DeltaTime)
@@ -70,10 +80,25 @@ void AInteractableObject::Tick(float DeltaTime)
 
 	if(APlayer && APlayer->bIsInteractComplete) 
 	{
-		ObjAction(APlayer);
+		OnRepObjAction_Implementation();
 		APlayer->bIsInteractComplete = false;
 	}
 	
+
+}
+
+void AInteractableObject::OnRepObjAction_Implementation()
+{
+	MultiCastObjAction();
+
+}
+
+void AInteractableObject::MultiCastObjAction_Implementation()
+{
+	if (HasAuthority())
+    {
+		ObjAction(APlayer);
+	}
 
 }
 
