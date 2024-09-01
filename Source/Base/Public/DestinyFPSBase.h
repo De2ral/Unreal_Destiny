@@ -141,19 +141,19 @@ public:
 	EPlayerClassEnum PlayerClass;
 
 	// Skill Variable
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isSkill = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isGrenade = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isUltimate = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isSmash = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isMeleeAttack = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -265,13 +265,13 @@ public:
 	void Move(const FInputActionValue& Value);
 
 	void Look(const FInputActionValue& Value);
-	void Skill(const FInputActionValue& Value);
-	void Grenade(const FInputActionValue& Value);
-	void MeleeAttack(const FInputActionValue& Value);
+	void Skill();
+	void Grenade();
+	void MeleeAttack();
 
 	void jump(const FInputActionValue& Value);
 	void jumpEnd(const FInputActionValue& Value);
-	void Ultimate(const FInputActionValue& Value);
+	void Ultimate();
 
 	void Sprint(const FInputActionValue& Value);
 	void SprintEnd(const FInputActionValue& Value);
@@ -401,6 +401,18 @@ public:
 
 	void PerformComboAttack();
 	void ResetCombo();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Skill();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Ultimate();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_MeleeAttack();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Grenade();
 	
 private:
 	float CurSkillCoolTime = SkillCoolTime;

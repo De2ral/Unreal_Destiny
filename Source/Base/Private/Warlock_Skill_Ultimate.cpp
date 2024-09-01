@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "Components/SphereComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "DestinyFPSBase.h"
 
 // Sets default values
@@ -14,6 +15,7 @@ AWarlock_Skill_Ultimate::AWarlock_Skill_Ultimate()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+    bReplicates = true;
 
 	AuraComponent = CreateDefaultSubobject<USphereComponent>(TEXT("AuraComponent"));
 	AuraComponent->SetupAttachment(RootComponent);
