@@ -382,7 +382,7 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 			PosTickCoolTime = 400.0f;
 
 			//if(DeathOrbTest) GetWorld()->
-			Actor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+			//Actor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
 
 		}
 	} 
