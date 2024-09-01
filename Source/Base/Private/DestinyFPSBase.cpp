@@ -26,6 +26,7 @@
 #include "Warlock_Melee_Fireball.h"
 #include "Warlock_Skill_Ultimate.h"
 #include "CarriableObject.h"
+#include "EngineUtils.h"
 
 
 // Sets default values
@@ -98,27 +99,16 @@ ADestinyFPSBase::ADestinyFPSBase()
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> WarlockSkillLandParticleAsset(
 		TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Combat_Base/Resurrection/P_Resurrection.P_Resurrection'"));
 	if (WarlockSkillLandParticleAsset.Succeeded())
-		WarlockSkillLandParticle = WarlockSkillLandParticleAsset.Object;	
-		
-
-	TitanSmashCollider = CreateDefaultSubobject<USphereComponent>(TEXT("TitanSmashCollider"));
-	TitanSmashCollider->SetupAttachment(TppMesh, TEXT("GroundSocket"));
-	TitanSmashCollider->SetGenerateOverlapEvents(true);
-	TitanSmashCollider->InitSphereRadius(10.f);
+		WarlockSkillLandParticle = WarlockSkillLandParticleAsset.Object;
 
 	TitanPunchCollider = CreateDefaultSubobject<USphereComponent>(TEXT("TitanPunchCollider"));
 	TitanPunchCollider->SetupAttachment(TppMesh, TEXT("TitanUltimateFistSocket"));
 	TitanPunchCollider->SetGenerateOverlapEvents(true);
 	TitanPunchCollider->InitSphereRadius(0.5f);
 
-	TitanPunchDamageCollider = CreateDefaultSubobject<USphereComponent>(TEXT("TitanPunchDamageCollider"));
-	TitanPunchDamageCollider->SetupAttachment(TppMesh, TEXT("TitanUltimateFistSocket"));
-	TitanPunchDamageCollider->SetGenerateOverlapEvents(true);
-	TitanPunchDamageCollider->InitSphereRadius(2.f);
-
 	WarlockSkillCollider = CreateDefaultSubobject<USphereComponent>(TEXT("WarlockSkillCollider"));
     WarlockSkillCollider->SetupAttachment(TppMesh, TEXT("GroundSocket"));
-	WarlockSkillCollider->SetGenerateOverlapEvents(true);
+	WarlockSkillCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     WarlockSkillCollider->InitSphereRadius(5.0f); 
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> HunterMeshAsset(
@@ -689,15 +679,6 @@ void ADestinyFPSBase::MeleeAttack(const FInputActionValue& Value)
 	}
 }
 
-void ADestinyFPSBase::PlayerSkillColliderOnOff()
-{
-	if(TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(false);
-	else if(!TitanSmashCollider->GetGenerateOverlapEvents()) TitanSmashCollider->SetGenerateOverlapEvents(true);
-
-	if(WarlockSkillCollider->GetGenerateOverlapEvents())WarlockSkillCollider->SetGenerateOverlapEvents(false);
-	else if(!WarlockSkillCollider->GetGenerateOverlapEvents())WarlockSkillCollider->SetGenerateOverlapEvents(true);
-}
-
 void ADestinyFPSBase::Ultimate(const FInputActionValue& Value)
 {
 	if(bIsCarrying) return;
@@ -892,14 +873,19 @@ void ADestinyFPSBase::TitanSmashDown()
     }
 
 	// Apply Damage
-	TArray<AActor*> OverlappingActors;
-	TitanSmashCollider->GetOverlappingActors(OverlappingActors);
+	UGameplayStatics::ApplyRadialDamage(
+		this,
+		TitanUltimateDamage,
+		GetActorLocation(),
+		SmashRadius,
+		UDamageType::StaticClass(),
+		TArray<AActor*>(),
+		this,
+		GetInstigatorController(),
+		true
+	);
 
-	for (AActor* Actor : OverlappingActors)
-	{
-		if (!Actor->IsA(ADestinyFPSBase::StaticClass()))
-			UGameplayStatics::ApplyDamage(Actor, TitanUltimateDamage, GetInstigatorController(), this, nullptr);
-	}
+	DrawDebugSphere(GetWorld(), GetActorLocation(), SmashRadius, 12, FColor::Green, false, 1.0f);
 }
 
 void ADestinyFPSBase::TitanSmashEnd(float DelayTime)
@@ -970,6 +956,7 @@ void ADestinyFPSBase::WarlockSkillTakeDamageAndHealPlayer(FVector Origin)
 	if (!isWarlockSkill)
 	{
 		TArray<AActor*> OverlappingActors;
+		WarlockSkillCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
    		WarlockSkillCollider->GetOverlappingActors(OverlappingActors);
 
 		for (AActor* Actor : OverlappingActors)
@@ -997,6 +984,7 @@ void ADestinyFPSBase::WarlockSkillTakeDamageAndHealPlayer(FVector Origin)
 				}
 			}
 		}
+		WarlockSkillCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
@@ -1328,15 +1316,27 @@ void ADestinyFPSBase::TitanPunchCollisionEvents()
 	if (OverlappingActors.Num() > 1)
 	{
 		CameraShake(1.5f);
-		
-		TArray<AActor*> DamagedActors;
-		TitanPunchDamageCollider->GetOverlappingActors(DamagedActors);
-		for (AActor* Actor : DamagedActors)
+		TArray<AActor*> IgnoredActors;
+
+		for (TActorIterator<ADestinyFPSBase> It(GetWorld()); It; ++It)
 		{
-			if (!Actor->IsA(ADestinyFPSBase::StaticClass()))
-				UGameplayStatics::ApplyDamage(Actor, TitanPunchDamage, GetInstigatorController(), this, nullptr);
+			AActor* ActorToIgnore = *It;
+			IgnoredActors.Add(ActorToIgnore);
 		}
+
 		isTitanPunch = false;
+
+		UGameplayStatics::ApplyRadialDamage(
+			this,
+			TitanPunchDamage,
+			GetActorLocation(),
+			TitanPunchRadius,
+			nullptr,  // 데미지 타입
+			IgnoredActors,  // 무시할 액터들
+			this,
+			GetInstigatorController(),
+			true  // Do full damage
+    	);
 
 		if (TitanPunchParticle)
 		{

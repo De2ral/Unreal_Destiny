@@ -172,6 +172,9 @@ public:
 	float SmashCoolTime = 7.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SmashRadius = 1000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MeleeAttackCoolTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -179,6 +182,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TitanPunchDamage = 75.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TitanPunchRadius = 500.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxSpawnWarlockUltimateDistance = 3000.f;
@@ -199,13 +205,7 @@ public:
 	class UAnimMontage* HunterComboMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
-	class USphereComponent* TitanSmashCollider;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
 	class USphereComponent* TitanPunchCollider;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
-	class USphereComponent* TitanPunchDamageCollider;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
 	class USphereComponent* WarlockSkillCollider;
@@ -376,7 +376,6 @@ public:
 	void TitanPunchCollisionEvents();
 	void PlayerCarryingStart(ACarriableObject* CarriableObject);
 	void PlayerCarryingEnd();
-	void PlayerSkillColliderOnOff();
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetLastPlayerPos() {return LastPlayerPos;};
