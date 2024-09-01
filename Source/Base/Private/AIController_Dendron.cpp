@@ -40,16 +40,16 @@ void AAIController_Dendron::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);	
+    //APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);	
     
-	GetBlackboardComponent()->SetValueAsVector(TEXT("TargetLocation"), PlayerPawn->GetActorLocation());		
+	//GetBlackboardComponent()->SetValueAsVector(TEXT("TargetLocation"), PlayerPawn->GetActorLocation());		
 
-	if (GetPawn()->GetDistanceTo(PlayerPawn) <= 3000)
-	{
-		GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), true);
-	}
-	else
-		GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), false);
+	//if (GetPawn()->GetDistanceTo(PlayerPawn) <= 3000)
+	//{
+	//	GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), true);
+	//}
+	//else
+	//	GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), false);
 
 }
 

@@ -15,26 +15,28 @@ public:
 	// Sets default values for this character's properties
 	ACPP_MonsterBase();
 	
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	float HP;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	float MaxHP = 100;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	float DamageValue;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Enemy")
 	bool isDead = false;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Combat")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Combat")
 	bool isAttack;	
+
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	bool isSuperPower;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Critical")
     class USphereComponent* CriticalHitBox;
@@ -44,16 +46,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Critical")
 	bool bIsCriticalHit = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Critical")
+	UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite, Category = "Critical")
 	bool bIsCriticalTextColor = false;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float DamageCooldownTime = 0.1f;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Item")
 	int32 MinItemValue = 1;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Item")
 	int32 MaxItemValue = 10;
 public:	
 	// Called every frame
@@ -62,11 +64,22 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION()
+    void OnRep_HP();
+
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+    void ServerTakeDamage(float DamageAmount);
+
 	UFUNCTION(BlueprintCallable, Category = "HP")
 	virtual float TakeDamage(float DamageAmount, 
     FDamageEvent const& DamageEvent, 
     AController* EventInstigator, 
     AActor* DamageCauser)override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastTakeDamage(float DamageAmount);
 
 	void ResetDamageCoolDown();
 
@@ -75,8 +88,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Physics")
     void EnablePhysicsSimulation();
 
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	UFUNCTION(NetMulticast, Reliable,BlueprintCallable, Category = "Spawn")
 	void ItemDrop(int32 ItemCount);
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
     TArray<TSubclassOf<AActor>> ItemsToSpawn;
