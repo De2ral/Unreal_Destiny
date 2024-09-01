@@ -12,10 +12,10 @@ AMyStash::AMyStash()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//StashMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StashMesh"));
-//
+
 	//Collider = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionTest"));
 	//Collider->SetupAttachment(RootComponent);
-//
+
 	//StashMesh->SetupAttachment(Collider);
 
 	ObjInteractTime = 40.0f;
@@ -31,37 +31,37 @@ void AMyStash::BeginPlay()
 	
 }
 
-void AMyStash::ObjAction()
+void AMyStash::ObjAction(ADestinyFPSBase* Player)
 {
 	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> MyStash.ObjAction()"));
 
+	int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
+    ItemDrop(ItemCount);
+
+	Destroy();
+
 }
 
-//void AMyStash::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
-//{
-//	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
-//	{
-//		ADestinyFPSBase* APlayer = Cast<ADestinyFPSBase>(OtherActor);
-//		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - OverlapBegin"));
-// 		APlayer->bPlayerInteractable = true;
-//		APlayer->MaxInteractTime = 50.0f;
-//
-//	}
-//
-//}
-//
-//void AMyStash::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex)
-//{
-//
-//	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
-//	{
-//		ADestinyFPSBase* APlayer = Cast<ADestinyFPSBase>(OtherActor);
-// 		GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Cyan,TEXT("Cast to Player - OverlapEnd"));
-// 		APlayer->bPlayerInteractable = false;
-//
-//	}
-//
-//}
+
+void AMyStash::ItemDrop(int32 ItemCount)
+{
+	for(int32 i = 0; i< ItemCount; ++i)
+	{
+		if (ItemsToSpawn.Num() > 0)
+    	{
+    	    int32 RandomIndex = FMath::RandRange(0, ItemsToSpawn.Num() - 1);
+    	    TSubclassOf<AActor> SelectedItem = ItemsToSpawn[RandomIndex];
+
+    	    if (SelectedItem)
+    	    {
+    	        FVector Location = GetActorLocation();
+    	        FRotator Rotation = GetActorRotation();
+    	        GetWorld()->SpawnActor<AActor>(SelectedItem, Location, Rotation);
+    	    }
+    	}
+	}
+
+}
 
 // Called every frame
 void AMyStash::Tick(float DeltaTime)

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "InteractableObject.generated.h"
 
@@ -45,6 +46,9 @@ public:
 	float ObjInteractTime = 0.0f;
 
 	UFUNCTION()
-	virtual void ObjAction() {};
+	virtual void ObjAction(ADestinyFPSBase* Player) {};
+
+	UFUNCTION()
+	UStaticMeshComponent* GetObjMesh() { return ObjMesh; }
 
 };

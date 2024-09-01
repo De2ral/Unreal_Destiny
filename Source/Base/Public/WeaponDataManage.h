@@ -12,8 +12,10 @@ UENUM(BlueprintType)
 enum class GunTypeList : uint8
 {
 	PISTOL UMETA(DisplayName = "Pistol"),
+    RIFLE UMETA(DisplayName = "Rifle"),
     SHOTGUN UMETA(DisplayName = "Shotgun"),
-    RIFLE UMETA(DisplayName = "Rifle")
+	SNIPER UMETA(DisplayName = "Sniper"),
+	LAUNCHER UMETA(DisplayName = "Launcher")
 };
 
 UENUM(BlueprintType)
@@ -24,13 +26,6 @@ enum class BulletTypeList : uint8
 	REINFORCE UMETA(DisplayName = "Reinforce")
 };
 
-UENUM(BlueprintType)
-enum class FireTypeList : uint8
-{
-	SINGLE UMETA(DisplayName = "Single"),
-	BURST UMETA(DisplayName = "Burst"),
-	CONTINU UMETA(DisplayName = "Continu")
-};
 
 USTRUCT(BlueprintType)
 struct FGunInfo : public FTableRowBase
@@ -38,9 +33,6 @@ struct FGunInfo : public FTableRowBase
 	GENERATED_BODY()
 public:
 	FGunInfo(){}
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName GunID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName GunName;
@@ -52,13 +44,19 @@ public:
 	BulletTypeList BulletType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FireTypeList FireType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GunDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Max_capacity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Rebound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool Linetracing;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMesh* ProjectileMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ProjectileSpeed;
@@ -70,17 +68,17 @@ public:
 	float FireRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 CurrentAmmo;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString GunModelPath;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* GunImage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Linetracing;
+	float AimLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMesh* ProjectileMesh;
+	float AimRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CameraZoom;
 };
