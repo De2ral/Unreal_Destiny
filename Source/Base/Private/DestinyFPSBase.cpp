@@ -15,6 +15,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "Net/UnrealNetwork.h"
 #include "Titan_Skill_Barrier.h"
 #include "Grenade.h"
 #include "Animation/AnimInstance.h"
@@ -386,6 +387,14 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		}
 		
 	}
+}
+
+void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    
+    DOREPLIFETIME(ADestinyFPSBase, HP);    
 }
 
 void ADestinyFPSBase::InvenOpenClose()
