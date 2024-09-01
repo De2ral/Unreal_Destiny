@@ -10,7 +10,6 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "FpsCppProjectile.h"
-#include "Titan_Skill_Grenade.h"
 
 #include "Camera/CameraShakeBase.h"
 #include "MyLegacyCameraShake.h"
@@ -822,6 +821,14 @@ void UWeaponComponent::LoadWeaponByName(FName WeaponName)
     {
         UE_LOG(LogTemp, Warning, TEXT("WeaponDataTable is null."));
     }
+}
+
+void UWeaponComponent::SetCurrentWeaponMeshVisibility(bool isVisible)
+{
+    if(CurrentSkeletalMeshComponent)
+        CurrentSkeletalMeshComponent->SetVisibility(isVisible);
+    if(CurrentStaticMeshComponent)
+        CurrentStaticMeshComponent->SetVisibility(isVisible);
 }
 
 void UWeaponComponent::RemoveCurrentWeaponModel()

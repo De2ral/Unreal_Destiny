@@ -140,6 +140,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetSlot3Weapon(FName inweapon);
 
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    FName GetSlot1Weapon() {return Slot1Weapon;}
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    FName GetSlot2Weapon() {return Slot2Weapon;}
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    FName GetSlot3Weapon() {return Slot3Weapon;}
+
     int CurrentAmmo();
     int StoredAmmo();
 
@@ -152,6 +159,9 @@ public:
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFire();
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    void SetCurrentWeaponMeshVisibility(bool isVisible);
     
 private:
     ADestinyFPSBase* Character;
