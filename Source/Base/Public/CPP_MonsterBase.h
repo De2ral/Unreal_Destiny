@@ -35,6 +35,9 @@ public:
 	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Combat")
 	bool isAttack;	
 
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Enemy")
+	bool isSuperPower;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Critical")
     class USphereComponent* CriticalHitBox;
 

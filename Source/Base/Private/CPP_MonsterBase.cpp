@@ -75,6 +75,7 @@ void ACPP_MonsterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &Out
     DOREPLIFETIME(ACPP_MonsterBase, MinItemValue);    
     DOREPLIFETIME(ACPP_MonsterBase, MaxItemValue);    
     DOREPLIFETIME(ACPP_MonsterBase, DamageValue);    
+    DOREPLIFETIME(ACPP_MonsterBase, isSuperPower);    
 }
 
 void ACPP_MonsterBase::OnRep_HP()
@@ -86,7 +87,8 @@ void ACPP_MonsterBase::OnRep_HP()
 float ACPP_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
 {	
     //if(!bCanTakeDamage) return 0.0f;
-
+    if(isSuperPower) return 0.0f;
+    
     if (HasAuthority())
     {
         // 서버에서 HP 감소
