@@ -210,7 +210,6 @@ void ADestinyFPSBase::BeginPlay()
 	}
 
 	SwitchToFirstPerson();
-
 }
 
 
@@ -522,6 +521,12 @@ void ADestinyFPSBase::Skill()
 	{
 		isSkill = true;
 		CurSkillCoolTime = 0.f;
+		if ((PlayerClass == EPlayerClassEnum::TITAN) || 
+		(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
+		{
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+		}
 	}
 	else
 	{
@@ -549,10 +554,12 @@ void ADestinyFPSBase::EndShield()
 	if (HasAuthority())
 	{
 		isSkill = false;
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 	}
 	else
 	{
-		Server_MeleeAttack(false);
+		Server_Skill(false);
 	}
 }
 
@@ -702,6 +709,8 @@ void ADestinyFPSBase::MeleeAttack()
 	{
 		isMeleeAttack = true;
 		CurMeleeAttackCoolTime = 0.f;
+		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+		SwitchToThirdPerson();
 	}
 	else
 	{
@@ -717,6 +726,37 @@ void ADestinyFPSBase::Ultimate()
 		isUltimate = true;
 		CurUltimateCoolTime = 0.f;
 		CurUltimateDuration = 0.f;
+		GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
+		if (PlayerClass == EPlayerClassEnum::TITAN)
+		{
+			GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Switching to Third Person"));
+			MeleeAttackCoolTime = 2.f;
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+			// Titan Ultimate Start
+			if (TitanUltimateFistParticle)
+			{
+				UGameplayStatics::SpawnEmitterAttached(
+					TitanUltimateFistParticle,
+					TppMesh,
+					FName("TitanUltimateFistSocket"),
+					FVector::ZeroVector, 
+					FRotator::ZeroRotator,
+					EAttachLocation::SnapToTarget,
+					true
+				);
+			}
+		}
+		else if (PlayerClass == EPlayerClassEnum::WARLOCK)
+		{
+			CheckStartWarlockUltimate();
+		}
+		else if (PlayerClass == EPlayerClassEnum::HUNTER)
+		{
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+			SpearMesh->SetVisibility(true);
+		}
 	}
 	else
 	{
@@ -804,6 +844,11 @@ void ADestinyFPSBase::TitanMeleeAttackEnd()
 	{
 		isMeleeAttack = false;
 		isTitanPunch = false;
+		if (!isUltimate)
+		{
+			WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+			SwitchToFirstPerson();
+		}
 	}
 	else
 	{
@@ -992,10 +1037,17 @@ void ADestinyFPSBase::WarlockSkillTakeDamageAndHealPlayer(FVector Origin)
 
 void ADestinyFPSBase::WarlockSkillEnd()
 {
-	isSkill = false;
-	GetCharacterMovement()->GravityScale = 1.f;
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
+	if (HasAuthority())
+	{
+		isSkill = false;
+		GetCharacterMovement()->GravityScale = 1.f;
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	}
+	else
+	{
+		Server_Skill(false);
+	}
 }
 
 void ADestinyFPSBase::WarlockMeleeStart(FVector CameraLocation)
@@ -1038,9 +1090,15 @@ void ADestinyFPSBase::WarlockMeleeFire()
 
 void ADestinyFPSBase::WarlockMeleeEnd()
 {
-	isMeleeAttack = false;
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
+	if (HasAuthority())
+	{
+		isMeleeAttack = false;
+		SwitchToFirstPerson();
+	}
+	else
+	{
+		Server_MeleeAttack(false);
+	}
 }
 
 void ADestinyFPSBase::WarlockUltimateStart(FVector CameraLocation)
@@ -1069,12 +1127,16 @@ void ADestinyFPSBase::WarlockUltimateEnd()
 
 void ADestinyFPSBase::EndUltimate()
 {
-	isUltimate = false;
-	isMeleeAttack = false;
-	isSmash = false;
-	MeleeAttackCoolTime = 8.f;
-	SwitchToFirstPerson();
-	WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	if (HasAuthority())
+	{
+		isUltimate = false;
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	}
+	else
+	{
+		Server_Ultimate(false);
+	}
 }
 
 void ADestinyFPSBase::jump(const FInputActionValue& Value)
@@ -1428,6 +1490,9 @@ void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 	else
 	{
 		isUltimate = value;
+		isMeleeAttack = false;
+		isSmash = false;
+		MeleeAttackCoolTime = 8.f;
 	}
 }
 
@@ -1513,41 +1578,51 @@ void ADestinyFPSBase::OnRep_Skill()
 	}
 	else
 	{
-		FTimerHandle TimerHandle;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 	}
 }
 
 void ADestinyFPSBase::OnRep_Ultimate()
 {
-	if (PlayerClass == EPlayerClassEnum::TITAN)
+	if (isUltimate)
 	{
-		MeleeAttackCoolTime = 2.f;
-		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-		SwitchToThirdPerson();
-		// Titan Ultimate Start
-		if (TitanUltimateFistParticle)
+		GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
+		if (PlayerClass == EPlayerClassEnum::TITAN)
 		{
-			UGameplayStatics::SpawnEmitterAttached(
-				TitanUltimateFistParticle,
-				TppMesh,
-				FName("TitanUltimateFistSocket"),
-				FVector::ZeroVector, 
-				FRotator::ZeroRotator,
-				EAttachLocation::SnapToTarget,
-				true
-			);
+			GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Switching to Third Person"));
+			MeleeAttackCoolTime = 2.f;
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+			// Titan Ultimate Start
+			if (TitanUltimateFistParticle)
+			{
+				UGameplayStatics::SpawnEmitterAttached(
+					TitanUltimateFistParticle,
+					TppMesh,
+					FName("TitanUltimateFistSocket"),
+					FVector::ZeroVector, 
+					FRotator::ZeroRotator,
+					EAttachLocation::SnapToTarget,
+					true
+				);
+			}
+		}
+		else if (PlayerClass == EPlayerClassEnum::WARLOCK)
+		{
+			CheckStartWarlockUltimate();
+		}
+		else if (PlayerClass == EPlayerClassEnum::HUNTER)
+		{
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+			SpearMesh->SetVisibility(true);
 		}
 	}
-	else if (PlayerClass == EPlayerClassEnum::WARLOCK)
+	else
 	{
-		CheckStartWarlockUltimate();
-	}
-	else if (PlayerClass == EPlayerClassEnum::HUNTER)
-	{
-		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-		SwitchToThirdPerson();
-		SpearMesh->SetVisibility(true);
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 	}
 }
 
