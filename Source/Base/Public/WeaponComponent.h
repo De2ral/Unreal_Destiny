@@ -120,11 +120,16 @@ public:
 
     void UseAmmo();
 
+    
     void Reload();
 
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
     bool GetIsAiming() {return bIsAiming;}
+
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void FillAmmo();
+    
+    void AllFillAmmo();
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void EndReloading() {IsReloading = false;}

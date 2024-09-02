@@ -480,9 +480,10 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 {
 	FVector2D LookVector = Value.Get<FVector2D>();
 
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if (Controller != nullptr)
 	{
-		if(WeaponComponent->GetIsAiming())
+		if(PlayerController->IsInputKeyDown(EKeys::RightMouseButton))
 		{
 			AddControllerYawInput(LookVector.X * 0.1f);
 			AddControllerPitchInput(LookVector.Y * 0.1f);
