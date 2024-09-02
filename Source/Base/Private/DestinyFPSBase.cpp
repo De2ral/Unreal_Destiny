@@ -1449,9 +1449,12 @@ void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedCompone
                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
                              bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && !OtherActor->IsA(ADestinyFPSBase::StaticClass()))
+	if (isUltimate && bIsHunterAttacking)
 	{
-		UGameplayStatics::ApplyDamage(OtherActor, HunterUltimateAttackDamage, GetController(), this, nullptr);
+		if (OtherActor && !OtherActor->IsA(ADestinyFPSBase::StaticClass()))
+		{
+			UGameplayStatics::ApplyDamage(OtherActor, HunterUltimateAttackDamage, GetController(), this, nullptr);
+		}
 	}
 }
 
