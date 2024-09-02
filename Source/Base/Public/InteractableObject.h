@@ -22,10 +22,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Replicated)
 	class USphereComponent* ObjCollider;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Replicated)
 	class UStaticMeshComponent* ObjMesh;
 
 	UPROPERTY(VisibleAnywhere)
@@ -37,12 +37,20 @@ protected:
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	 // 리플리케이션 설정 함수
+    virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
+	UFUNCTION(Server,Reliable)
+	void OnRepObjAction();
+
+	UFUNCTION(NetMulticast,Reliable)
+	void MultiCastObjAction();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Replicated)
 	float ObjInteractTime = 0.0f;
 
 	UFUNCTION()

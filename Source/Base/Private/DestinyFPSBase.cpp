@@ -210,7 +210,6 @@ void ADestinyFPSBase::BeginPlay()
 	}
 
 	SwitchToFirstPerson();
-
 }
 
 
@@ -249,7 +248,9 @@ void ADestinyFPSBase::SetClassValue()
 				this->JumpMaxCount = 2;
 
 				// Set Character Skill Value by Player Class
-				
+				GrenadeCoolTime = 3.f;
+				UltimateCoolTime = 40.f;
+				UltimateDuration = 30.f;
 			}
 		break;
 
@@ -268,8 +269,12 @@ void ADestinyFPSBase::SetClassValue()
 				this->JumpMaxCount = 1;
 
 				// Set Character Skill Value by Player Class
-				MeleeAttackCoolTime = 8.f;
+				SkillCoolTime = 3.f;
+				GrenadeCoolTime = 3.f;
 				UltimateCoolTime = 40.f;
+				UltimateDuration = 30.f;
+				SmashCoolTime = 7.5f;
+				MeleeAttackCoolTime = 8.f;
 			}
 		break;
 
@@ -289,8 +294,10 @@ void ADestinyFPSBase::SetClassValue()
 				GetCharacterMovement()->JumpZVelocity = 800.0f;
 
 				// Set Character Skill Value by Player Class
-				MeleeAttackCoolTime = 10.f;
+				SkillCoolTime = 3.f;
+				GrenadeCoolTime = 3.f;
 				UltimateCoolTime = 60.f;
+				MeleeAttackCoolTime = 10.f;
 			}
 		break;
 
@@ -300,46 +307,53 @@ void ADestinyFPSBase::SetClassValue()
 			}
 		break;
 	}
-	CurMeleeAttackCoolTime = MeleeAttackCoolTime;
+	CurSkillCoolTime = SkillCoolTime;
+	CurGrenadeCoolTime = GrenadeCoolTime;
 	CurUltimateCoolTime = UltimateCoolTime;
+	CurUltimateDuration = UltimateDuration;
+	CurSmashCoolTime = SmashCoolTime;
+	CurMeleeAttackCoolTime = MeleeAttackCoolTime;
 }
 
 void ADestinyFPSBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (CurSkillCoolTime < SkillCoolTime)
+	if (HasAuthority())
 	{
-		CurSkillCoolTime += DeltaTime;
-		HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
-	}
+		if (CurSkillCoolTime < SkillCoolTime)
+		{
+			CurSkillCoolTime += DeltaTime;
+			HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
+		}
 
-	if (CurGrenadeCoolTime < GrenadeCoolTime)
-	{
-		CurGrenadeCoolTime += DeltaTime;
-		HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
-	}
+		if (CurGrenadeCoolTime < GrenadeCoolTime)
+		{
+			CurGrenadeCoolTime += DeltaTime;
+			HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
+		}
 
-	if (CurUltimateCoolTime < UltimateCoolTime)
-	{
-		CurUltimateCoolTime += DeltaTime;
-	}
+		if (CurUltimateCoolTime < UltimateCoolTime)
+		{
+			CurUltimateCoolTime += DeltaTime;
+		}
 
-	if (CurUltimateDuration < UltimateDuration)
-	{
-		CurUltimateDuration += DeltaTime;
-		if (CurUltimateDuration >= UltimateDuration)
-			EndUltimate();
-	}
+		if (CurUltimateDuration < UltimateDuration)
+		{
+			CurUltimateDuration += DeltaTime;
+			if (CurUltimateDuration >= UltimateDuration)
+				EndUltimate();
+		}
 
-	if (CurSmashCoolTime < SmashCoolTime)
-	{
-		CurSmashCoolTime += DeltaTime;
-	}
+		if (CurSmashCoolTime < SmashCoolTime)
+		{
+			CurSmashCoolTime += DeltaTime;
+		}
 
-	if (CurMeleeAttackCoolTime < MeleeAttackCoolTime)
-	{
-		CurMeleeAttackCoolTime += DeltaTime;
+		if (CurMeleeAttackCoolTime < MeleeAttackCoolTime)
+		{
+			CurMeleeAttackCoolTime += DeltaTime;
+		}
 	}
 
 	if (isTitanPunch)
@@ -443,6 +457,13 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 	DOREPLIFETIME(ADestinyFPSBase, isUltimate);   
 	DOREPLIFETIME(ADestinyFPSBase, isSmash);   
 	DOREPLIFETIME(ADestinyFPSBase, isMeleeAttack);   
+
+	DOREPLIFETIME(ADestinyFPSBase, CurSkillCoolTime);   
+	DOREPLIFETIME(ADestinyFPSBase, CurGrenadeCoolTime);   
+	DOREPLIFETIME(ADestinyFPSBase, CurUltimateCoolTime);   
+	DOREPLIFETIME(ADestinyFPSBase, CurUltimateDuration);   
+	DOREPLIFETIME(ADestinyFPSBase, CurSmashCoolTime);   
+	DOREPLIFETIME(ADestinyFPSBase, CurMeleeAttackCoolTime);   
 }
 
 void ADestinyFPSBase::InvenOpenClose()
@@ -495,31 +516,27 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 
 void ADestinyFPSBase::Skill()
 {
-	if(!HasAuthority())
-	{
-		Server_Skill();
-		return;
-	}
-
 	if(bIsCarrying) return;
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("전용 스킬"));
-
-	if(CurSkillCoolTime >= SkillCoolTime)
+	if(HasAuthority())
 	{
+		isSkill = true;
+		CurSkillCoolTime = 0.f;
 		if ((PlayerClass == EPlayerClassEnum::TITAN) || 
 		(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
 		{
-			CurSkillCoolTime = 0.f;
-			isSkill = true;
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
 		}
+	}
+	else
+	{
+		Server_Skill(true);
 	}
 }
 
 void ADestinyFPSBase::SpawnShield()
 {
+	if (!HasAuthority()) return;
 	UWorld* world = GetWorld();
 
 	if(world)
@@ -534,29 +551,35 @@ void ADestinyFPSBase::SpawnShield()
 
 void ADestinyFPSBase::EndShield()
 {
-	isSkill = false;
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
+	if (HasAuthority())
+	{
+		isSkill = false;
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	}
+	else
+	{
+		Server_Skill(false);
+	}
 }
 
 void ADestinyFPSBase::Grenade()
 {
-	if(!HasAuthority())
-	{
-		Server_Grenade();
-		return;
-	}
 	if(bIsCarrying) return;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
-	if (CurGrenadeCoolTime >= GrenadeCoolTime)
+	if (HasAuthority())
 	{
-		CurGrenadeCoolTime = 0.f;
 		isGrenade = true;
+		CurGrenadeCoolTime = 0.f;
+	}
+	else
+	{
+		Server_Grenade(true);
 	}
 }
 
 void ADestinyFPSBase::Throw()
 {
+	if(!HasAuthority()) return;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("쿨타임 : %f"), CurGrenadeCoolTime));
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
@@ -682,41 +705,31 @@ void ADestinyFPSBase::PlayerCarryingEnd()
 
 void ADestinyFPSBase::MeleeAttack()
 {
-	if (!HasAuthority())
+	if(HasAuthority())
 	{
-		Server_MeleeAttack();
-		return;
-	}
-	if(bIsCarrying) return;
-	if (CurMeleeAttackCoolTime >= MeleeAttackCoolTime)
-	{
-		CurUltimateCoolTime = 0.f;
-		CurUltimateDuration = 0.f;
 		isMeleeAttack = true;
+		CurMeleeAttackCoolTime = 0.f;
 		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 		SwitchToThirdPerson();
+	}
+	else
+	{
+		Server_MeleeAttack(true);
 	}
 }
 
 void ADestinyFPSBase::Ultimate()
 {
-	if(!HasAuthority())
-	{
-		Server_Ultimate();
-		return;
-	}
-
 	if(bIsCarrying) return;
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("궁극기"));
-
-	if (CurUltimateCoolTime >= UltimateCoolTime)
+	if(HasAuthority())
 	{
+		isUltimate = true;
+		CurUltimateCoolTime = 0.f;
+		CurUltimateDuration = 0.f;
+		GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
 		if (PlayerClass == EPlayerClassEnum::TITAN)
 		{
-			CurUltimateCoolTime = 0.f;
-			CurUltimateDuration = 0.f;
-			isUltimate = true;
+			GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Switching to Third Person"));
 			MeleeAttackCoolTime = 2.f;
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
@@ -740,13 +753,14 @@ void ADestinyFPSBase::Ultimate()
 		}
 		else if (PlayerClass == EPlayerClassEnum::HUNTER)
 		{
-			CurUltimateCoolTime = 0.f;
-			CurUltimateDuration = 0.f;
-			isUltimate = true;
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
 			SpearMesh->SetVisibility(true);
 		}
+	}
+	else
+	{
+		Server_Ultimate(true);
 	}
 }
 
@@ -780,12 +794,8 @@ void ADestinyFPSBase::CheckStartWarlockUltimate()
 				float Distance = FVector::Dist(StartLocation, HitResult.Location);
 				if (Distance <= MaxSpawnWarlockUltimateDistance)
 				{
-					CurUltimateCoolTime = 0.f;
-					CurUltimateDuration = 0.f;
-					isUltimate = true;
 					WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 					SwitchToThirdPerson();
-
 					WarlockUltimateSpawnLocation = HitResult.Location;
 				}
 			}
@@ -830,8 +840,20 @@ void ADestinyFPSBase::TitanMeleeAttackStart(float ZDirection, float LaunchStreng
 
 void ADestinyFPSBase::TitanMeleeAttackEnd()
 {
-	isMeleeAttack = false;
-	isTitanPunch = false;
+	if (HasAuthority())
+	{
+		isMeleeAttack = false;
+		isTitanPunch = false;
+		if (!isUltimate)
+		{
+			WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+			SwitchToFirstPerson();
+		}
+	}
+	else
+	{
+		Server_MeleeAttack(false);
+	}
 }
 
 void ADestinyFPSBase::TitanSmashStart(float ZDirection, float LaunchStrength, float GravityScale, FVector CameraLocation)
@@ -1015,10 +1037,17 @@ void ADestinyFPSBase::WarlockSkillTakeDamageAndHealPlayer(FVector Origin)
 
 void ADestinyFPSBase::WarlockSkillEnd()
 {
-	isSkill = false;
-	GetCharacterMovement()->GravityScale = 1.f;
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
+	if (HasAuthority())
+	{
+		isSkill = false;
+		GetCharacterMovement()->GravityScale = 1.f;
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	}
+	else
+	{
+		Server_Skill(false);
+	}
 }
 
 void ADestinyFPSBase::WarlockMeleeStart(FVector CameraLocation)
@@ -1028,6 +1057,7 @@ void ADestinyFPSBase::WarlockMeleeStart(FVector CameraLocation)
 
 void ADestinyFPSBase::WarlockMeleeFire()
 {
+	if(!HasAuthority()) return;
 	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;  // 플레이어 앞에서 스폰
 
     TArray<float> Angles = { -30.f, -15.f, 0.f, 15.f, 30.f };
@@ -1060,9 +1090,15 @@ void ADestinyFPSBase::WarlockMeleeFire()
 
 void ADestinyFPSBase::WarlockMeleeEnd()
 {
-	isMeleeAttack = false;
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ADestinyFPSBase::SwitchToFirstPerson, 0.5f, false);
+	if (HasAuthority())
+	{
+		isMeleeAttack = false;
+		SwitchToFirstPerson();
+	}
+	else
+	{
+		Server_MeleeAttack(false);
+	}
 }
 
 void ADestinyFPSBase::WarlockUltimateStart(FVector CameraLocation)
@@ -1091,12 +1127,16 @@ void ADestinyFPSBase::WarlockUltimateEnd()
 
 void ADestinyFPSBase::EndUltimate()
 {
-	isUltimate = false;
-	isMeleeAttack = false;
-	isSmash = false;
-	MeleeAttackCoolTime = 8.f;
-	SwitchToFirstPerson();
-	WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	if (HasAuthority())
+	{
+		isUltimate = false;
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	}
+	else
+	{
+		Server_Ultimate(false);
+	}
 }
 
 void ADestinyFPSBase::jump(const FInputActionValue& Value)
@@ -1213,10 +1253,14 @@ void ADestinyFPSBase::LeftClickFunction(const FInputActionValue &Value)
 	{
 		if (PlayerClass == EPlayerClassEnum::TITAN)
 		{
-			if (CurMeleeAttackCoolTime >= MeleeAttackCoolTime)
+			if (HasAuthority())
 			{
-				CurMeleeAttackCoolTime = 0.f;
 				isMeleeAttack = true;
+				CurMeleeAttackCoolTime = 0.f;
+			}
+			else
+			{
+				Server_MeleeAttack(true);
 			}
 		}
 		if (PlayerClass == EPlayerClassEnum::HUNTER)
@@ -1240,10 +1284,14 @@ void ADestinyFPSBase::RightClickFunction(const FInputActionValue &Value)
 	{
 		if (PlayerClass == EPlayerClassEnum::TITAN)
 		{
-			if (CurSmashCoolTime >= SmashCoolTime)
+			if (HasAuthority())
 			{
-				CurSmashCoolTime = 0.f;
 				isSmash = true;
+				CurSmashCoolTime = 0.f;
+			}
+			else
+			{
+				Server_Smash(true);
 			}
 		}
 	}
@@ -1407,46 +1455,190 @@ void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedCompone
 	}
 }
 
-void ADestinyFPSBase::Server_Skill_Implementation()
+void ADestinyFPSBase::Server_Skill_Implementation(bool value)
 {
-	if(HasAuthority())
-    	Skill();
+	if (value)
+	{
+		if (CurSkillCoolTime >= SkillCoolTime)
+		{
+			isSkill = value;
+			CurSkillCoolTime = 0.f;
+		}
+	}
+	else
+	{
+		isSkill = value;
+	}
 }
 
-bool ADestinyFPSBase::Server_Skill_Validate()
+bool ADestinyFPSBase::Server_Skill_Validate(bool value)
 {
     return true;
 }
 
-void ADestinyFPSBase::Server_Ultimate_Implementation()
+void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 {
-	if(HasAuthority())
-    	Ultimate();
+	if (value)
+	{
+		if (CurUltimateCoolTime >= UltimateCoolTime)
+		{
+			isUltimate = value;
+			CurUltimateCoolTime = 0.f;
+			CurUltimateDuration = 0.f;
+		}
+	}
+	else
+	{
+		isUltimate = value;
+		isMeleeAttack = false;
+		isSmash = false;
+		MeleeAttackCoolTime = 8.f;
+	}
 }
 
-bool ADestinyFPSBase::Server_Ultimate_Validate()
+bool ADestinyFPSBase::Server_Ultimate_Validate(bool value)
 {
     return true;
 }
 
-void ADestinyFPSBase::Server_MeleeAttack_Implementation()
+void ADestinyFPSBase::Server_MeleeAttack_Implementation(bool value)
 {
-	if(HasAuthority())
-    	MeleeAttack();
+	if (value)
+	{
+		if (CurMeleeAttackCoolTime >= MeleeAttackCoolTime)
+		{
+			isMeleeAttack = value;
+			CurMeleeAttackCoolTime = 0.f;
+		}
+	}
+	else
+	{
+		isMeleeAttack = value;
+		isTitanPunch = value;
+	}
 }
 
-bool ADestinyFPSBase::Server_MeleeAttack_Validate()
+bool ADestinyFPSBase::Server_MeleeAttack_Validate(bool value)
 {
     return true;
 }
 
-void ADestinyFPSBase::Server_Grenade_Implementation()
+void ADestinyFPSBase::Server_Grenade_Implementation(bool value)
 {
-	if(HasAuthority())
-    	Grenade();
+	if (value)
+	{
+		if (CurGrenadeCoolTime >= GrenadeCoolTime)
+		{
+			isGrenade = value;
+			CurGrenadeCoolTime = 0.f;
+		}
+	}
+	else
+	{
+		isGrenade = value;
+	}
 }
 
-bool ADestinyFPSBase::Server_Grenade_Validate()
+bool ADestinyFPSBase::Server_Grenade_Validate(bool value)
 {
     return true;
+}
+
+void ADestinyFPSBase::Server_Smash_Implementation(bool value)
+{
+	if (value)
+	{
+		if (CurSmashCoolTime >= SmashCoolTime)
+		{
+			isSmash = value;
+			CurSmashCoolTime = 0.f;
+		}
+	}
+	else
+	{
+		isSmash = value;
+	}
+}
+
+bool ADestinyFPSBase::Server_Smash_Validate(bool value)
+{
+    return true;
+}
+
+void ADestinyFPSBase::OnRep_Skill()
+{
+	if (isSkill)
+	{
+		if ((PlayerClass == EPlayerClassEnum::TITAN) || 
+		(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
+		{
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+		}
+	}
+	else
+	{
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	}
+}
+
+void ADestinyFPSBase::OnRep_Ultimate()
+{
+	if (isUltimate)
+	{
+		GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
+		if (PlayerClass == EPlayerClassEnum::TITAN)
+		{
+			GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Switching to Third Person"));
+			MeleeAttackCoolTime = 2.f;
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+			// Titan Ultimate Start
+			if (TitanUltimateFistParticle)
+			{
+				UGameplayStatics::SpawnEmitterAttached(
+					TitanUltimateFistParticle,
+					TppMesh,
+					FName("TitanUltimateFistSocket"),
+					FVector::ZeroVector, 
+					FRotator::ZeroRotator,
+					EAttachLocation::SnapToTarget,
+					true
+				);
+			}
+		}
+		else if (PlayerClass == EPlayerClassEnum::WARLOCK)
+		{
+			CheckStartWarlockUltimate();
+		}
+		else if (PlayerClass == EPlayerClassEnum::HUNTER)
+		{
+			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			SwitchToThirdPerson();
+			SpearMesh->SetVisibility(true);
+		}
+	}
+	else
+	{
+		SwitchToFirstPerson();
+		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	}
+}
+
+void ADestinyFPSBase::OnRep_MeleeAttack()
+{
+	if (isMeleeAttack)
+	{
+		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+		SwitchToThirdPerson();
+	}
+	else
+	{
+		if (!isUltimate)
+		{
+			WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+			SwitchToFirstPerson();
+		}
+	}
 }
