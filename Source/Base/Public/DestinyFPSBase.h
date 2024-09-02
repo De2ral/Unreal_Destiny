@@ -107,10 +107,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* DeathReviveAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Replicated)
 	bool bIsSliding = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Replicated)
 	bool bPlayerSprint = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -134,26 +134,26 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly,Replicated)
 	FVector SlideVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerClassEnum PlayerClass;
 
 	// Skill Variable
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Skill, EditAnywhere, BlueprintReadWrite)
 	bool isSkill = false;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isGrenade = false;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Ultimate, EditAnywhere, BlueprintReadWrite)
 	bool isUltimate = false;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isSmash = false;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_MeleeAttack, EditAnywhere, BlueprintReadWrite)
 	bool isMeleeAttack = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -200,6 +200,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HunterUltimateAttackDamage = 40.f;
+
+	UPROPERTY(Replicated)
+	float SlideSpeedScale = 2.3f;
+
+	UPROPERTY(Replicated)
+	float SlideCapsuleHeight = 0.0f;
 
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* HunterComboMontage;
@@ -277,7 +283,8 @@ public:
 	void SprintEnd(const FInputActionValue& Value);
 
 	void Slide(const FInputActionValue& Value);
-	void SlideEnd(const FInputActionValue& Value);
+	
+	void OnRep_Slide();
 
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
@@ -403,25 +410,48 @@ public:
 	void ResetCombo();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Skill();
+	void Server_Skill(bool value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Ultimate();
+	void Server_Ultimate(bool value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_MeleeAttack();
+	void Server_MeleeAttack(bool value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Grenade();
-	
-private:
-	float CurSkillCoolTime = SkillCoolTime;
-	float CurGrenadeCoolTime = GrenadeCoolTime;
+	void Server_Grenade(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Smash(bool value);
+
+	UFUNCTION()
+	void OnRep_Skill();
+
+	UFUNCTION()
+	void OnRep_Ultimate();
+
+	UFUNCTION()
+	void OnRep_MeleeAttack();
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurSkillCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurGrenadeCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	float CurUltimateCoolTime;
-	float CurUltimateDuration = UltimateDuration;
-	float CurSmashCoolTime = SmashCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurUltimateDuration;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurSmashCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	float CurMeleeAttackCoolTime;
 	
+private:
 	float CurComboAttackDelay = 0.f;
 	float ComboAttackDelay = 0.4f;
 
@@ -445,8 +475,6 @@ private:
 	
 	int jumpCount = 0;
 	float DefaultCapsuleHeight;
-    float SlideCapsuleHeight;
-	float SlideSpeedScale = 2.3f;
 	FVector LastPlayerPos;
 	float PosTickCoolTime = 400.0f;
 	bool bIsPlayerAlive = true;
