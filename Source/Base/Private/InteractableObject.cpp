@@ -35,6 +35,7 @@ void AInteractableObject::BeginPlay()
 void AInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 
 }
 
