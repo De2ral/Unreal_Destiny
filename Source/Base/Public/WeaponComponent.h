@@ -122,7 +122,7 @@ public:
 
     void Reload();
 
-
+    bool GetIsAiming() {return bIsAiming;}
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void FillAmmo();
 
@@ -152,8 +152,8 @@ public:
 
     void ChangeGunPose(int inbool);
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
-    bool bIsAiming;
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
+    bool bIsAiming = false;
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
 
@@ -209,4 +209,6 @@ private:
     UParticleSystem* LauncherFlash;
     
     UParticleSystem* HitFlash;
+
+    float OriginalMouseSensitivity;
 };

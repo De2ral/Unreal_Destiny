@@ -482,8 +482,16 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		AddControllerYawInput(LookVector.X);
-		AddControllerPitchInput(LookVector.Y);
+		if(WeaponComponent->GetIsAiming())
+		{
+			AddControllerYawInput(LookVector.X * 0.1f);
+			AddControllerPitchInput(LookVector.Y * 0.1f);
+		}
+		else
+		{
+			AddControllerYawInput(LookVector.X);
+			AddControllerPitchInput(LookVector.Y);
+		}
 	}
 }
 

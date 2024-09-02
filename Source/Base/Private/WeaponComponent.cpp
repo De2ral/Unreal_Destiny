@@ -51,7 +51,9 @@ void UWeaponComponent::BeginPlay()
     
     AddMapping(PlayerCharacter);
 
-
+    APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+    OriginalMouseSensitivity = PlayerController->InputYawScale_DEPRECATED;
+    UE_LOG(LogTemp, Warning, TEXT("OriginalMouseSensitivity: %f"),OriginalMouseSensitivity);
     if (AmmoWidgetClass)
 	{
         //CurrentAmmo = MaxAmmo;
@@ -458,7 +460,28 @@ void UWeaponComponent::StartAiming()
     UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
     bIsAiming = true;
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
-    return;
+    //APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+    //PlayerController->InputYawScale_DEPRECATED = OriginalMouseSensitivity * 0.01f;  // 감도 감소 (0.5배로)
+    //if(CurrentScopeX <= 0.4f)
+    //{
+    //    APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+    //    FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
+    //    FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+    //    FVector ForwardVector = CameraRotation.Vector();
+    //    FVector RightVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Y);
+    //    FVector UpVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Z);
+    //    
+    //    FVector TargetLocation = CameraLocation + (ForwardVector * 50.0f); 
+    //    TargetLocation -= UpVector * CurrentWeapon.AimLocation;
+//
+    //    FQuat QuatRotation = FQuat(CameraRotation);
+    //    FRotator TargetRotation = QuatRotation.Rotator();
+    //    QuatRotation = QuatRotation * FQuat(FRotator(0.0f, CurrentWeapon.AimRotation, 0.0f)); // 기존 Yaw 조정 부분을 쿼터니언으로 처리
+    //    TargetRotation = QuatRotation.Rotator();
+//
+    //    CurrentStaticMeshComponent->SetWorldLocation(TargetLocation);
+    //    CurrentStaticMeshComponent->SetWorldRotation(TargetRotation);
+    //}
 }
 
 void UWeaponComponent::StopAiming()
@@ -466,35 +489,47 @@ void UWeaponComponent::StopAiming()
     UE_LOG(LogTemp, Warning, TEXT("StopAiming"));
     bIsAiming = false;
     AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+    //APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+    //PlayerController->InputYawScale_DEPRECATED = OriginalMouseSensitivity;  // 감도 감소 (0.5배로)
     return;
 }
 
 void UWeaponComponent::EquipWeapon1()
 {
-    LoadWeaponByName(Slot1Weapon);
-    FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
-    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-    return;
+    if(!bIsAiming)
+    {
+        LoadWeaponByName(Slot1Weapon);
+        FString ModelPath = CurrentWeapon.GunModelPath;
+        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+        return;
+    } 
 }
 
 void UWeaponComponent::EquipWeapon2()
 {
-    LoadWeaponByName(Slot2Weapon);
-    FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);   
-    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    if(!bIsAiming)
+    {
+        LoadWeaponByName(Slot2Weapon);
+        FString ModelPath = CurrentWeapon.GunModelPath;
+        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);   
+        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    }
+    
 }
 
 void UWeaponComponent::EquipWeapon3()
 {
-    LoadWeaponByName(Slot3Weapon);
-    FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
-    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    if(!bIsAiming)
+    {
+        LoadWeaponByName(Slot3Weapon);
+        FString ModelPath = CurrentWeapon.GunModelPath;
+        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    }
 }
 
 void UWeaponComponent::SetSlot1Weapon(FName inweapon)
@@ -968,11 +1003,40 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
             }
         }
 
-    FVector NewLocation = FMath::VInterpTo(CurrentStaticMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
-    FRotator NewRotation = FMath::RInterpTo(CurrentStaticMeshComponent->GetComponentRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
 
-    FVector MeshNewLocation = FMath::VInterpTo(Character->GetFppMesh()->GetRelativeLocation(), MeshTargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
-    FRotator MeshNewRotation = FMath::RInterpTo(Character->GetFppMesh()->GetRelativeRotation(), MeshTargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+    APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+    FVector NewLocation = FVector::ZeroVector;
+    FRotator NewRotation = FRotator::ZeroRotator;
+
+    FVector MeshNewLocation = FVector::ZeroVector; 
+    FRotator MeshNewRotation = FRotator::ZeroRotator;
+
+    
+
+    if(CurrentScopeX > 0.5f)
+    {
+        NewLocation = FMath::VInterpTo(CurrentStaticMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+        NewRotation = FMath::RInterpTo(CurrentStaticMeshComponent->GetComponentRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+
+        MeshNewLocation = FMath::VInterpTo(Character->GetFppMesh()->GetRelativeLocation(), MeshTargetLocation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+        MeshNewRotation = FMath::RInterpTo(Character->GetFppMesh()->GetRelativeRotation(), MeshTargetRotation, GetWorld()->GetDeltaSeconds(), AimingSpeed);
+
+       
+        
+        //PlayerController->InputYawScale_DEPRECATED *= 0.5f;  // 감도 감소 (0.5배로)
+    }
+
+    else
+    {
+        NewLocation = FMath::VInterpTo(CurrentStaticMeshComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), 50.0f);
+        NewRotation = FMath::RInterpTo(CurrentStaticMeshComponent->GetComponentRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), 50.0f);
+
+        MeshNewLocation = FMath::VInterpTo(Character->GetFppMesh()->GetRelativeLocation(), MeshTargetLocation, GetWorld()->GetDeltaSeconds(), 50.0f);
+        MeshNewRotation = FMath::RInterpTo(Character->GetFppMesh()->GetRelativeRotation(), MeshTargetRotation, GetWorld()->GetDeltaSeconds(), 50.0f);
+
+        PlayerController->InputYawScale_DEPRECATED = OriginalMouseSensitivity;
+    }
+    
     if(CurrentWeapon.GunType == GunTypeList::PISTOL)
     {
         Character->GetFppMesh()->SetRelativeLocation(MeshNewLocation);
