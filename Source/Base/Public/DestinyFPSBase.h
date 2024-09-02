@@ -141,19 +141,19 @@ public:
 	EPlayerClassEnum PlayerClass;
 
 	// Skill Variable
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Skill, EditAnywhere, BlueprintReadWrite)
 	bool isSkill = false;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isGrenade = false;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Ultimate, EditAnywhere, BlueprintReadWrite)
 	bool isUltimate = false;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isSmash = false;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_MeleeAttack, EditAnywhere, BlueprintReadWrite)
 	bool isMeleeAttack = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -410,25 +410,48 @@ public:
 	void ResetCombo();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Skill();
+	void Server_Skill(bool value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Ultimate();
+	void Server_Ultimate(bool value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_MeleeAttack();
+	void Server_MeleeAttack(bool value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Grenade();
-	
-private:
-	float CurSkillCoolTime = SkillCoolTime;
-	float CurGrenadeCoolTime = GrenadeCoolTime;
+	void Server_Grenade(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Smash(bool value);
+
+	UFUNCTION()
+	void OnRep_Skill();
+
+	UFUNCTION()
+	void OnRep_Ultimate();
+
+	UFUNCTION()
+	void OnRep_MeleeAttack();
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurSkillCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurGrenadeCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	float CurUltimateCoolTime;
-	float CurUltimateDuration = UltimateDuration;
-	float CurSmashCoolTime = SmashCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurUltimateDuration;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurSmashCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	float CurMeleeAttackCoolTime;
 	
+private:
 	float CurComboAttackDelay = 0.f;
 	float ComboAttackDelay = 0.4f;
 

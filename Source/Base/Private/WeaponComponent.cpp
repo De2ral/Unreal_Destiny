@@ -455,10 +455,13 @@ void UWeaponComponent::StopFiring()
 
 void UWeaponComponent::StartAiming()
 {
-    UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
-    bIsAiming = true;
-    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
-    return;
+    if(!Character->isUltimate && !Character->isGrenade && !Character->isMeleeAttack)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
+        bIsAiming = true;
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+        return;
+    }
 }
 
 void UWeaponComponent::StopAiming()
