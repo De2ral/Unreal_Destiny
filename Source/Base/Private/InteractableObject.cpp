@@ -32,6 +32,12 @@ void AInteractableObject::BeginPlay()
 	ObjCollider->OnComponentEndOverlap.AddDynamic(this,&AInteractableObject::OnOverlapEnd);
 }
 
+void AInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+}
+
 void AInteractableObject::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
     if (OtherActor->ActorHasTag("DestinyPlayer"))
@@ -65,11 +71,6 @@ void AInteractableObject::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AAct
 	
 }
 
-void AInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-}
 
 // Called every frame
 void AInteractableObject::Tick(float DeltaTime)

@@ -2,7 +2,7 @@
 
 
 #include "MyStash.h"
-
+#include "Net/UnrealNetwork.h"
 #include "DestinyFPSBase.h"
 
 // Sets default values
@@ -11,12 +11,8 @@ AMyStash::AMyStash()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//StashMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StashMesh"));
-
-	//Collider = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionTest"));
-	//Collider->SetupAttachment(RootComponent);
-
-	//StashMesh->SetupAttachment(Collider);
+	// Replicate this actor
+    bReplicates = true;
 
 	ObjInteractTime = 40.0f;
 
@@ -26,26 +22,36 @@ AMyStash::AMyStash()
 void AMyStash::BeginPlay()
 {
 	Super::BeginPlay();
-	//Collider->OnComponentBeginOverlap.AddDynamic(this,&AMyStash::OnOverlapBegin);
-	//Collider->OnComponentEndOverlap.AddDynamic(this,&AMyStash::OnOverlapEnd);
 	
+}
+
+void AMyStash::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    // Replicate any relevant variables
+    DOREPLIFETIME(AMyStash, MinItemValue);
+    DOREPLIFETIME(AMyStash, MaxItemValue);
+    DOREPLIFETIME(AMyStash, ItemsToSpawn);
 }
 
 void AMyStash::ObjAction(ADestinyFPSBase* Player)
 {
 
-	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> MyStash.ObjAction()"));
+ 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("InteractableObj -> MyStash.ObjAction()"));
 
-	//int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
-    //ItemDrop(ItemCount);
+    int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
+    ItemDrop(ItemCount);
 
-	if(HasAuthority())
+    if (HasAuthority()) // 서버일 경우
     {
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Authority: Server, Destroying on server"));
         Destroy();
     }
-    else
+    else // 클라이언트일 경우 서버에 파괴 요청
     {
-        ServerDestroy();  // 클라이언트에서는 서버에게 파괴 요청
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Authority: Client, Requesting server to destroy"));
+        ServerDestroy();
     }
 
 }
@@ -73,18 +79,10 @@ void AMyStash::ItemDrop(int32 ItemCount)
 
 void AMyStash::ServerDestroy_Implementation()
 {
-    if (IsValid(this))
-    {
-        MulticastDestroy_Implementation();
-    }
+    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Server is destroying the object"));
+    Destroy();
 }
 
-void AMyStash::MulticastDestroy_Implementation()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Server is destroying the object"));
-	Destroy();
-
-}
 
 bool AMyStash::ServerDestroy_Validate()
 {

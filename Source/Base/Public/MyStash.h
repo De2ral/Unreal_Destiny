@@ -27,16 +27,16 @@ protected:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerDestroy();
 
-	UFUNCTION(NetMulticast,Reliable)
-	void MulticastDestroy();
+	// 리플리케이션 설정 함수
+    virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Item")
 	int32 MinItemValue = 1;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
+	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Item")
 	int32 MaxItemValue = 10;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+	UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite, Category = "Spawn")
     TArray<TSubclassOf<AActor>> ItemsToSpawn;
 
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
