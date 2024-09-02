@@ -22,10 +22,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere,Replicated)
+	UPROPERTY(EditAnywhere)
 	class USphereComponent* ObjCollider;
 
-	UPROPERTY(EditAnywhere,Replicated)
+	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* ObjMesh;
 
 	UPROPERTY(VisibleAnywhere)
@@ -41,7 +41,7 @@ protected:
     virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	UFUNCTION(Server,Reliable)
-	void OnRepObjAction();
+	void ServerObjAction();
 
 	UFUNCTION(NetMulticast,Reliable)
 	void MultiCastObjAction();

@@ -22,6 +22,9 @@ protected:
 
 	virtual void ObjAction(ADestinyFPSBase* Player);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDestroy();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

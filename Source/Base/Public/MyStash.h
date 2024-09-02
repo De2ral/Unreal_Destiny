@@ -24,6 +24,12 @@ protected:
 
 	virtual void ObjAction(ADestinyFPSBase* Player) override;
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDestroy();
+
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastDestroy();
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
 	int32 MinItemValue = 1;
 

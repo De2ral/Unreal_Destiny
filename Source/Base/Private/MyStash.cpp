@@ -33,12 +33,20 @@ void AMyStash::BeginPlay()
 
 void AMyStash::ObjAction(ADestinyFPSBase* Player)
 {
+
 	GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,TEXT("InteractableObj -> MyStash.ObjAction()"));
 
-	int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
-    ItemDrop(ItemCount);
+	//int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
+    //ItemDrop(ItemCount);
 
-	Destroy();
+	if(HasAuthority())
+    {
+        Destroy();
+    }
+    else
+    {
+        ServerDestroy();  // 클라이언트에서는 서버에게 파괴 요청
+    }
 
 }
 
@@ -61,6 +69,26 @@ void AMyStash::ItemDrop(int32 ItemCount)
     	}
 	}
 
+}
+
+void AMyStash::ServerDestroy_Implementation()
+{
+    if (IsValid(this))
+    {
+        MulticastDestroy_Implementation();
+    }
+}
+
+void AMyStash::MulticastDestroy_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Server is destroying the object"));
+	Destroy();
+
+}
+
+bool AMyStash::ServerDestroy_Validate()
+{
+    return true;  // 이 함수가 검증을 통과했음을 의미
 }
 
 // Called every frame

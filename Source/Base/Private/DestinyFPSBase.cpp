@@ -516,7 +516,7 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 
 void ADestinyFPSBase::Skill()
 {
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 	if(HasAuthority())
 	{
 		isSkill = true;

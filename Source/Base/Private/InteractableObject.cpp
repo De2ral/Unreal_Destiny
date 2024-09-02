@@ -69,8 +69,6 @@ void AInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AInteractableObject, ObjCollider);
-	DOREPLIFETIME(AInteractableObject, ObjMesh);
 }
 
 // Called every frame
@@ -80,25 +78,31 @@ void AInteractableObject::Tick(float DeltaTime)
 
 	if(APlayer && APlayer->bIsInteractComplete) 
 	{
-		OnRepObjAction_Implementation();
+		ServerObjAction_Implementation();
 		APlayer->bIsInteractComplete = false;
 	}
 	
 
 }
 
-void AInteractableObject::OnRepObjAction_Implementation()
+void AInteractableObject::ServerObjAction_Implementation()
 {
-	MultiCastObjAction();
+	if (HasAuthority()) // 서버에서 호출
+    {
+        MultiCastObjAction();
+    }
+    else // 클라이언트에서 호출
+    {
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Client to Server"));
+        ObjAction(APlayer);
+    }
 
 }
 
 void AInteractableObject::MultiCastObjAction_Implementation()
 {
-	if (HasAuthority())
-    {
-		ObjAction(APlayer);
-	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Server to Everyone"));
+	ObjAction(APlayer);
 
 }
 
