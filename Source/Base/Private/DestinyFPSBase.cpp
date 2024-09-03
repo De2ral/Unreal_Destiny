@@ -146,7 +146,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	if(HunterSpearAsset.Succeeded())
 		HunterSpearMesh = HunterSpearAsset.Object;
 
-	PlayerClass = EPlayerClassEnum::WARLOCK;
+	PlayerClass = EPlayerClassEnum::HUNTER;
 
 	LastPlayerPos = GetActorLocation();
 
