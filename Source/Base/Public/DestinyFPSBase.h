@@ -59,7 +59,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* TppMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* SpearMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -407,6 +407,7 @@ public:
 	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
 
 	void PerformComboAttack();
+	void PlayMontage_Internal(int32 ComboStage);
 	void ResetCombo();
 
 	UFUNCTION(Server, Reliable, WithValidation)
@@ -423,6 +424,9 @@ public:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_Smash(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_PerformComboAttack(int32 ComboStage);
 
 	UFUNCTION()
 	void OnRep_Skill();
@@ -450,6 +454,12 @@ public:
 
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	float CurMeleeAttackCoolTime;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateSpearMeshVisibility(bool bVisible);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayComboMontage(int32 ComboStage);
 	
 private:
 	float CurComboAttackDelay = 0.f;
@@ -483,7 +493,7 @@ private:
 
 	int32 HunterComboStage;
 	bool bIsHunterAttacking;
-	bool bHasNextComboQueued;
+	bool isHasNexCombo;
 	float ComboInputWindow;
 	FTimerHandle ComboResetTimer;
 };
