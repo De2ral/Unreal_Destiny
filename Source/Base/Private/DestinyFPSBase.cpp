@@ -25,8 +25,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Warlock_Melee_Fireball.h"
 #include "Warlock_Skill_Ultimate.h"
-#include "CarriableObject.h"
 #include "EngineUtils.h"
+#include "ReplicatedObj.h"
 
 
 // Sets default values
@@ -196,6 +196,9 @@ void ADestinyFPSBase::BeginPlay()
 
 	CurSkillCoolTime = SkillCoolTime;
 	CurGrenadeCoolTime = GrenadeCoolTime;
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this,&ADestinyFPSBase::OnOverlapBegin);
+	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this,&ADestinyFPSBase::OnOverlapEnd);
 
 	if (HUDWidgetClass)
 	{
@@ -376,6 +379,13 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		GetCharacterMovement()->MaxWalkSpeed /= SlideSpeedScale;
   		GetCapsuleComponent()->SetCapsuleHalfHeight(DefaultCapsuleHeight);
 	}
+
+	if(InterObj && bIsInteractComplete)
+	{
+		
+		InterObjAction();
+		bIsInteractComplete = false;
+	} 
 
 	//->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf("MaxWalkSpeed = %f",GetCharacterMovement()->MaxWalkSpeed));
 
@@ -631,7 +641,7 @@ void ADestinyFPSBase::SwitchToThirdPerson()
 	}
 }
 
-void ADestinyFPSBase::PlayerCarryingStart(ACarriableObject* CarriableObject)
+void ADestinyFPSBase::PlayerCarryingStart(AReplicatedObj* CarriableObject)
 {
 	 if (!CarriableObject)
     {
@@ -685,7 +695,7 @@ void ADestinyFPSBase::PlayerCarryingEnd()
 
         	// ACarriableObject를 플레이어 앞에 스폰
         	FActorSpawnParameters SpawnParams;
-        	ACarriableObject* DroppedObject = GetWorld()->SpawnActor<ACarriableObject>(ACarriableObject::StaticClass(), DropLocation, PlayerRotation, SpawnParams);
+        	AReplicatedObj* DroppedObject = GetWorld()->SpawnActor<AReplicatedObj>(AReplicatedObj::StaticClass(), DropLocation, PlayerRotation, SpawnParams);
 
         	// DroppedObject에 원래 메쉬 설정
         	if (DroppedObject && DroppedObject->GetObjMesh())
@@ -1454,6 +1464,34 @@ void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedCompone
 	}
 }
 
+void ADestinyFPSBase::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
+{
+	if (OtherActor->ActorHasTag("InteractObj") || OtherActor->ActorHasTag("NPC"))
+    {
+		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Yellow,TEXT("isObj"));
+        InterObj = Cast<AReplicatedObj>(OtherActor);
+
+        if (bIsPlayerAlive)
+        {
+            bPlayerInteractable = true;
+            MaxInteractTime = InterObj->ObjInteractTime;
+        }
+        
+    }
+
+}
+
+void ADestinyFPSBase::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor->ActorHasTag("InteractObj") || OtherActor->ActorHasTag("NPC"))
+    {
+		if (bIsPlayerAlive) bPlayerInteractable = false;
+	
+	}
+
+
+}
+
 void ADestinyFPSBase::Server_Skill_Implementation(bool value)
 {
 	if (value)
@@ -1538,6 +1576,28 @@ void ADestinyFPSBase::Server_Grenade_Implementation(bool value)
 	}
 }
 
+void ADestinyFPSBase::ServerInterObjAction_Implementation()
+{
+
+	InterObjAction();
+
+}
+
+void ADestinyFPSBase::MultiInterObjAction_Implementation()
+{
+
+	InterObj->GetObjMesh()->SetStaticMesh(InterObj->AfterInteractMesh->GetStaticMesh());
+
+}
+
+
+
+bool ADestinyFPSBase::ServerInterObjAction_Validate()
+{
+    return true;
+}
+
+
 bool ADestinyFPSBase::Server_Grenade_Validate(bool value)
 {
     return true;
@@ -1562,6 +1622,42 @@ void ADestinyFPSBase::Server_Smash_Implementation(bool value)
 bool ADestinyFPSBase::Server_Smash_Validate(bool value)
 {
     return true;
+}
+
+void ADestinyFPSBase::InterObjAction()
+{
+	if(HasAuthority())
+	{	
+
+		if(InterObj->ActorHasTag("Stash"))
+		{
+			int32 ItemCount = FMath::RandRange(InterObj->MinItemValue,InterObj->MaxItemValue);
+			InterObj->ItemDrop(ItemCount);
+			InterObj->Destroy();
+		}
+
+		if(InterObj->ActorHasTag("NPC")) InterObj->ShowQuestUI();
+
+		if(InterObj->ActorHasTag("Carriable"))
+		{
+			if(!bIsCarrying) PlayerCarryingStart(InterObj);
+			SwitchToThirdPerson();
+			InterObj->Destroy();
+		}
+
+		if(InterObj->ActorHasTag("CarryInput"))
+		{
+			if(bIsCarrying)
+			{
+				CarriedMeshComponent->DestroyComponent();
+				CarriedMeshComponent = nullptr;
+				PlayerCarryingEnd();
+				InterObj->SetObjIsFill(true);
+			}
+
+		}
+
+	} else ServerInterObjAction();
 }
 
 void ADestinyFPSBase::OnRep_Skill()

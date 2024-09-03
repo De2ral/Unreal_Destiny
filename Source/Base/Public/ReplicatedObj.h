@@ -24,32 +24,27 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class USphereComponent* ObjCollider;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	class UStaticMeshComponent* ObjMesh;
 
 	UPROPERTY(VisibleAnywhere)
 	class ADestinyFPSBase* APlayer;
 
-	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	// UFUNCTION()
+	// void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION()
-	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UFUNCTION(Server,Reliable,WithValidation)
-	void ServerRepliObjAction();
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
-	int32 MinItemValue = 1;
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
-	int32 MaxItemValue = 10;
+	// UFUNCTION()
+	// void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
     TArray<TSubclassOf<AActor>> ItemsToSpawn;
 
-	UFUNCTION(BlueprintCallable, Category = "Spawn")
-	void ItemDrop(int32 ItemCount);
+	UPROPERTY(EditAnywhere, Category="UI")
+	TSubclassOf<UUserWidget> QuestUIClass;
+
+	UUserWidget* QuestUIInstance;
+
+	bool bIsFill = false;
 
 public:	
 	// Called every frame
@@ -58,10 +53,28 @@ public:
 	UPROPERTY(EditAnywhere)
 	float ObjInteractTime = 60.0f;
 
-	UFUNCTION()
-	void RepliObjAction(ADestinyFPSBase* Player);
+	UFUNCTION(BlueprintCallable, Category = "Spawn")
+	void ItemDrop(int32 ItemCount);
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
+	int32 MinItemValue = 1;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
+	int32 MaxItemValue = 10;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	class UStaticMeshComponent* AfterInteractMesh;
 
 	UFUNCTION()
 	UStaticMeshComponent* GetObjMesh() { return ObjMesh; }
+
+	UFUNCTION()
+	void ShowQuestUI();
+
+	UFUNCTION(BlueprintCallable)
+	bool GetObjIsFill() {return bIsFill; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetObjIsFill(bool value) { bIsFill = value; }
 
 };

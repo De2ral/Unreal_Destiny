@@ -62,6 +62,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* SpearMesh;
 
+	UPROPERTY(VisibleAnywhere)
+	class AReplicatedObj* InterObj;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputMappingContext* DefaultMappingContext;
 
@@ -381,7 +384,7 @@ public:
 
 	void SetClassValue();
 	void TitanPunchCollisionEvents();
-	void PlayerCarryingStart(ACarriableObject* CarriableObject);
+	void PlayerCarryingStart(AReplicatedObj* CarriableObject);
 	void PlayerCarryingEnd();
 
 	UFUNCTION(BlueprintCallable)
@@ -404,6 +407,12 @@ public:
                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
                              bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
 
 	void PerformComboAttack();
@@ -423,6 +432,14 @@ public:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_Smash(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerInterObjAction();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiInterObjAction();
+
+	void InterObjAction();
 
 	UFUNCTION()
 	void OnRep_Skill();
