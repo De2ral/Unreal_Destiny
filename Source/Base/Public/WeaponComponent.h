@@ -66,6 +66,14 @@ public:
     UPROPERTY()
     UWeaponWidget* AmmoWidget;
 
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UWeaponWidget> AmmoWidgetClass2;
+
+    UPROPERTY()
+    UWeaponWidget* AmmoWidget2;
+
+
+
     // 애니메이션
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* ReloadAnimation;
@@ -111,14 +119,20 @@ public:
     void Fire();
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFire();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastTakeFire();
 
     void FireInRange();
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFireInRange();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastTakeFireInRange();
 
     void FireLauncher();
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerFireLauncher();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastTakeFireLauncher();
 
     void StartFiring();
     void StopFiring();
@@ -142,18 +156,24 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void EndReloading() {IsReloading = false;}
 
-    void EquipWeapon1();
-    void EquipWeapon2();
-    void EquipWeapon3();
     
+    void EquipWeapon1();
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerEquipWeapon1();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipWeapon1();
 
+    void EquipWeapon2();
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerEquipWeapon2();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipWeapon2();
 
+    void EquipWeapon3();
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerEquipWeapon3();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipWeapon3();
 
     void ChangeCrosshair();
 
@@ -189,8 +209,7 @@ public:
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     
-    UFUNCTION(NetMulticast, Reliable)
-    void MulticastOnWeaponEquipped(int NewGunType, int32 CurrentAmmo, int32 StoredAmmo);
+    UStaticMeshComponent* GetCurrentStaticMeshComponent_TPP() {return CurrentStaticMeshComponent_TPP;}
 public:
     ADestinyFPSBase* Character;
     
@@ -214,6 +233,8 @@ public:
     int StoredAmmo_Reinforce = 300;
 
     UStaticMeshComponent* CurrentStaticMeshComponent;
+    UStaticMeshComponent* CurrentStaticMeshComponent_TPP;
+
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
    

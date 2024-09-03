@@ -58,7 +58,8 @@ public:
 	void SetbExplodeOnImpact(bool inbool) {bExplodeOnImpact = inbool;}
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
+
+	void DelayedDestroy();
 private:
 	float Damage;
 

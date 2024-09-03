@@ -21,8 +21,7 @@ AFpsCppProjectile::AFpsCppProjectile()
 
     // 네트워크 복제 설정
     bReplicates = true; 
-    SetReplicateMovement(true);
-
+    //SetReplicateMovement(true);
 
 
 	// Use a sphere as a simple collision representation
@@ -132,6 +131,13 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
     {
        if (bExplodeOnImpact)
         {
+            if (OtherActor->GetClass() == GetClass())
+            {
+                Destroy();
+                return;
+            }
+            
+            
             // 폭발 데미지를 적용
             UGameplayStatics::ApplyRadialDamage(
                 this,
@@ -147,10 +153,20 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
             if (HitFlash_Launcher)
                 UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash_Launcher, Hit.Location,FRotator(0.0f, 0.0f, 0.0f), FVector(2.0f, 2.0f, 2.0f));
-            Destroy();
+
+            FTimerHandle TimerHandle;
+            GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AFpsCppProjectile::DelayedDestroy, 0.1f, false);
+            
         }
         else
         {
+            if (OtherActor->GetClass() == GetClass())
+            {
+                Destroy();
+                return;
+            }
+            
+            
             AController* InstigatorController = GetInstigatorController();
             UGameplayStatics::ApplyDamage(
                 OtherActor,
@@ -162,11 +178,16 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
             if (HitFlash)
                 UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, Hit.Location,FRotator(0.0f, 0.0f, 0.0f), FVector(0.25f, 0.25f, 0.25f));
-            Destroy();
+              
+            FTimerHandle TimerHandle;
+            GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AFpsCppProjectile::DelayedDestroy, 0.1f, false);
         }
     }
 }
-
+void AFpsCppProjectile::DelayedDestroy()
+{
+    Destroy();
+}
 void AFpsCppProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	
@@ -239,10 +260,5 @@ void AFpsCppProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    // Mesh 컴포넌트의 복제 설정
-    //DOREPLIFETIME(AFpsCppProjectile, Mesh);
-
-    // 필요시 다른 변수도 복제 설정 가능
-    //DOREPLIFETIME(AFpsCppProjectile, Damage);
     DOREPLIFETIME(AFpsCppProjectile, bExplodeOnImpact);
 }

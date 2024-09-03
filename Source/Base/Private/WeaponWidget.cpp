@@ -84,6 +84,8 @@ void UWeaponWidget::ImageMove(float NewX, UStaticMeshComponent* Object, bool IsR
 
 void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
 {
+    UE_LOG(LogTemp, Warning, TEXT("SetTextureBasedOnGunType"));
+    UE_LOG(LogTemp, Warning, TEXT("GunType %d"),GunType);
     FString TexturePath;
 
     switch (GunType)
@@ -120,10 +122,14 @@ void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
         return;
     }
 
+    UE_LOG(LogTemp, Warning, TEXT("GunType %s"),*TexturePath);
+
     UTexture2D* LoadedTexture = LoadObject<UTexture2D>(nullptr, *TexturePath);
     if (LoadedTexture)
     {
-        BaseCrossImage->SetBrushFromTexture(LoadedTexture);
+        UE_LOG(LogTemp, Warning, TEXT("SetTextureBasedOnGunType success"));
+        if(BaseCrossImage)
+            BaseCrossImage->SetBrushFromTexture(LoadedTexture);
     }
     else
     {

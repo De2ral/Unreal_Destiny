@@ -51,25 +51,35 @@ void UWeaponComponent::BeginPlay()
     
     AddMapping(PlayerCharacter);
 
-    if (AmmoWidgetClass)
-	{
-        //CurrentAmmo = MaxAmmo;
-		AmmoWidget = CreateWidget<UWeaponWidget>(GetWorld(), AmmoWidgetClass);
-		if (AmmoWidget)
-		{
-			AmmoWidget->AddToViewport();
-			//AmmoWidget->UpdateAmmo(CurrentAmmo, MaxAmmo);
-		}
-	}
+    if(GetOwner()->HasAuthority())
+    {
+        if (AmmoWidgetClass)
+	    {
+            //CurrentAmmo = MaxAmmo;
+	    	AmmoWidget = CreateWidget<UWeaponWidget>(GetWorld(), AmmoWidgetClass);
+	    	if (AmmoWidget)
+	    	{
+	    		AmmoWidget->AddToViewport();
+	    	}
+	    }
+    }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("AmmoWidgetClass called failed."));
+        if (AmmoWidgetClass2)
+	    {
+            //CurrentAmmo = MaxAmmo;
+	    	AmmoWidget2 = CreateWidget<UWeaponWidget>(GetWorld(), AmmoWidgetClass2);
+	    	if (AmmoWidget2)
+	    	{
+	    		AmmoWidget2->AddToViewport();
+	    	}
+	    }
     }
-
-    if (GetOwner()->HasAuthority())
-    {
-        SetSlot1Weapon(TEXT("Rifle1"));
-    }
+    
+    //if (GetOwner()->HasAuthority())
+    //{
+    //    SetSlot1Weapon(TEXT("Rifle1"));
+    //}
 
     if (PlayerCharacter != nullptr)
     {
@@ -84,6 +94,8 @@ void UWeaponComponent::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter called failed."));
 	}
     FillAmmo();
+
+    ChangeCrosshair();
 }
 
 
@@ -92,14 +104,34 @@ void UWeaponComponent::Fire()
 {
     if (GetOwner()->HasAuthority())  // 서버에서 실행되는지 확인
     {
-        UE_LOG(LogTemp, Warning, TEXT("Fire"));
+        ServerFire();
+	}
+    
+    else
+    {
+        ServerFire();  // 클라이언트에서 호출 시 서버로 전달
+    }
+}
+void UWeaponComponent::ServerFire_Implementation()
+{
+    MulticastTakeFire();
+}
+bool UWeaponComponent::ServerFire_Validate()
+{
+    return true;  // 보통 추가 검증이 필요할 수 있음
+}
+void UWeaponComponent::MulticastTakeFire_Implementation()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Fire"));
 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
-		APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-        
-		const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+		APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+        FRotator SpawnRotation = FRotator::ZeroRotator;
+        if(PlayerController)
+		    SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+
         FVector MuzzleLocation;
 
         if(CurrentStaticMeshComponent)
@@ -147,8 +179,9 @@ void UWeaponComponent::Fire()
             }
         }
         
-		const FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
-		
+		FVector CameraLocation = FVector::ZeroVector;
+		if(PlayerController)
+            CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
 		const FVector TraceStart = CameraLocation;
 		const FVector TraceEnd = TraceStart + (SpawnRotation.Vector() * 1000000.0f);
 		FHitResult HitResult;
@@ -203,35 +236,38 @@ void UWeaponComponent::Fire()
         {
             Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
         }
-	}
-    }
-    else
-    {
-        ServerFire();  // 클라이언트에서 호출 시 서버로 전달
     }
 }
-
-void UWeaponComponent::ServerFire_Implementation()
-{
-    Fire();
-}
-
-bool UWeaponComponent::ServerFire_Validate()
-{
-    return true;  // 보통 추가 검증이 필요할 수 있음
-}
-
 
 void UWeaponComponent::FireInRange()
 {
     if (GetOwner()->HasAuthority())
     {
-        UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
+        ServerFireInRange();
+    }
+    
+    else
+    {
+        ServerFireInRange();
+    }
+    
+}
+void UWeaponComponent::ServerFireInRange_Implementation()
+{
+    MulticastTakeFireInRange();
+}
+bool UWeaponComponent::ServerFireInRange_Validate()
+{
+    return true;
+}
+void UWeaponComponent::MulticastTakeFireInRange_Implementation()
+{
+    UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
     UWorld* const World = GetWorld();
     if (World != nullptr)
     {
-        APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+        APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
         
         const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
         FVector MuzzleLocation;
@@ -310,34 +346,37 @@ void UWeaponComponent::FireInRange()
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
         }
     }
-    }
-    else
-    {
-        ServerFireInRange();
-    }
-    
 }
-void UWeaponComponent::ServerFireInRange_Implementation()
-{
-    FireInRange();
-}
-
-bool UWeaponComponent::ServerFireInRange_Validate()
-{
-    return true;
-}
-
 
 void UWeaponComponent::FireLauncher()
 {
     if (GetOwner()->HasAuthority())
     {
-        UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
+        ServerFireLauncher();
+    }
+    else
+    {
+        ServerFireLauncher();
+    }
+       
+	
+}
+void UWeaponComponent::ServerFireLauncher_Implementation()
+{
+    MulticastTakeFireLauncher();
+}
+bool UWeaponComponent::ServerFireLauncher_Validate()
+{
+    return true;  // 보통 추가 검증이 필요할 수 있음
+}
+void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
+{
+    UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
  
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
-		APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+		APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
         if (PlayerController == nullptr)
     {
         UE_LOG(LogTemp, Warning, TEXT("PlayerController is null."));
@@ -426,22 +465,6 @@ void UWeaponComponent::FireLauncher()
             Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
         }
     }
-    }
-    else
-    {
-        ServerFireLauncher();
-    }
-       
-	
-}
-void UWeaponComponent::ServerFireLauncher_Implementation()
-{
-    FireLauncher();
-}
-
-bool UWeaponComponent::ServerFireLauncher_Validate()
-{
-    return true;  // 보통 추가 검증이 필요할 수 있음
 }
 
 void UWeaponComponent::StartFiring()
@@ -507,7 +530,11 @@ void UWeaponComponent::StartAiming()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
     bIsAiming = true;
-    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+    if(GetOwner()->HasAuthority())
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+    else
+        AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+
     if(CurrentScopeX <= 0.1f)
     {
         FVector MeshTargetLocation = Character->GetFppMesh()->GetRelativeLocation();
@@ -549,7 +576,10 @@ void UWeaponComponent::StopAiming()
 {
     UE_LOG(LogTemp, Warning, TEXT("StopAiming"));
     bIsAiming = false;
-    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+    if(GetOwner()->HasAuthority())
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+    else
+        AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
     //APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
     //PlayerController->InputYawScale_DEPRECATED = OriginalMouseSensitivity;  // 감도 감소 (0.5배로)
     return;
@@ -559,106 +589,115 @@ void UWeaponComponent::EquipWeapon1()
 {
     if(GetOwner()->HasAuthority())
     {
-        if(!bIsAiming)
-        {
-            LoadWeaponByName(Slot1Weapon);
-            FString ModelPath = CurrentWeapon.GunModelPath;
-            LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-            //MulticastOnWeaponEquipped(int(CurrentWeapon.GunType), CurrentAmmo(), StoredAmmo()); 
-
-           
-           
-               
-        } 
+        
+        ServerEquipWeapon1();
+        //ChangeCrosshair();
+        
     }
     else
     {
         ServerEquipWeapon1();
+        //ChangeCrosshair();
     }
-    
 }
-
 bool UWeaponComponent::ServerEquipWeapon1_Validate()
 {
     // 필요 시 유효성 검사 추가
     return true;
 }
-
 void UWeaponComponent::ServerEquipWeapon1_Implementation()
 {
-    EquipWeapon1();
+    MulticastEquipWeapon1();
 }
-void UWeaponComponent::MulticastOnWeaponEquipped_Implementation(int NewGunType, int32 CurrentAmmo, int32 StoredAmmo)
+void UWeaponComponent::MulticastEquipWeapon1_Implementation()
 {
-    // 클라이언트에서 UI를 업데이트합니다.
-    
+    if(!bIsAiming)
+    {
+    LoadWeaponByName(Slot1Weapon);
+    FString ModelPath = CurrentWeapon.GunModelPath;
+    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+    }
 }
 
 void UWeaponComponent::EquipWeapon2()
 {
     if(GetOwner()->HasAuthority())
     {
-        if(!bIsAiming)
-        {
-            LoadWeaponByName(Slot2Weapon);
-            FString ModelPath = CurrentWeapon.GunModelPath;
-            LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-            //AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);   
-            //AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-        }
+        
+        
+        ServerEquipWeapon2();
+        //ChangeCrosshair();
+        
     }
     else
     {
         ServerEquipWeapon2();
+        //ChangeCrosshair();
     }
 }
-
 bool UWeaponComponent::ServerEquipWeapon2_Validate()
 {
     // 필요 시 유효성 검사 추가
     return true;
 }
-
 void UWeaponComponent::ServerEquipWeapon2_Implementation()
 {
-    EquipWeapon2();
+    MulticastEquipWeapon2();
+}
+void UWeaponComponent::MulticastEquipWeapon2_Implementation()
+{
+    if(!bIsAiming)
+    {
+    LoadWeaponByName(Slot2Weapon);
+    FString ModelPath = CurrentWeapon.GunModelPath;
+    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+    }
 }
 
 void UWeaponComponent::EquipWeapon3()
 {
     if(GetOwner()->HasAuthority())
     {
-        if(!bIsAiming)
-        {
-            LoadWeaponByName(Slot3Weapon);
-            FString ModelPath = CurrentWeapon.GunModelPath;
-            LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-            //AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
-            //AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-        }
+        ServerEquipWeapon3();
     }
     else
     {
         ServerEquipWeapon3();
+        //ChangeCrosshair();
     }
 }
-
 bool UWeaponComponent::ServerEquipWeapon3_Validate()
 {
     // 필요 시 유효성 검사 추가
     return true;
 }
-
 void UWeaponComponent::ServerEquipWeapon3_Implementation()
 {
-    EquipWeapon3();
+    MulticastEquipWeapon3();
 }
-
+void UWeaponComponent::MulticastEquipWeapon3_Implementation()
+{
+    if(!bIsAiming)
+    {
+    LoadWeaponByName(Slot3Weapon);
+    FString ModelPath = CurrentWeapon.GunModelPath;
+    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+    }
+}
 void UWeaponComponent::ChangeCrosshair()
 {
     UE_LOG(LogTemp, Warning, TEXT("ChangeCrosshair"));
-    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
-    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    if(GetOwner()->HasAuthority())
+    {
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
+        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    }
+    else
+    {
+        AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
+        AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    }
+    
 }
 
 void UWeaponComponent::SetSlot1Weapon(FName inweapon)
@@ -749,7 +788,10 @@ void UWeaponComponent::UseAmmo()
         }
         Ammo3--;
     }
-    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    if(GetOwner()->HasAuthority())
+        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    else
+        AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::Reload()
@@ -810,7 +852,10 @@ void UWeaponComponent::FillAmmo()
         } 
     }
 
-    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    if(GetOwner()->HasAuthority())
+        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    else
+        AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::AllFillAmmo()
@@ -828,7 +873,10 @@ void UWeaponComponent::AllFillAmmo()
     if(WeaponData)
         Ammo3 = WeaponData->Max_capacity;
        
-    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    if(GetOwner()->HasAuthority())
+        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    else
+        AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::ChangeGunPose(int inbool)
@@ -879,11 +927,11 @@ void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
             EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &UWeaponComponent::StopAiming);
             EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &UWeaponComponent::Reload);
             EnhancedInputComponent->BindAction(Equip1Action, ETriggerEvent::Started, this, &UWeaponComponent::EquipWeapon1);
-            EnhancedInputComponent->BindAction(Equip1Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
+            //EnhancedInputComponent->BindAction(Equip1Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
             EnhancedInputComponent->BindAction(Equip2Action, ETriggerEvent::Started, this, &UWeaponComponent::EquipWeapon2);
-            EnhancedInputComponent->BindAction(Equip2Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
+            //EnhancedInputComponent->BindAction(Equip2Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
             EnhancedInputComponent->BindAction(Equip3Action, ETriggerEvent::Started, this, &UWeaponComponent::EquipWeapon3);
-            EnhancedInputComponent->BindAction(Equip3Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
+            //EnhancedInputComponent->BindAction(Equip3Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
         }
     }
     UE_LOG(LogTemp, Warning, TEXT("addmapping"));
@@ -916,6 +964,7 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
     else if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(Model))
     {
         CurrentStaticMeshComponent = NewObject<UStaticMeshComponent>(Character);
+        CurrentStaticMeshComponent_TPP = CurrentStaticMeshComponent;
         CurrentStaticMeshComponent->SetStaticMesh(StaticMesh);
         FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
         if(CurrentWeapon.GunType == GunTypeList::PISTOL)
@@ -940,6 +989,8 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
 
         DefaultOffset =  CurrentStaticMeshComponent->GetRelativeLocation();
         DefaultRotation = CurrentStaticMeshComponent->GetRelativeRotation();
+
+        //ChangeCrosshair();
     }
 }
 
@@ -1051,14 +1102,7 @@ void UWeaponComponent::RemoveCurrentWeaponModel()
 
 void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-
-    if (AmmoWidget)
-    {
-        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
-        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-    }   
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction); 
 
     if (CurrentStaticMeshComponent)
     {
@@ -1081,13 +1125,30 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
             {
                 if(CurrentWeapon.GunType == GunTypeList::SNIPER)
                 {
-                    AmmoWidget->SetScopeSize(CurrentScopeSize);
-                    AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                    if(GetOwner()->HasAuthority())
+                    {
+                        AmmoWidget->SetScopeSize(CurrentScopeSize);
+                        AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                    }
+                    else
+                    {
+                        AmmoWidget2->SetScopeSize(CurrentScopeSize);
+                        AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                    }
                 }
                 else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
                 {
-                    AmmoWidget->SetScopeSize(CurrentScopeSize);
-                    AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                    if(GetOwner()->HasAuthority())
+                    {
+                        AmmoWidget->SetScopeSize(CurrentScopeSize);
+                        AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                    }
+                    else
+                    {
+                        AmmoWidget2->SetScopeSize(CurrentScopeSize);
+                        AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                    }
+                    
                 } 
             }
 
@@ -1157,15 +1218,32 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 {
                     CurrentScopeSize = 0.5f;
                     CurrentScopeX = 600.0f;
-                    AmmoWidget->SetScopeSize(CurrentScopeSize);
-                    AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                    if(GetOwner()->HasAuthority())
+                    {
+                        AmmoWidget->SetScopeSize(CurrentScopeSize);
+                        AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                    }
+                    else
+                    {
+                        AmmoWidget2->SetScopeSize(CurrentScopeSize);
+                        AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                    }                    
                 }
                 else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
                 {
                     CurrentScopeSize = 0.5f;
                     CurrentScopeX = 600.0f;
-                    AmmoWidget->SetScopeSize(CurrentScopeSize);
-                    AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                    if(GetOwner()->HasAuthority())
+                    {
+                        AmmoWidget->SetScopeSize(CurrentScopeSize);
+                        AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                    }
+                    else
+                    {
+                        AmmoWidget2->SetScopeSize(CurrentScopeSize);
+                        AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                    }
+                    
                 } 
             }
         }
