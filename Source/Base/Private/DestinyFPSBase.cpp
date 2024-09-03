@@ -152,7 +152,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 
 	HunterComboStage = 0;
 	bIsHunterAttacking = false;
-	bHasNextComboQueued = false;
+	isHasNexCombo = false;
 	ComboInputWindow = 0.6f;
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> HunterMontageAsset(
@@ -242,6 +242,7 @@ void ADestinyFPSBase::SetClassValue()
    					SpearMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
     				SpearMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 					SpearMesh->OnComponentBeginOverlap.AddDynamic(this, &ADestinyFPSBase::OnSpearOverlapBegin);
+					//SpearMesh->SetIsReplicated(true);
 				}
 
 				// Set Character Movement by Player Class
@@ -450,6 +451,7 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	//DOREPLIFETIME(ADestinyFPSBase, SpearMesh);
     
     DOREPLIFETIME(ADestinyFPSBase, HP);    
 	DOREPLIFETIME(ADestinyFPSBase, isSkill);   
@@ -726,13 +728,13 @@ void ADestinyFPSBase::Ultimate()
 		isUltimate = true;
 		CurUltimateCoolTime = 0.f;
 		CurUltimateDuration = 0.f;
-		GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
+		SwitchToThirdPerson();
+		GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
 		if (PlayerClass == EPlayerClassEnum::TITAN)
 		{
-			GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Switching to Third Person"));
+			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Switching to Third Person"));
 			MeleeAttackCoolTime = 2.f;
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-			SwitchToThirdPerson();
 			// Titan Ultimate Start
 			if (TitanUltimateFistParticle)
 			{
@@ -754,12 +756,13 @@ void ADestinyFPSBase::Ultimate()
 		else if (PlayerClass == EPlayerClassEnum::HUNTER)
 		{
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-			SwitchToThirdPerson();
-			SpearMesh->SetVisibility(true);
+			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("헌터 궁극기 시전. (서버)"));
+			Multicast_UpdateSpearMeshVisibility(isUltimate);
 		}
 	}
 	else
 	{
+		GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("헌터 궁극기 시전. (클라)"));
 		Server_Ultimate(true);
 	}
 }
@@ -1265,15 +1268,22 @@ void ADestinyFPSBase::LeftClickFunction(const FInputActionValue &Value)
 		}
 		if (PlayerClass == EPlayerClassEnum::HUNTER)
 		{
-			if (bIsHunterAttacking && CurComboAttackDelay <= 0.f)
-			{
-				bHasNextComboQueued = true;
-				PerformComboAttack();
-			}
-			else
-			{
-				PerformComboAttack();
-			}
+			if (HasAuthority())
+            {
+                if (bIsHunterAttacking && CurComboAttackDelay <= 0.f)
+                {
+                    isHasNexCombo = true;
+                    PerformComboAttack();
+                }
+                else
+                {
+                    PerformComboAttack();
+                }
+            }
+            else
+            {
+                Server_PerformComboAttack(HunterComboStage);
+            }
 		}
 	}
 }
@@ -1303,11 +1313,11 @@ void ADestinyFPSBase::PerformComboAttack()
     if (AnimInstance)
     {
         // Determine the next combo stage
-        if ((bHasNextComboQueued) && (HunterComboStage < 5))
+        if ((isHasNexCombo) && (HunterComboStage < 5))
         {
 			GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Blue, TEXT("몽타주 콤보 증가."));
             HunterComboStage++;
-            bHasNextComboQueued = false;
+            isHasNexCombo = false;
 			CurComboAttackDelay = ComboAttackDelay;
         }
         else if (!bIsHunterAttacking)
@@ -1326,13 +1336,35 @@ void ADestinyFPSBase::PerformComboAttack()
 
         // Play the corresponding montage section
         FName ComboSectionName = FName(*FString::Printf(TEXT("Combo%d"), HunterComboStage));
-        if (!AnimInstance->Montage_IsPlaying(HunterComboMontage))
-            AnimInstance->Montage_Play(HunterComboMontage, 1.f);
-        AnimInstance->Montage_JumpToSection(ComboSectionName, HunterComboMontage);
+		if (HasAuthority())
+        {
+            // On server: play montage and notify all clients
+            PlayMontage_Internal(HunterComboStage);
+            Multicast_PlayComboMontage(HunterComboStage);
+        }
+        else
+        {
+            // On client: request server to perform the combo attack
+            Server_PerformComboAttack(HunterComboStage);
+        }
 
         bIsHunterAttacking = true;
         // Set a timer to allow for the next combo input
         GetWorldTimerManager().SetTimer(ComboResetTimer, this, &ADestinyFPSBase::ResetCombo, ComboInputWindow, false);
+    }
+}
+
+void ADestinyFPSBase::PlayMontage_Internal(int32 ComboStage)
+{
+	UAnimInstance* AnimInstance = TppMesh->GetAnimInstance();
+    if (AnimInstance && HunterComboMontage)
+    {
+        FName ComboSectionName = FName(*FString::Printf(TEXT("Combo%d"), ComboStage));
+        if (!AnimInstance->Montage_IsPlaying(HunterComboMontage))
+        {
+            AnimInstance->Montage_Play(HunterComboMontage, 1.f);
+        }
+        AnimInstance->Montage_JumpToSection(ComboSectionName, HunterComboMontage);
     }
 }
 
@@ -1341,7 +1373,7 @@ void ADestinyFPSBase::ResetCombo()
     // Reset combo variables
     bIsHunterAttacking = false;
     HunterComboStage = 0;
-    bHasNextComboQueued = false;
+    isHasNexCombo = false;
     GetWorldTimerManager().ClearTimer(ComboResetTimer);
 }
 
@@ -1481,6 +1513,7 @@ bool ADestinyFPSBase::Server_Skill_Validate(bool value)
 
 void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 {
+	GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("서버 궁극기 함수 실행"));
 	if (value)
 	{
 		if (CurUltimateCoolTime >= UltimateCoolTime)
@@ -1488,6 +1521,7 @@ void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 			isUltimate = value;
 			CurUltimateCoolTime = 0.f;
 			CurUltimateDuration = 0.f;
+			Multicast_UpdateSpearMeshVisibility(isUltimate);
 		}
 	}
 	else
@@ -1568,6 +1602,16 @@ bool ADestinyFPSBase::Server_Smash_Validate(bool value)
     return true;
 }
 
+void ADestinyFPSBase::Server_PerformComboAttack_Implementation(int32 ComboStage)
+{
+	PerformComboAttack();
+}
+
+bool ADestinyFPSBase::Server_PerformComboAttack_Validate(int32 ComboStage)
+{
+    return true;
+}
+
 void ADestinyFPSBase::OnRep_Skill()
 {
 	if (isSkill)
@@ -1588,12 +1632,13 @@ void ADestinyFPSBase::OnRep_Skill()
 
 void ADestinyFPSBase::OnRep_Ultimate()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, TEXT("OnRep_Ultimate 호출됨"));
 	if (isUltimate)
 	{
-		GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
+		GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
 		if (PlayerClass == EPlayerClassEnum::TITAN)
 		{
-			GEngine->AddOnScreenDebugMessage(-1,2.0f,FColor::Blue, TEXT("Switching to Third Person"));
+			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Switching to Third Person"));
 			MeleeAttackCoolTime = 2.f;
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
@@ -1617,9 +1662,9 @@ void ADestinyFPSBase::OnRep_Ultimate()
 		}
 		else if (PlayerClass == EPlayerClassEnum::HUNTER)
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, TEXT("OnRep_Ultimate: SpearMesh visible"));
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
-			SpearMesh->SetVisibility(true);
 		}
 	}
 	else
@@ -1627,7 +1672,7 @@ void ADestinyFPSBase::OnRep_Ultimate()
 		SwitchToFirstPerson();
 		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 	}
-}
+}	
 
 void ADestinyFPSBase::OnRep_MeleeAttack()
 {
@@ -1644,4 +1689,18 @@ void ADestinyFPSBase::OnRep_MeleeAttack()
 			SwitchToFirstPerson();
 		}
 	}
+}
+
+void ADestinyFPSBase::Multicast_UpdateSpearMeshVisibility_Implementation(bool bVisible)
+{
+	if (SpearMesh)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, FString::Printf(TEXT("Multicast_SetStaticMeshVisibility called with bVisible: %d"), bVisible));
+		SpearMesh->SetVisibility(bVisible, true);
+	}
+}
+
+void ADestinyFPSBase::Multicast_PlayComboMontage_Implementation(int32 ComboStage)
+{
+	PlayMontage_Internal(ComboStage);
 }
