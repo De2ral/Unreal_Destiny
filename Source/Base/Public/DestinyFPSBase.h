@@ -156,6 +156,12 @@ public:
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_MeleeAttack, EditAnywhere, BlueprintReadWrite)
 	bool isMeleeAttack = false;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	bool isSwordAura = false;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	bool isHunterMeleeAttack = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SkillCoolTime = 3.f;
 
@@ -176,6 +182,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MeleeAttackCoolTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HunterMeleeAttackCoolTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SwordAuraCoolTime = 8.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HunterPunchDamage = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HunterPunchRadius = 200.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TitanUltimateDamage = 100.f;
@@ -240,6 +258,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* WarlockSkillLandParticle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* SpearParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* HunterPunchParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* HunterThunderPunchParticle;
+
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
 
@@ -254,6 +281,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<class AWarlock_Melee_Fireball> WarlockFireballClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class AHunter_Skill_SwordAura> HunterSwordAuraClass;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
@@ -374,6 +404,18 @@ public:
 	void WarlockUltimateEnd();
 
 	UFUNCTION(BlueprintCallable)
+	void HunterSwordAura();
+
+	UFUNCTION(BlueprintCallable)
+	void HunterSwordAuraEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void HunterMeleePunch();
+
+	UFUNCTION(BlueprintCallable)
+	void HunterMeleeEnd();
+
+	UFUNCTION(BlueprintCallable)
 	void SwitchToFirstPerson();
 
 	UFUNCTION(BlueprintCallable)
@@ -428,6 +470,9 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_PerformComboAttack(int32 ComboStage);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SwordAura(bool value);
+
 	UFUNCTION()
 	void OnRep_Skill();
 
@@ -454,6 +499,12 @@ public:
 
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	float CurMeleeAttackCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurSwordAuraCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurHunterMeleeAttackCoolTime;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdateSpearMeshVisibility(bool bVisible);
