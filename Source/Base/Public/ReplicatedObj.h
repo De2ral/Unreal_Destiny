@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
-#include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "ReplicatedObj.generated.h"
 
@@ -34,30 +33,19 @@ protected:
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerDestroy();
+	UFUNCTION(Server,Reliable,WithValidation)
+	void ServerRepliObjAction();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastDestroy();
-
-	UFUNCTION(Server,Reliable)
-	void ServerObjAction();
-
-	UFUNCTION(NetMulticast,Reliable)
-	void MultiCastObjAction();
-
-	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
 	int32 MinItemValue = 1;
 
-	UPROPERTY(Replicated,EditAnywhere,BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item")
 	int32 MaxItemValue = 10;
 
-	UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
     TArray<TSubclassOf<AActor>> ItemsToSpawn;
 
 	UFUNCTION(BlueprintCallable, Category = "Spawn")
@@ -67,11 +55,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere,Replicated)
+	UPROPERTY(EditAnywhere)
 	float ObjInteractTime = 60.0f;
 
 	UFUNCTION()
-	void ObjAction(ADestinyFPSBase* Player);
+	void RepliObjAction(ADestinyFPSBase* Player);
 
 	UFUNCTION()
 	UStaticMeshComponent* GetObjMesh() { return ObjMesh; }

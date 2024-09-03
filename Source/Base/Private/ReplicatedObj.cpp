@@ -30,15 +30,15 @@ void AReplicatedObj::BeginPlay()
 	ObjCollider->OnComponentEndOverlap.AddDynamic(this,&AReplicatedObj::OnOverlapEnd);
 }
 
-void AReplicatedObj::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+// void AReplicatedObj::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+// {
+//     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AReplicatedObj, MinItemValue);
-    DOREPLIFETIME(AReplicatedObj, MaxItemValue);
-    DOREPLIFETIME(AReplicatedObj, ItemsToSpawn);
+// 	DOREPLIFETIME(AReplicatedObj, MinItemValue);
+//     DOREPLIFETIME(AReplicatedObj, MaxItemValue);
+//     DOREPLIFETIME(AReplicatedObj, ItemsToSpawn);
 
-}
+// }
 
 void AReplicatedObj::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
@@ -71,40 +71,18 @@ void AReplicatedObj::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AActor *O
 	}
 }
 
-void AReplicatedObj::ServerDestroy_Implementation()
+void AReplicatedObj::ServerRepliObjAction_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Server is destroying the object"));
-	MulticastDestroy_Implementation();
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("서버에서 계산해"));
+	RepliObjAction(APlayer);
+
 }
 
-bool AReplicatedObj::ServerDestroy_Validate()
+bool AReplicatedObj::ServerRepliObjAction_Validate()
 {
-	 return true;
+	return true;
 }
 
-void AReplicatedObj::MulticastDestroy_Implementation()
-{
-	Destroy();
-}
-
-void AReplicatedObj::ServerObjAction_Implementation()
-{
-	if (HasAuthority()) // 서버에서 호출
-    {
-        MultiCastObjAction();
-    }
-    else // 클라이언트에서 호출
-    {
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Client to Server"));
-        ObjAction(APlayer);
-    }
-}
-
-void AReplicatedObj::MultiCastObjAction_Implementation()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Server to Everyone"));
-	ObjAction(APlayer);
-}
 
 void AReplicatedObj::ItemDrop(int32 ItemCount)
 {
@@ -132,27 +110,30 @@ void AReplicatedObj::Tick(float DeltaTime)
 
 	if(APlayer && APlayer->bIsInteractComplete) 
 	{
-		ServerObjAction_Implementation();
-		APlayer->bIsInteractComplete = false;
+		RepliObjAction(APlayer);
 	}
 
 }
 
-void AReplicatedObj::ObjAction(ADestinyFPSBase *Player)
+void AReplicatedObj::RepliObjAction(ADestinyFPSBase *Player)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("InteractableObj -> MyStash.ObjAction()"));
 
-    int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
-    ItemDrop(ItemCount);
+	if(HasAuthority())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("InteractableObj -> MyStash.RepliObjAction()"));
 
-    if (HasAuthority()) // 서버일 경우
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Authority: Server, Destroying on server"));
-        Destroy();
-    }
-    else // 클라이언트일 경우 서버에 파괴 요청
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Authority: Client, Requesting server to destroy"));
-        ServerDestroy();
-    }
+    	int32 ItemCount = FMath::RandRange(MinItemValue, MaxItemValue);	
+    	ItemDrop(ItemCount);
+
+    	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Authority: Server, Destroying on server"));
+		APlayer->bIsInteractComplete = false;
+    	Destroy();
+    	
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("클라면 서버로 가"));
+		ServerRepliObjAction();
+	} 
+	
 }

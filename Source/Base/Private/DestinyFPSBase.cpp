@@ -698,7 +698,6 @@ void ADestinyFPSBase::PlayerCarryingEnd()
         	CarriedMeshComponent = nullptr;
 		}
 
-        
     }
 
 }

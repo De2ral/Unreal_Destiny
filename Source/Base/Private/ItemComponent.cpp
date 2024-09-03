@@ -11,11 +11,14 @@ UItemComponent::UItemComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	
+
 	AActor* Parent = GetOwner();
 
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
 	ItemCollider->InitSphereRadius(14.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
+	ItemCollider->SetIsReplicated(true);
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMesh->SetWorldScale3D(FVector3d(3.0f,3.0f,3.0f));
@@ -23,6 +26,7 @@ UItemComponent::UItemComponent()
 	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.SM_Drongo_Grenade_FX_Body02'"));
 	ItemMesh->SetStaticMesh(MeshAsset.Object);
 	ItemMesh->SetSimulatePhysics(true);
+	ItemMesh->SetIsReplicated(true);
 
 	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));
 	static ConstructorHelpers::FObjectFinder<UMaterial>AmmoMaterial1(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/SpecAmmoMat.SpecAmmoMat'"));
@@ -42,7 +46,7 @@ UItemComponent::UItemComponent()
 
 	if(IsValid(Parent)) ItemMesh->SetupAttachment(Parent->GetRootComponent());
 	ItemCollider->SetupAttachment(ItemMesh);
-	
+
 	// ...
 }
 
