@@ -26,7 +26,7 @@
 UWeaponComponent::UWeaponComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
-
+    SetIsReplicated(true);
     Character = Cast<ADestinyFPSBase>(GetOwner());
 
     static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Sparks/P_Sparks_C.P_Sparks_C'"));
@@ -51,9 +51,6 @@ void UWeaponComponent::BeginPlay()
     
     AddMapping(PlayerCharacter);
 
-    APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
-    OriginalMouseSensitivity = PlayerController->InputYawScale_DEPRECATED;
-    UE_LOG(LogTemp, Warning, TEXT("OriginalMouseSensitivity: %f"),OriginalMouseSensitivity);
     if (AmmoWidgetClass)
 	{
         //CurrentAmmo = MaxAmmo;
@@ -68,15 +65,17 @@ void UWeaponComponent::BeginPlay()
     {
         UE_LOG(LogTemp, Warning, TEXT("AmmoWidgetClass called failed."));
     }
+
+    if (GetOwner()->HasAuthority())
+    {
+        SetSlot1Weapon(TEXT("Rifle1"));
+    }
+
     if (PlayerCharacter != nullptr)
     {
         SetSlot1Weapon(TEXT("Rifle1"));
         SetSlot2Weapon(TEXT("Pistol1"));
         SetSlot3Weapon(TEXT("Launcher1"));
-
-        //Slot1Weapon = FName(TEXT("Rifle1"));
-        //Slot2Weapon = FName(TEXT("Pistol1"));
-        //Slot3Weapon = FName(TEXT("Launcher1"));
 
         EquipWeapon1();
     }
@@ -127,11 +126,24 @@ void UWeaponComponent::Fire()
         AFpsCppProjectile* Projectile = nullptr;
         if(!CurrentWeapon.Linetracing)
         {
-		    Projectile = World->SpawnActor<AFpsCppProjectile>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
-            if(Projectile)
+		    //Projectile = World->SpawnActor<AFpsCppProjectile>(MuzzleLocation, SpawnRotation, ActorSpawnParams);
+            //if(Projectile)
+            //{
+            //    Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
+            //    Projectile->AttachTrailEffect(true);
+            //}
+
+            Projectile = World->SpawnActorDeferred<AFpsCppProjectile>(AFpsCppProjectile::StaticClass(), FTransform(SpawnRotation, MuzzleLocation), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+            if (Projectile)
             {
+                // 이 부분에서 SetProjectile을 생성 시 설정한 값을 전달합니다.
                 Projectile->SetProjectile(CurrentWeapon.ProjectileMesh, CurrentWeapon.ProjectileSpeed, CurrentWeapon.GunDamage);
+
+                // 트레일 이펙트나 추가 설정을 이 곳에서 할 수 있습니다.
                 Projectile->AttachTrailEffect(true);
+
+                // 최종적으로 스폰 완료를 알림
+                UGameplayStatics::FinishSpawningActor(Projectile, FTransform(SpawnRotation, MuzzleLocation));
             }
         }
         
@@ -197,9 +209,6 @@ void UWeaponComponent::Fire()
     {
         ServerFire();  // 클라이언트에서 호출 시 서버로 전달
     }
-
-
-    
 }
 
 void UWeaponComponent::ServerFire_Implementation()
@@ -215,7 +224,9 @@ bool UWeaponComponent::ServerFire_Validate()
 
 void UWeaponComponent::FireInRange()
 {
-    UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
+    if (GetOwner()->HasAuthority())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
     UWorld* const World = GetWorld();
     if (World != nullptr)
@@ -299,11 +310,29 @@ void UWeaponComponent::FireInRange()
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
         }
     }
+    }
+    else
+    {
+        ServerFireInRange();
+    }
+    
 }
+void UWeaponComponent::ServerFireInRange_Implementation()
+{
+    FireInRange();
+}
+
+bool UWeaponComponent::ServerFireInRange_Validate()
+{
+    return true;
+}
+
 
 void UWeaponComponent::FireLauncher()
 {
-    UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
+    if (GetOwner()->HasAuthority())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
  
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -396,8 +425,23 @@ void UWeaponComponent::FireLauncher()
         {
             Projectile->GetProjectileMovement()->Velocity = ProjectileDirection * Projectile->GetProjectileMovement()->InitialSpeed;
         }
+    }
+    }
+    else
+    {
+        ServerFireLauncher();
+    }
        
-	}
+	
+}
+void UWeaponComponent::ServerFireLauncher_Implementation()
+{
+    FireLauncher();
+}
+
+bool UWeaponComponent::ServerFireLauncher_Validate()
+{
+    return true;  // 보통 추가 검증이 필요할 수 있음
 }
 
 void UWeaponComponent::StartFiring()
@@ -513,40 +557,108 @@ void UWeaponComponent::StopAiming()
 
 void UWeaponComponent::EquipWeapon1()
 {
-    if(!bIsAiming)
+    if(GetOwner()->HasAuthority())
     {
-        LoadWeaponByName(Slot1Weapon);
-        FString ModelPath = CurrentWeapon.GunModelPath;
-        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
-        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-        return;
-    } 
-}
+        if(!bIsAiming)
+        {
+            LoadWeaponByName(Slot1Weapon);
+            FString ModelPath = CurrentWeapon.GunModelPath;
+            LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+            //MulticastOnWeaponEquipped(int(CurrentWeapon.GunType), CurrentAmmo(), StoredAmmo()); 
 
-void UWeaponComponent::EquipWeapon2()
-{
-    if(!bIsAiming)
+           
+           
+               
+        } 
+    }
+    else
     {
-        LoadWeaponByName(Slot2Weapon);
-        FString ModelPath = CurrentWeapon.GunModelPath;
-        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);   
-        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+        ServerEquipWeapon1();
     }
     
 }
 
+bool UWeaponComponent::ServerEquipWeapon1_Validate()
+{
+    // 필요 시 유효성 검사 추가
+    return true;
+}
+
+void UWeaponComponent::ServerEquipWeapon1_Implementation()
+{
+    EquipWeapon1();
+}
+void UWeaponComponent::MulticastOnWeaponEquipped_Implementation(int NewGunType, int32 CurrentAmmo, int32 StoredAmmo)
+{
+    // 클라이언트에서 UI를 업데이트합니다.
+    
+}
+
+void UWeaponComponent::EquipWeapon2()
+{
+    if(GetOwner()->HasAuthority())
+    {
+        if(!bIsAiming)
+        {
+            LoadWeaponByName(Slot2Weapon);
+            FString ModelPath = CurrentWeapon.GunModelPath;
+            LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+            //AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);   
+            //AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+        }
+    }
+    else
+    {
+        ServerEquipWeapon2();
+    }
+}
+
+bool UWeaponComponent::ServerEquipWeapon2_Validate()
+{
+    // 필요 시 유효성 검사 추가
+    return true;
+}
+
+void UWeaponComponent::ServerEquipWeapon2_Implementation()
+{
+    EquipWeapon2();
+}
+
 void UWeaponComponent::EquipWeapon3()
 {
-    if(!bIsAiming)
+    if(GetOwner()->HasAuthority())
     {
-        LoadWeaponByName(Slot3Weapon);
-        FString ModelPath = CurrentWeapon.GunModelPath;
-        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
-        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
-        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+        if(!bIsAiming)
+        {
+            LoadWeaponByName(Slot3Weapon);
+            FString ModelPath = CurrentWeapon.GunModelPath;
+            LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath);
+            //AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+            //AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+        }
     }
+    else
+    {
+        ServerEquipWeapon3();
+    }
+}
+
+bool UWeaponComponent::ServerEquipWeapon3_Validate()
+{
+    // 필요 시 유효성 검사 추가
+    return true;
+}
+
+void UWeaponComponent::ServerEquipWeapon3_Implementation()
+{
+    EquipWeapon3();
+}
+
+void UWeaponComponent::ChangeCrosshair()
+{
+    UE_LOG(LogTemp, Warning, TEXT("ChangeCrosshair"));
+    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
+    AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::SetSlot1Weapon(FName inweapon)
@@ -767,8 +879,11 @@ void UWeaponComponent::AddMapping(ADestinyFPSBase* TargetCharacter)
             EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &UWeaponComponent::StopAiming);
             EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &UWeaponComponent::Reload);
             EnhancedInputComponent->BindAction(Equip1Action, ETriggerEvent::Started, this, &UWeaponComponent::EquipWeapon1);
+            EnhancedInputComponent->BindAction(Equip1Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
             EnhancedInputComponent->BindAction(Equip2Action, ETriggerEvent::Started, this, &UWeaponComponent::EquipWeapon2);
+            EnhancedInputComponent->BindAction(Equip2Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
             EnhancedInputComponent->BindAction(Equip3Action, ETriggerEvent::Started, this, &UWeaponComponent::EquipWeapon3);
+            EnhancedInputComponent->BindAction(Equip3Action, ETriggerEvent::Started, this, &UWeaponComponent::ChangeCrosshair);
         }
     }
     UE_LOG(LogTemp, Warning, TEXT("addmapping"));
@@ -872,15 +987,25 @@ void UWeaponComponent::LoadAndAttachModelToCharacter(ADestinyFPSBase *InCharacte
 
 void UWeaponComponent::SetCurrentWeapon(const FGunInfo& NewWeapon)
 {
-    CurrentWeapon = NewWeapon;
-    if(CurrentWeapon.GunType == GunTypeList::PISTOL)
-        Character->SetHasRifle(false);
-    else
-        Character->SetHasRifle(true);
+    if(GetOwner()->HasAuthority())
+    {
+        CurrentWeapon = NewWeapon;
+        if(CurrentWeapon.GunType == GunTypeList::PISTOL)
+            Character->SetHasRifle(false);
+        else
+            Character->SetHasRifle(true);
+    }
+    
 }
 
 void UWeaponComponent::LoadWeaponByName(FName WeaponName)
 {
+    if (!GetOwner()->HasAuthority())
+    {
+        // 서버 권한이 없으면 함수 종료
+        return;
+    }
+
     if (WeaponDataTable)
     {
         FGunInfo* WeaponData = WeaponDataTable->FindRow<FGunInfo>(WeaponName, TEXT("Weapon Lookup"));
@@ -928,6 +1053,13 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+
+    if (AmmoWidget)
+    {
+        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
+        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    }   
+
     if (CurrentStaticMeshComponent)
     {
         FVector TargetLocation;
@@ -968,8 +1100,6 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 FVector ForwardVector = CameraRotation.Vector();
                 FVector RightVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Y);
                 FVector UpVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Z);
-
-                
 
                 TargetLocation = CameraLocation + (ForwardVector * 50.0f); 
         
@@ -1082,8 +1212,25 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
         //MeshNewLocation = MeshTargetLocation;
         //MeshNewRotation = MeshTargetRotation;
     }
-    
-    
-    
+    }
+}
+
+void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    //if(CurrentWeapon.ProjectileMesh != nullptr)
+    DOREPLIFETIME(UWeaponComponent, CurrentWeapon);    
+}
+
+void UWeaponComponent::OnRep_CurrentWeapon()
+{
+    UE_LOG(LogTemp, Log, TEXT("OnRep_CurrentWeapon called"));
+    ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
+    if (PlayerCharacter)
+    {
+        UE_LOG(LogTemp, Log, TEXT("PlayerCharacter called"));
+        LoadWeaponByName(CurrentWeapon.GunName);
+        LoadAndAttachModelToCharacter(PlayerCharacter, CurrentWeapon.GunModelPath);
     }
 }

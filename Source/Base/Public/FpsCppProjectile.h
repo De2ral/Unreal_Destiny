@@ -65,7 +65,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float ExplosionRadius = 1000.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Combat")
 	bool bExplodeOnImpact = false;
 
 	UParticleSystem* HitFlash;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "Engine/StaticMesh.h"
+#include "Net/UnrealNetwork.h"  // 복제 시스템을 위해 추가
 
 #include "WeaponDataManage.generated.h"
 

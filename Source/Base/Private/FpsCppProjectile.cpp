@@ -244,4 +244,5 @@ void AFpsCppProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
     // 필요시 다른 변수도 복제 설정 가능
     //DOREPLIFETIME(AFpsCppProjectile, Damage);
+    DOREPLIFETIME(AFpsCppProjectile, bExplodeOnImpact);
 }

@@ -34,7 +34,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
+	bReplicates = true; 
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 	TppMesh->SetOwnerNoSee(true);
 	TppMesh->SetupAttachment(RootComponent);
@@ -437,6 +437,7 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 
     
     DOREPLIFETIME(ADestinyFPSBase, HP);    
+	DOREPLIFETIME(ADestinyFPSBase, bHasRifle);
 }
 
 void ADestinyFPSBase::InvenOpenClose()

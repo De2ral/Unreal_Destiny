@@ -27,12 +27,12 @@ public:
     UWeaponComponent();
 
     // 투사체
-	UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
-	TSubclassOf<class AFpsCppProjectile> ProjectileClass;
+	//UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
+	//TSubclassOf<class AFpsCppProjectile> ProjectileClass;
 
     // 투사체 발사 위치
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	FVector MuzzleOffset;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	//FVector MuzzleOffset;
 
     // 모델 장착
     void AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, UObject* Model);
@@ -109,8 +109,16 @@ public:
     class UInputAction* Equip3Action;
 
     void Fire();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFire();
+
     void FireInRange();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFireInRange();
+
     void FireLauncher();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFireLauncher();
 
     void StartFiring();
     void StopFiring();
@@ -138,6 +146,17 @@ public:
     void EquipWeapon2();
     void EquipWeapon3();
     
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerEquipWeapon1();
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerEquipWeapon2();
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerEquipWeapon3();
+
+    void ChangeCrosshair();
+
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetSlot1Weapon(FName inweapon);
     UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -162,16 +181,25 @@ public:
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
 
-    UFUNCTION(Server, Reliable, WithValidation)
-    void ServerFire();
+
+    
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetCurrentWeaponMeshVisibility(bool isVisible);
+
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     
-private:
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastOnWeaponEquipped(int NewGunType, int32 CurrentAmmo, int32 StoredAmmo);
+public:
     ADestinyFPSBase* Character;
     
+    UPROPERTY(ReplicatedUsing=OnRep_CurrentWeapon, BlueprintReadOnly)
     FGunInfo CurrentWeapon;
+
+    UFUNCTION()
+    void OnRep_CurrentWeapon();
+
 
     FName Slot1Weapon;
     FName Slot2Weapon;
@@ -214,6 +242,4 @@ private:
     UParticleSystem* LauncherFlash;
     
     UParticleSystem* HitFlash;
-
-    float OriginalMouseSensitivity;
 };

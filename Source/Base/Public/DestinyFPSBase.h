@@ -295,7 +295,7 @@ public:
 	UPROPERTY(EditAnyWhere)
 	UStaticMeshComponent* CarriedMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool bHasRifle;
 
 	UFUNCTION(BlueprintCallable, Category = Weapon)

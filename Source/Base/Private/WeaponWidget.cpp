@@ -3,6 +3,7 @@
 #include "WeaponWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Net/UnrealNetwork.h"
 
 
 void UWeaponWidget::NativeConstruct()
@@ -122,7 +123,6 @@ void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
     UTexture2D* LoadedTexture = LoadObject<UTexture2D>(nullptr, *TexturePath);
     if (LoadedTexture)
     {
-        UE_LOG(LogTemp, Warning, TEXT("cross success"));
         BaseCrossImage->SetBrushFromTexture(LoadedTexture);
     }
     else
