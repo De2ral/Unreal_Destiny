@@ -28,6 +28,7 @@
 #include "EngineUtils.h"
 #include "Hunter_Skill_SwordAura.h"
 #include "ReplicatedObj.h"
+#include "CPP_DeathOrb.h"
 
 
 // Sets default values
@@ -418,10 +419,16 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 
 	if(InterObj && bIsInteractComplete)
 	{
-		
 		InterObjAction();
 		bIsInteractComplete = false;
 	} 
+
+	if(OtherPlayerDeathOrb && bIsInteractComplete)
+	{
+		Revive();
+		bIsInteractComplete = false;
+
+	}
 
 	//->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf("MaxWalkSpeed = %f",GetCharacterMovement()->MaxWalkSpeed));
 
@@ -510,8 +517,6 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 	DOREPLIFETIME(ADestinyFPSBase, CurSmashCoolTime);   
 	DOREPLIFETIME(ADestinyFPSBase, CurMeleeAttackCoolTime);   
 	DOREPLIFETIME(ADestinyFPSBase, CurHunterMeleeAttackCoolTime); 
-
-	DOREPLIFETIME(ADestinyFPSBase, SpawnedDeathOrb);   
 }
 
 void ADestinyFPSBase::InvenOpenClose()
@@ -1553,38 +1558,43 @@ void ADestinyFPSBase::ResetCombo()
 
 void ADestinyFPSBase::Death()
 {
-	bIsPlayerAlive = false;
+	GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Red,TEXT("Dying"));
 
-	if(!SpawnedDeathOrb)
+	if (HasAuthority())
 	{
-		SpawnedDeathOrb = GetWorld()->SpawnActor<AReplicatedObj>(AReplicatedObj::StaticClass(),LastPlayerPos,GetActorRotation());
+		bIsPlayerAlive = false;
 
-		SpawnedDeathOrb->Tags.Add(FName("InterObj"));
-		SpawnedDeathOrb->Tags.Add(FName("DeathOrb"));
-		SetActorLocation(LastPlayerPos);
-		SwitchToThirdPerson();
+		if(DeathOrbClass)
+		{
+			 ACPP_DeathOrb* SpawnedDeathOrb = GetWorld()->SpawnActor<ACPP_DeathOrb>(DeathOrbClass, LastPlayerPos, GetActorRotation());
 
-		TppMesh->SetOwnerNoSee(true);
-		FppMesh->SetOwnerNoSee(true);
+			SetActorLocation(LastPlayerPos);
+			SwitchToThirdPerson();
 
-		if(bIsCarrying) PlayerCarryingEnd();
+			TppMesh->SetOwnerNoSee(true);
+			FppMesh->SetOwnerNoSee(true);
 
-		SpawnedDeathOrb->SetDeadPlayer(this);
-        
-    }
+			if(bIsCarrying) PlayerCarryingEnd();
+	
+    	}
+
+	}else ServerDeath();
+
+	
 }
 
+//상대 플레이어를 살리는 함수
 void ADestinyFPSBase::Revive()
 {
-	bIsPlayerAlive = true;
-
-	if(SpawnedDeathOrb != nullptr)
+	if(HasAuthority())
 	{
-		SpawnedDeathOrb->Destroy();
-		SpawnedDeathOrb = nullptr;
-	}
+		OtherPlayerDeathOrb->GetDeadPlayer()->bIsPlayerAlive = true;
 
-	SwitchToFirstPerson();
+		OtherPlayerDeathOrb->GetDeadPlayer()->SetCurrHP(OtherPlayerDeathOrb->GetDeadPlayer()->GetMaxHP());
+
+		SwitchToFirstPerson();
+
+	}else ServerRevive();
 
 }
 
@@ -1654,7 +1664,7 @@ float ADestinyFPSBase::TakeDamage(float DamageAmount, FDamageEvent const &Damage
 void ADestinyFPSBase::HPDamageTest(const FInputActionValue &Value)
 {
 	if(HP > 0.0f) HP -= 10.0f;
-	else if(HP <= 0.0f) Death();
+	else if(HP < 0.0f) Death();
 }
 
 void ADestinyFPSBase::OnSpearOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -1681,24 +1691,37 @@ void ADestinyFPSBase::OnSpearOverlap(UPrimitiveComponent* OverlappedComp, AActor
 
 void ADestinyFPSBase::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	if (OtherActor->ActorHasTag("InteractObj") || OtherActor->ActorHasTag("NPC"))
-    {
-		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Yellow,TEXT("isObj"));
-        InterObj = Cast<AReplicatedObj>(OtherActor);
 
+	if (OtherActor->ActorHasTag("InteractObj"))
+    {
         if (bIsPlayerAlive)
         {
+			GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Yellow,TEXT("isObj"));
+        	InterObj = Cast<AReplicatedObj>(OtherActor);
             bPlayerInteractable = true;
             MaxInteractTime = InterObj->ObjInteractTime;
         }
         
     }
 
+	if(OtherActor->ActorHasTag("DeathOrb"))
+	{
+		if (bIsPlayerAlive)
+		{
+			GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Black,TEXT("isDeathOrb"));
+
+			bPlayerInteractable = true;
+            MaxInteractTime = InterObj->ObjInteractTime;
+		}
+
+
+	}
+
 }
 
 void ADestinyFPSBase::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor->ActorHasTag("InteractObj") || OtherActor->ActorHasTag("NPC"))
+	if (OtherActor->ActorHasTag("InteractObj") || OtherActor->ActorHasTag("DeathOrb"))
     {
 		if (bIsPlayerAlive) bPlayerInteractable = false;
 	
@@ -1815,19 +1838,36 @@ void ADestinyFPSBase::ServerInterObjAction_Implementation()
 
 }
 
-void ADestinyFPSBase::MultiInterObjAction_Implementation()
-{
-
-	InterObj->GetObjMesh()->SetStaticMesh(InterObj->AfterInteractMesh->GetStaticMesh());
-
-}
-
-
-
 bool ADestinyFPSBase::ServerInterObjAction_Validate()
 {
     return true;
 }
+
+void ADestinyFPSBase::ServerDeath_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Red,TEXT("Client Dying"));
+	Death();
+
+}
+
+bool ADestinyFPSBase::ServerDeath_Validate()
+{
+    return true;
+}
+
+void ADestinyFPSBase::ServerRevive_Implementation()
+{
+
+	Revive();
+
+}
+
+bool ADestinyFPSBase::ServerRevive_Validate()
+{
+    return true;
+}
+
+
 
 
 bool ADestinyFPSBase::Server_Grenade_Validate(bool value)
@@ -1924,12 +1964,6 @@ void ADestinyFPSBase::InterObjAction()
 				InterObj->SetObjIsFill(true);
 			}
 
-		}
-
-		if(InterObj->ActorHasTag("DeathOrb"))
-		{
-			InterObj->GetDeadPlayer()->Revive();
-			InterObj->Destroy();
 		}
 
 	} else ServerInterObjAction();

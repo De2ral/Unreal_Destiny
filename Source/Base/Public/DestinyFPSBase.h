@@ -297,8 +297,11 @@ public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bPlayerIsMoving = false;
 
-	UPROPERTY(Replicated,EditDefaultsOnly, BlueprintReadOnly)
-	class AReplicatedObj* SpawnedDeathOrb;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Death")
+	TSubclassOf<class ACPP_DeathOrb> DeathOrbClass;
+
+	UPROPERTY(VisibleAnywhere)
+	class ACPP_DeathOrb* OtherPlayerDeathOrb;
 	
 	void InvenOpenClose();
 
@@ -484,8 +487,11 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerInterObjAction();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MultiInterObjAction();
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDeath();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRevive();
 
 	void InterObjAction();
 
@@ -527,6 +533,12 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayComboMontage(int32 ComboStage);
+
+	int GetMaxHP() {return MaxHp;}
+	void SetMaxHP(int value) {MaxHp = value;}
+
+	int GetCurrHP() {return HP;}
+	void SetCurrHP(int value) {HP = value;}
 	
 private:
 	float CurComboAttackDelay = 0.f;
