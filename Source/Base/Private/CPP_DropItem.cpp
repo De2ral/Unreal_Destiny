@@ -1,22 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ItemComponent.h"
+#include "CPP_DropItem.h"
 #include "string.h"
 
-// Sets default values for this component's properties
-UItemComponent::UItemComponent()
+// Sets default values
+ACPP_DropItem::ACPP_DropItem()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
 
-	AActor* Parent = GetOwner();
+	bReplicates = true;
 
 	ItemCollider = CreateDefaultSubobject<USphereComponent>(TEXT("ItemCollider"));
 	ItemCollider->InitSphereRadius(14.0f);
 	ItemCollider->SetMobility(EComponentMobility::Movable);
-	ItemCollider->SetIsReplicated(true);
+	//ItemCollider->SetIsReplicated(true);
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMesh->SetWorldScale3D(FVector3d(3.0f,3.0f,3.0f));
@@ -24,7 +23,7 @@ UItemComponent::UItemComponent()
 	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/ParagonDrongo/FX/Meshes/Heroes/Drongo/SM_Drongo_Grenade_FX_Body02.SM_Drongo_Grenade_FX_Body02'"));
 	ItemMesh->SetStaticMesh(MeshAsset.Object);
 	ItemMesh->SetSimulatePhysics(true);
-	ItemMesh->SetIsReplicated(true);
+	//ItemMesh->SetIsReplicated(true);
 
 	SpecAmmoMaterial = CreateDefaultSubobject<UMaterial>(TEXT("SpecAmmoMat"));
 	static ConstructorHelpers::FObjectFinder<UMaterial>AmmoMaterial1(TEXT("/Script/Engine.Material'/Game/DestinyFPS/Items/SpecAmmoMat.SpecAmmoMat'"));
@@ -42,36 +41,33 @@ UItemComponent::UItemComponent()
 	static ConstructorHelpers::FObjectFinder<UMaterial>WeaponItemMaterialFind(TEXT("/Script/Engine.Material'/DatasmithContent/Materials/FBXImporter/VRED/MetallicCarpaint.MetallicCarpaint'"));
 	WeaponItemMaterial = WeaponItemMaterialFind.Object;
 
-	if(IsValid(Parent)) ItemMesh->SetupAttachment(Parent->GetRootComponent());
+	ItemMesh->SetupAttachment(RootComponent);
 	ItemCollider->SetupAttachment(ItemMesh);
 
-	// ...
 }
 
-
-// Called when the game starts
-void UItemComponent::BeginPlay()
+// Called when the game starts or when spawned
+void ACPP_DropItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&UItemComponent::OnOverlapBegin);
+	ItemCollider->OnComponentBeginOverlap.AddDynamic(this,&ACPP_DropItem::OnOverlapBegin);
 	
-
 	uint8 randomSeed;
 	randomSeed = FMath::RandRange(2,5);
 	switch (randomSeed)
 	{
 	case 2:
-		ThisItemType = EItemType::RefAmmo;
+		ThisItemType = EDropItemType::RefAmmo;
 		break;
 	case 3:
-		ThisItemType = EItemType::Ammo;
+		ThisItemType = EDropItemType::Ammo;
 		break;
 	case 4:
-		ThisItemType = EItemType::SpecAmmo;
+		ThisItemType = EDropItemType::SpecAmmo;
 		break;
 	case 5:
-		ThisItemType = EItemType::Weapon;
+		ThisItemType = EDropItemType::Weapon;
 		break;
 	default:
 		break;
@@ -79,69 +75,62 @@ void UItemComponent::BeginPlay()
 
 	switch (ThisItemType)
 	{
-	case EItemType::Ammo:
+	case EDropItemType::Ammo:
 		ItemMesh->SetMaterial(0,NormalAmmoMaterial);
 		break;
-	case EItemType::SpecAmmo:
+	case EDropItemType::SpecAmmo:
 		ItemMesh->SetMaterial(0,SpecAmmoMaterial);
 		break;
-	case EItemType::RefAmmo:
+	case EDropItemType::RefAmmo:
 		ItemMesh->SetMaterial(0,RefAmmoMaterial);
 		break;
-	case EItemType::Weapon:
+	case EDropItemType::Weapon:
 		ItemMesh->SetMaterial(0,WeaponItemMaterial);
 		break;
 	}
-
 	
 }
 
-void UItemComponent::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
+// Called every frame
+void ACPP_DropItem::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 
-	AActor* Parent = GetOwner();
+}
 
-	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")) && Parent)
+void ACPP_DropItem::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
+{
+	if(OtherActor->ActorHasTag(TEXT("DestinyPlayer")))
 	{
 		UInventorySystem* PlayerInventory = Cast<UInventorySystem>(OtherActor->GetComponentByClass(UInventorySystem::StaticClass()));
 		//여기에 아이템 - 인벤토리간 상호작용 코드
-		if(ThisItemType == EItemType::Ammo /*&& !PlayerInventory->bIsAmmoFull()*/)
+		if(ThisItemType == EDropItemType::Ammo /*&& !PlayerInventory->bIsAmmoFull()*/)
 		{
 			PlayerInventory->AddCurrAmmo(30);
-			Parent->Destroy();
+			Destroy();
 			
 		}
 
-		if(ThisItemType == EItemType::RefAmmo && !PlayerInventory->bIsRefAmmoFull())
+		if(ThisItemType == EDropItemType::RefAmmo && !PlayerInventory->bIsRefAmmoFull())
 		{
 			PlayerInventory->AddCurrRefAmmo(20);
-			Parent->Destroy();
+			Destroy();
 			
 		}
 
-		if(ThisItemType == EItemType::SpecAmmo && !PlayerInventory->bIsSpecAmmoFull())
+		if(ThisItemType == EDropItemType::SpecAmmo && !PlayerInventory->bIsSpecAmmoFull())
 		{
 			PlayerInventory->AddCurrSpecialAmmo(5);
-			Parent->Destroy();
+			Destroy();
 			
 		}
 
-		if(ThisItemType == EItemType::Weapon)
+		if(ThisItemType == EDropItemType::Weapon)
 		{
 
 			PlayerInventory->AddWeaponToInventory();
-			Parent->Destroy();
+			Destroy();
 		}
 
 	}
-
 }
-
-// Called every frame
-void UItemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-

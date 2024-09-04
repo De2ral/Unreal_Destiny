@@ -62,6 +62,9 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* SpearMesh;
 
+	UPROPERTY(VisibleAnywhere)
+	class AReplicatedObj* InterObj;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputMappingContext* DefaultMappingContext;
 
@@ -294,10 +297,8 @@ public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bPlayerIsMoving = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<AActor> DeathOrbTest;
-
-	AActor* SpawnedDeathOrb;
+	UPROPERTY(Replicated,EditDefaultsOnly, BlueprintReadOnly)
+	class AReplicatedObj* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
 
@@ -426,7 +427,7 @@ public:
 
 	void SetClassValue();
 	void TitanPunchCollisionEvents();
-	void PlayerCarryingStart(ACarriableObject* CarriableObject);
+	void PlayerCarryingStart(AReplicatedObj* CarriableObject);
 	void PlayerCarryingEnd();
 
 	UFUNCTION(BlueprintCallable)
@@ -446,6 +447,12 @@ public:
 
 	UFUNCTION()
     void OnSpearOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
 
@@ -473,6 +480,12 @@ public:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SwordAura(bool value);
+	void ServerInterObjAction();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiInterObjAction();
+
+	void InterObjAction();
 
 	UFUNCTION()
 	void OnRep_Skill();
