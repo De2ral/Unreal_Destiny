@@ -27,13 +27,19 @@ public:
     class UParticleSystem* SwordAuraParticle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* SwordAuraThunderParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* ExplodeParticle;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
-    float Speed = 1000.0f;
+    float Speed = 2000.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Damage")
     float DamageAmount = 70.f;
+
+	UPROPERTY(VisibleAnywhere)
+	float DestroyDelay = 5.f;
 
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* CollisionComponent;
@@ -48,6 +54,7 @@ public:
 
     void ApplyDamage();
 	void PlayExlodeParticle();
+	void DestroyAura();
 
 	void SetSwordAuraDirection(const FVector& Direction);
 };

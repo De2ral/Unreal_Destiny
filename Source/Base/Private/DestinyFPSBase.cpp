@@ -107,6 +107,11 @@ ADestinyFPSBase::ADestinyFPSBase()
 	if (SpearParticleAsset.Succeeded())
 		SpearParticle = SpearParticleAsset.Object;
 
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SpearAttackParticleAsset(
+		TEXT("/Script/Engine.ParticleSystem'/Game/ParagonKwang/FX/Particles/Abilities/LightStrike/FX/P_LightStrikeImpact.P_LightStrikeImpact'"));
+	if (SpearAttackParticleAsset.Succeeded())
+		SpearAttackParticle = SpearAttackParticleAsset.Object;
+
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> HunterPunchParticleAsset(
 		TEXT("/Script/Engine.ParticleSystem'/Game/FXVarietyPack/Particles/P_ky_hit1.P_ky_hit1'"));
 	if (HunterPunchParticleAsset.Succeeded())
@@ -162,6 +167,11 @@ ADestinyFPSBase::ADestinyFPSBase()
 	if(HunterSpearAsset.Succeeded())
 		HunterSpearMesh = HunterSpearAsset.Object;
 
+	ConstructorHelpers::FObjectFinder<UAnimMontage> HunterMontageAsset(
+		TEXT("/Script/Engine.AnimMontage'/Game/ThirdPerson/Characters/Hunter/Animations/Ultimate_Attack.Ultimate_Attack'"));
+    if (HunterMontageAsset.Succeeded())
+        HunterComboMontage = HunterMontageAsset.Object;
+
 	PlayerClass = EPlayerClassEnum::HUNTER;
 
 	LastPlayerPos = GetActorLocation();
@@ -170,11 +180,6 @@ ADestinyFPSBase::ADestinyFPSBase()
 	bIsHunterAttacking = false;
 	isHasNexCombo = false;
 	ComboInputWindow = 0.6f;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> HunterMontageAsset(
-		TEXT("/Script/Engine.AnimMontage'/Game/ThirdPerson/Characters/Hunter/Animations/Ultimate_Attack.Ultimate_Attack'"));
-    if (HunterMontageAsset.Succeeded())
-        HunterComboMontage = HunterMontageAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -257,7 +262,7 @@ void ADestinyFPSBase::SetClassValue()
 					SpearMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
    					SpearMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
     				SpearMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-					SpearMesh->OnComponentBeginOverlap.AddDynamic(this, &ADestinyFPSBase::OnSpearOverlapBegin);
+					SpearMesh->OnComponentBeginOverlap.AddDynamic(this, &ADestinyFPSBase::OnSpearOverlap);
 					//SpearMesh->SetIsReplicated(true);
 				}
 
@@ -795,6 +800,8 @@ void ADestinyFPSBase::Ultimate()
 		}
 		else if (PlayerClass == EPlayerClassEnum::HUNTER)
 		{
+			CurUltimateCoolTime = 0.f;
+			CurUltimateDuration = 0.f;
 			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("헌터 궁극기 시전. (서버)"));
 			Multicast_UpdateSpearMeshVisibility(isUltimate);
@@ -1180,13 +1187,14 @@ void ADestinyFPSBase::HunterSwordAura()
 	FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
 
     TArray<float> Angles = { -30.f, -15.f, 0.f, 15.f, 30.f };
+	FVector CameraForward = TppCamera->GetForwardVector();
 	FRotator ShootRotation = this->GetActorRotation();
 
 	AHunter_Skill_SwordAura* swordAura = GetWorld()->SpawnActor<AHunter_Skill_SwordAura>(AHunter_Skill_SwordAura::StaticClass(), SpawnLocation, ShootRotation);
 
 	if (swordAura)
 	{
-		FVector ShootDirection = ShootRotation.Vector(); 
+		FVector ShootDirection = CameraForward; 
 		swordAura->SetSwordAuraDirection(ShootDirection);
 	}
 }
@@ -1196,8 +1204,6 @@ void ADestinyFPSBase::HunterSwordAuraEnd()
 	if (HasAuthority())
 	{
 		isSwordAura = false;
-		SwitchToFirstPerson();
-		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 	}
 	else
 	{
@@ -1264,6 +1270,19 @@ void ADestinyFPSBase::EndUltimate()
 	if (HasAuthority())
 	{
 		isUltimate = false;
+		if (PlayerClass == EPlayerClassEnum::TITAN)
+		{
+			isMeleeAttack = false;
+			isSmash = false;
+			MeleeAttackCoolTime = 8.f;
+		}
+		if (PlayerClass == EPlayerClassEnum::HUNTER)
+		{
+			HunterComboStage = 0;
+			bIsHunterAttacking = false;
+			isHasNexCombo = false;
+			Multicast_UpdateSpearMeshVisibility(false);
+		}
 		SwitchToFirstPerson();
 		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 	}
@@ -1511,6 +1530,7 @@ void ADestinyFPSBase::PlayMontage_Internal(int32 ComboStage)
             AnimInstance->Montage_Play(HunterComboMontage, 1.f);
         }
         AnimInstance->Montage_JumpToSection(ComboSectionName, HunterComboMontage);
+		isSpearAttack = true;
     }
 }
 
@@ -1623,15 +1643,23 @@ void ADestinyFPSBase::HPDamageTest(const FInputActionValue &Value)
 	else if(HP <= 0.0f) HP = MaxHp;
 }
 
-void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
-                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
-                             bool bFromSweep, const FHitResult& SweepResult)
+void ADestinyFPSBase::OnSpearOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (isUltimate && bIsHunterAttacking)
+	if (isUltimate && bIsHunterAttacking && isSpearAttack)
 	{
 		if (OtherActor && !OtherActor->IsA(ADestinyFPSBase::StaticClass()))
 		{
 			UGameplayStatics::ApplyDamage(OtherActor, HunterUltimateAttackDamage, GetController(), this, nullptr);
+			FVector ParticleSpawnLocation = OtherComp->GetComponentLocation();
+			FRotator ParticleSpawnRotation = FRotator(0.f, 0.f, 0.f);
+			UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				SpearAttackParticle,
+				ParticleSpawnLocation,
+				ParticleSpawnRotation,
+				(FVector)((1.5F))
+			);
+			isSpearAttack = false;
 		}
 	}
 }
@@ -1673,9 +1701,19 @@ void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 	else
 	{
 		isUltimate = value;
-		isMeleeAttack = false;
-		isSmash = false;
-		MeleeAttackCoolTime = 8.f;
+		if (PlayerClass == EPlayerClassEnum::TITAN)
+		{
+			isMeleeAttack = false;
+			isSmash = false;
+			MeleeAttackCoolTime = 8.f;
+		}
+		if (PlayerClass == EPlayerClassEnum::HUNTER)
+		{
+			HunterComboStage = 0;
+			bIsHunterAttacking = false;
+			isHasNexCombo = false;
+			Multicast_UpdateSpearMeshVisibility(false);
+		}
 	}
 }
 
@@ -1877,6 +1915,7 @@ void ADestinyFPSBase::Multicast_UpdateSpearMeshVisibility_Implementation(bool bV
 	{
 		if (bVisible)
 		{
+			HunterSpearSpawnedEmitter =
 			UGameplayStatics::SpawnEmitterAttached(
 				SpearParticle,
 				TppMesh,
@@ -1886,6 +1925,10 @@ void ADestinyFPSBase::Multicast_UpdateSpearMeshVisibility_Implementation(bool bV
 				EAttachLocation::SnapToTarget,
 				true
 			);
+		}
+		else
+		{
+			HunterSpearSpawnedEmitter->DestroyComponent();
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, FString::Printf(TEXT("Multicast_SetStaticMeshVisibility called with bVisible: %d"), bVisible));
 		SpearMesh->SetVisibility(bVisible, true);

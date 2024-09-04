@@ -187,7 +187,7 @@ public:
 	float HunterMeleeAttackCoolTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SwordAuraCoolTime = 8.f;
+	float SwordAuraCoolTime = 2.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HunterPunchDamage = 20.f;
@@ -225,7 +225,7 @@ public:
 	UPROPERTY(Replicated)
 	float SlideCapsuleHeight = 0.0f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	class UAnimMontage* HunterComboMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
@@ -260,6 +260,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* SpearParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* SpearAttackParticle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* HunterPunchParticle;
@@ -442,9 +445,7 @@ public:
     AActor* DamageCauser)override;
 
 	UFUNCTION()
-    void OnSpearOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
-                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
-                             bool bFromSweep, const FHitResult& SweepResult);
+    void OnSpearOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
 
@@ -518,12 +519,14 @@ private:
 
 	bool isTitanPunch = false;
 	bool isWarlockSkill = false;
+	bool isSpearAttack = false;
 
 	USkeletalMesh* HunterMesh;
 	USkeletalMesh* TitanMesh;
 	USkeletalMesh* WarlockMesh;
 
 	UStaticMesh* HunterSpearMesh;
+	UParticleSystemComponent* HunterSpearSpawnedEmitter;
 
 	TSubclassOf<UAnimInstance> HunterAnimInstanceClass;
 	TSubclassOf<UAnimInstance> TitanAnimInstanceClass;

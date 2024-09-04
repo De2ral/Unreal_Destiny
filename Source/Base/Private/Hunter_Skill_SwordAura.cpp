@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Hunter_Skill_SwordAura.h"
+#include "TimerManager.h"
 
 // Sets default values
 AHunter_Skill_SwordAura::AHunter_Skill_SwordAura()
@@ -27,8 +28,13 @@ AHunter_Skill_SwordAura::AHunter_Skill_SwordAura()
 	if (SwordAuraAsset.Succeeded())
 		SwordAuraParticle = SwordAuraAsset.Object;
 
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SwordAuraThunderAsset(
+		TEXT("/Script/Engine.ParticleSystem'/Game/ParagonKwang/FX/Particles/Abilities/Sword/FX/P_Kwang_Sword_Attach.P_Kwang_Sword_Attach'"));
+	if (SwordAuraThunderAsset.Succeeded())
+		SwordAuraThunderParticle = SwordAuraThunderAsset.Object;
+
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExplodeAsset(
-		TEXT("/Script/Engine.ParticleSystem'/Game/FXVarietyPack/Particles/P_ky_explosion.P_ky_explosion'"));
+		TEXT("/Script/Engine.ParticleSystem'/Game/ParagonKwang/FX/Particles/Abilities/LightStrike/FX/P_LightStrikeImpact_2.P_LightStrikeImpact_2'"));
 	if (ExplodeAsset.Succeeded())
 		ExplodeParticle = ExplodeAsset.Object;
 }
@@ -37,6 +43,8 @@ AHunter_Skill_SwordAura::AHunter_Skill_SwordAura()
 void AHunter_Skill_SwordAura::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("회전 X : %f, Y : %f, Z : %f"), GetActorRotation().Vector().X, GetActorRotation().Vector().Y, GetActorRotation().Vector().Z));
 	
 	UGameplayStatics::SpawnEmitterAttached(
 		SwordAuraParticle,
@@ -44,9 +52,22 @@ void AHunter_Skill_SwordAura::BeginPlay()
 		NAME_None,
 		FVector::ZeroVector, 
 		FRotator::ZeroRotator,
-		EAttachLocation::SnapToTarget,
+		EAttachLocation::KeepRelativeOffset,
 		true
 	);
+
+	UGameplayStatics::SpawnEmitterAttached(
+		SwordAuraThunderParticle,
+		RootComponent,
+		NAME_None,
+		FVector::ZeroVector, 
+		FRotator::ZeroRotator,
+		EAttachLocation::KeepRelativeOffset,
+		true
+	);
+
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &AHunter_Skill_SwordAura::DestroyAura, DestroyDelay, false);
 }
 
 // Called every frame
@@ -99,4 +120,9 @@ void AHunter_Skill_SwordAura::PlayExlodeParticle()
 		ParticleSpawnRotation,
 		(FVector)((0.5F))
 	);
+}
+
+void AHunter_Skill_SwordAura::DestroyAura()
+{
+	Destroy();
 }
