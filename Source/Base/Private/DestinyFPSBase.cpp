@@ -62,9 +62,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 	SpearMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpearMesh"));
 
 	DeathMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DeathMesh"));
-	ConstructorHelpers::FObjectFinder<UStaticMesh> DeathMeshAsset( TEXT("/Script/Engine.StaticMesh'/Engine/EngineMeshes/SM_MatPreviewMesh_01.SM_MatPreviewMesh_01'"));
-	DeathMesh->SetStaticMesh(DeathMeshAsset.Object);
-	DeathMesh->SetVisibility(false);
+	DeathMesh->SetHiddenInGame(true);
 	DeathMesh->SetupAttachment(RootComponent);
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
@@ -537,6 +535,8 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 	DOREPLIFETIME(ADestinyFPSBase, CurHunterMeleeAttackCoolTime); 
 
 	DOREPLIFETIME(ADestinyFPSBase, DeathMesh);
+	DOREPLIFETIME(ADestinyFPSBase, TppMesh);
+
 	
 }
 
@@ -1586,12 +1586,9 @@ void ADestinyFPSBase::Death()
 	SwitchToThirdPerson();
 	TppMesh->SetOwnerNoSee(true);
 	FppMesh->SetOwnerNoSee(true);
+	SetActorLocation(LastPlayerPos);
 
-	if(HasAuthority())
-	{
-		CreateDeathOrb();
-
-	}else ServerCreateDeathOrb();
+	ServerCreateDeathOrb();
 
 	
 }
@@ -1606,15 +1603,13 @@ void ADestinyFPSBase::Revive()
 
 	ReviveCoolTime = 300.0f;
 
-	if(HasAuthority()) DeathMesh->SetVisibility(false);
-	else ServerRevive();
+	ServerRevive();
 
 }
 
 void ADestinyFPSBase::CreateDeathOrb()
 {
-	DeathMesh->SetVisibility(true);
-	SetActorLocation(LastPlayerPos);
+	DeathMesh->SetHiddenInGame(false);
 }
 
 void ADestinyFPSBase::SetHasRifle(bool bNewHasRifle)
@@ -1864,7 +1859,7 @@ bool ADestinyFPSBase::ServerInterObjAction_Validate()
 
 void ADestinyFPSBase::ServerDeath_Implementation()
 {
-	DeathMesh->SetVisibility(true);
+	DeathMesh->SetHiddenInGame(false);
 
 }
 
@@ -1875,7 +1870,7 @@ bool ADestinyFPSBase::ServerDeath_Validate()
 
 void ADestinyFPSBase::ServerRevive_Implementation()
 {
-	DeathMesh->SetVisibility(false);
+	MulticastRevive();
 }
 
 bool ADestinyFPSBase::ServerRevive_Validate()
@@ -1883,12 +1878,32 @@ bool ADestinyFPSBase::ServerRevive_Validate()
     return true;
 }
 
+void ADestinyFPSBase::MulticastRevive_Implementation()
+{
+	DeathMesh->SetHiddenInGame(true);
+}
+
+bool ADestinyFPSBase::MulticastRevive_Validate()
+{
+    return true;
+}
+
 void ADestinyFPSBase::ServerCreateDeathOrb_Implementation()
+{
+	MulticastCreateDeathOrb();
+}
+
+bool ADestinyFPSBase::ServerCreateDeathOrb_Validate()
+{
+    return true;
+}
+
+void ADestinyFPSBase::MulticastCreateDeathOrb_Implementation()
 {
 	CreateDeathOrb();
 }
 
-bool ADestinyFPSBase::ServerCreateDeathOrb_Validate()
+bool ADestinyFPSBase::MulticastCreateDeathOrb_Validate()
 {
     return true;
 }

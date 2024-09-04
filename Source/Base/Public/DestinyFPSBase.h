@@ -56,7 +56,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* FppMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* TppMesh;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
@@ -494,8 +494,14 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRevive();
 
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void MulticastRevive();
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerCreateDeathOrb();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void MulticastCreateDeathOrb();
 
 	void InterObjAction();
 
