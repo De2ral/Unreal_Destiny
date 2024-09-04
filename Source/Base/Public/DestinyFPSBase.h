@@ -402,6 +402,7 @@ public:
 	void PerformComboAttack();
 	void ResetCombo();
 	
+	
 private:
 	float CurSkillCoolTime = SkillCoolTime;
 	float CurGrenadeCoolTime = GrenadeCoolTime;

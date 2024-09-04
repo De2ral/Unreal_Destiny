@@ -1046,7 +1046,6 @@ void UWeaponComponent::SetCurrentWeapon(const FGunInfo& NewWeapon)
         else
             Character->SetHasRifle(true);
     }
-    
 }
 
 void UWeaponComponent::LoadWeaponByName(FName WeaponName)
