@@ -1893,6 +1893,7 @@ void ADestinyFPSBase::Server_SwordAura_Implementation(bool value)
 bool ADestinyFPSBase::Server_SwordAura_Validate(bool value)
 {
     return true;
+}
 void ADestinyFPSBase::InterObjAction()
 {
 	if(HasAuthority())

@@ -480,6 +480,8 @@ public:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SwordAura(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerInterObjAction();
 
 	UFUNCTION(NetMulticast, Reliable)
