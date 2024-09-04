@@ -1649,6 +1649,7 @@ void ADestinyFPSBase::OnSpearOverlap(UPrimitiveComponent* OverlappedComp, AActor
 	{
 		if (OtherActor && !OtherActor->IsA(ADestinyFPSBase::StaticClass()))
 		{
+			CameraShake(1.f);
 			UGameplayStatics::ApplyDamage(OtherActor, HunterUltimateAttackDamage, GetController(), this, nullptr);
 			FVector ParticleSpawnLocation = OtherComp->GetComponentLocation();
 			FRotator ParticleSpawnRotation = FRotator(0.f, 0.f, 0.f);
