@@ -51,7 +51,7 @@ void UWeaponComponent::BeginPlay()
     
     AddMapping(PlayerCharacter);
 
-    if(GetOwner()->HasAuthority())
+    //if(GetOwner()->HasAuthority())
     {
         if (AmmoWidgetClass)
 	    {
@@ -63,18 +63,18 @@ void UWeaponComponent::BeginPlay()
 	    	}
 	    }
     }
-    else
-    {
-        if (AmmoWidgetClass2)
-	    {
-            //CurrentAmmo = MaxAmmo;
-	    	AmmoWidget2 = CreateWidget<UWeaponWidget>(GetWorld(), AmmoWidgetClass2);
-	    	if (AmmoWidget2)
-	    	{
-	    		AmmoWidget2->AddToViewport();
-	    	}
-	    }
-    }
+    //else
+    //{
+    //    if (AmmoWidgetClass2)
+	//    {
+    //        //CurrentAmmo = MaxAmmo;
+	//    	AmmoWidget2 = CreateWidget<UWeaponWidget>(GetWorld(), AmmoWidgetClass2);
+	//    	if (AmmoWidget2)
+	//    	{
+	//    		AmmoWidget2->AddToViewport();
+	//    	}
+	//    }
+    //}
     
     //if (GetOwner()->HasAuthority())
     //{
@@ -530,10 +530,10 @@ void UWeaponComponent::StartAiming()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
     bIsAiming = true;
-    if(GetOwner()->HasAuthority())
+    //if(GetOwner()->HasAuthority())
         AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
-    else
-        AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+    //else
+    //    AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
 
     if(CurrentScopeX <= 0.1f)
     {
@@ -576,10 +576,10 @@ void UWeaponComponent::StopAiming()
 {
     UE_LOG(LogTemp, Warning, TEXT("StopAiming"));
     bIsAiming = false;
-    if(GetOwner()->HasAuthority())
+    //if(GetOwner()->HasAuthority())
         AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
-    else
-        AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
+    //else
+    //    AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),false);
     //APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
     //PlayerController->InputYawScale_DEPRECATED = OriginalMouseSensitivity;  // 감도 감소 (0.5배로)
     return;
@@ -687,16 +687,16 @@ void UWeaponComponent::MulticastEquipWeapon3_Implementation()
 void UWeaponComponent::ChangeCrosshair()
 {
     UE_LOG(LogTemp, Warning, TEXT("ChangeCrosshair"));
-    if(GetOwner()->HasAuthority())
+    //if(GetOwner()->HasAuthority())
     {
         AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
         AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
     }
-    else
-    {
-        AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
-        AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-    }
+    //else
+    //{
+    //    AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
+    //    AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    //}
     
 }
 
@@ -788,10 +788,10 @@ void UWeaponComponent::UseAmmo()
         }
         Ammo3--;
     }
-    if(GetOwner()->HasAuthority())
+    //if(GetOwner()->HasAuthority())
         AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-    else
-        AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    //else
+    //    AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::Reload()
@@ -852,10 +852,10 @@ void UWeaponComponent::FillAmmo()
         } 
     }
 
-    if(GetOwner()->HasAuthority())
+    //if(GetOwner()->HasAuthority())
         AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-    else
-        AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    //else
+    //    AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::AllFillAmmo()
@@ -873,10 +873,10 @@ void UWeaponComponent::AllFillAmmo()
     if(WeaponData)
         Ammo3 = WeaponData->Max_capacity;
        
-    if(GetOwner()->HasAuthority())
+    //if(GetOwner()->HasAuthority())
         AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-    else
-        AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+    //else
+    //    AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
 
 void UWeaponComponent::ChangeGunPose(int inbool)
@@ -1124,29 +1124,29 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
             {
                 if(CurrentWeapon.GunType == GunTypeList::SNIPER)
                 {
-                    if(GetOwner()->HasAuthority())
+                    //if(GetOwner()->HasAuthority())
                     {
                         AmmoWidget->SetScopeSize(CurrentScopeSize);
                         AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
                     }
-                    else
-                    {
-                        AmmoWidget2->SetScopeSize(CurrentScopeSize);
-                        AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
-                    }
+                    //else
+                    //{
+                    //    AmmoWidget2->SetScopeSize(CurrentScopeSize);
+                    //    AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                    //}
                 }
                 else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
                 {
-                    if(GetOwner()->HasAuthority())
+                    //if(GetOwner()->HasAuthority())
                     {
                         AmmoWidget->SetScopeSize(CurrentScopeSize);
                         AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
                     }
-                    else
-                    {
-                        AmmoWidget2->SetScopeSize(CurrentScopeSize);
-                        AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
-                    }
+                    //else
+                    //{
+                    //    AmmoWidget2->SetScopeSize(CurrentScopeSize);
+                    //    AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                    //}
                     
                 } 
             }
@@ -1217,31 +1217,31 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
                 {
                     CurrentScopeSize = 0.5f;
                     CurrentScopeX = 600.0f;
-                    if(GetOwner()->HasAuthority())
+                    //if(GetOwner()->HasAuthority())
                     {
                         AmmoWidget->SetScopeSize(CurrentScopeSize);
                         AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
                     }
-                    else
-                    {
-                        AmmoWidget2->SetScopeSize(CurrentScopeSize);
-                        AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
-                    }                    
+                    //else
+                    //{
+                    //    AmmoWidget2->SetScopeSize(CurrentScopeSize);
+                    //    AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,true);
+                    //}                    
                 }
                 else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
                 {
                     CurrentScopeSize = 0.5f;
                     CurrentScopeX = 600.0f;
-                    if(GetOwner()->HasAuthority())
+                    //if(GetOwner()->HasAuthority())
                     {
                         AmmoWidget->SetScopeSize(CurrentScopeSize);
                         AmmoWidget->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
                     }
-                    else
-                    {
-                        AmmoWidget2->SetScopeSize(CurrentScopeSize);
-                        AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
-                    }
+                    //else
+                    //{
+                    //    AmmoWidget2->SetScopeSize(CurrentScopeSize);
+                    //    AmmoWidget2->ImageMove(CurrentScopeX,CurrentStaticMeshComponent,false);
+                    //}
                     
                 } 
             }

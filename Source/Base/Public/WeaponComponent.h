@@ -66,11 +66,11 @@ public:
     UPROPERTY()
     UWeaponWidget* AmmoWidget;
 
-    UPROPERTY(EditAnywhere, Category = "UI")
-    TSubclassOf<UWeaponWidget> AmmoWidgetClass2;
+    //UPROPERTY(EditAnywhere, Category = "UI")
+    //TSubclassOf<UWeaponWidget> AmmoWidgetClass2;
 
-    UPROPERTY()
-    UWeaponWidget* AmmoWidget2;
+    //UPROPERTY()
+    //UWeaponWidget* AmmoWidget2;
 
 
 
