@@ -218,15 +218,20 @@ void ADestinyFPSBase::BeginPlay()
 	CurSkillCoolTime = SkillCoolTime;
 	CurGrenadeCoolTime = GrenadeCoolTime;
 
-	if (HUDWidgetClass)
+	if (IsLocallyControlled())
 	{
-		HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
-		if (HUDWidget)
+		if (HUDWidgetClass)
 		{
-			HUDWidget->AddToViewport();
-			HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
-			HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
-			HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
+			HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
+			if (HUDWidget)
+			{
+				HUDWidget->AddToViewport();
+				HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
+				HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
+				HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
+				HUDWidget->UpdateMeleeCoolTime(CurMeleeAttackCoolTime, MeleeAttackCoolTime);
+				HUDWidget->SetOwningPlayer(PlayerController);
+			}
 		}
 	}
 
@@ -350,13 +355,12 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		if (CurSkillCoolTime < SkillCoolTime)
 		{
 			CurSkillCoolTime += DeltaTime;
-			HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
+			
 		}
 
 		if (CurGrenadeCoolTime < GrenadeCoolTime)
 		{
 			CurGrenadeCoolTime += DeltaTime;
-			HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 		}
 
 		if (CurUltimateCoolTime < UltimateCoolTime)
@@ -390,6 +394,14 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		{
 			CurSwordAuraCoolTime += DeltaTime;
 		}
+	}
+
+	if (HUDWidget)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red, TEXT("위젯 업데이트"));
+		HUDWidget->UpdateSkillCoolTime(FMath::Min(CurSkillCoolTime, SkillCoolTime), SkillCoolTime);
+		HUDWidget->UpdateGrenadeCoolTime(FMath::Min(CurGrenadeCoolTime, GrenadeCoolTime), GrenadeCoolTime);
+		HUDWidget->UpdateMeleeCoolTime(FMath::Min(CurMeleeAttackCoolTime, MeleeAttackCoolTime), MeleeAttackCoolTime);
 	}
 
 	if (isTitanPunch)

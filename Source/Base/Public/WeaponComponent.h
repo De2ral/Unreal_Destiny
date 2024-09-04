@@ -182,8 +182,9 @@ private:
 
     UStaticMeshComponent* CurrentStaticMeshComponent;
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
+    UStaticMeshComponent* CurrentMultiStaticMeshComponent;
+    USkeletalMeshComponent* CurrentMultiSkeletalMeshComponent;
 
-   
     bool bIsFiring = false;                
 
     FVector DefaultOffset;

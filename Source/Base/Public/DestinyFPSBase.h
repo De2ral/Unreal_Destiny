@@ -342,6 +342,7 @@ public:
 	void SetHasRifle(bool bNewHasRifle);
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
+	USkeletalMeshComponent* GetTppMesh() const { return TppMesh; }
 
 	void Throw();
 	void EndUltimate();
