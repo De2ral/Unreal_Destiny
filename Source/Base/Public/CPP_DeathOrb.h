@@ -29,7 +29,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* OrbMesh;
 
-    UPROPERTY(Replicated)
+    UPROPERTY(EditAnywhere)
     class ADestinyFPSBase* DeadPlayer;
 
 public:	
@@ -46,6 +46,6 @@ public:
 
     // 다른 플레이어가 상호작용할 때 호출될 함수 (서버에서 실행)
     UFUNCTION(Server, Reliable, WithValidation)
-    void ServerOnInteract(ADestinyFPSBase* InteractingPlayer);
+    void ServerOnInteract();
 
 };

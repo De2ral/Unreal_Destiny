@@ -62,6 +62,9 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* SpearMesh;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* DeathMesh;
+
 	UPROPERTY(VisibleAnywhere)
 	class AReplicatedObj* InterObj;
 
@@ -296,12 +299,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bPlayerIsMoving = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Death")
-	TSubclassOf<class ACPP_DeathOrb> DeathOrbClass;
-
-	UPROPERTY(VisibleAnywhere)
-	class ACPP_DeathOrb* OtherPlayerDeathOrb;
 	
 	void InvenOpenClose();
 
@@ -332,6 +329,7 @@ public:
 
 	void Death();
 	void Revive();
+	void CreateDeathOrb();
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
@@ -440,6 +438,9 @@ public:
 	bool GetIsPlayerAlive() {return bIsPlayerAlive;}
 
 	UFUNCTION(BlueprintCallable)
+	void SetIsPlayerAlive(bool value) {bIsPlayerAlive = value;}
+
+	UFUNCTION(BlueprintCallable)
 	bool GetIsPlayerCarrying() {return bIsCarrying;}
 
 	UFUNCTION(BlueprintCallable, Category = "HP")
@@ -492,6 +493,9 @@ public:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRevive();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerCreateDeathOrb();
 
 	void InterObjAction();
 
@@ -568,6 +572,7 @@ private:
 	float DefaultCapsuleHeight;
 	FVector LastPlayerPos;
 	float PosTickCoolTime = 400.0f;
+	float ReviveCoolTime = 300.0f;
 	bool bIsPlayerAlive = true;
 	bool bIsCarrying = false;
 	bool bIsInWarlockAura = false;

@@ -11,17 +11,24 @@ ACPP_DeathOrb::ACPP_DeathOrb()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	OrbCollider = CreateDefaultSubobject<USphereComponent>(TEXT("OrbCollider"));
-	OrbCollider->InitSphereRadius(70.0f);
-
-	OrbMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OrbMesh"));
-	OrbMesh->SetWorldScale3D(FVector3d(3.0f,3.0f,3.0f));
-
-	OrbMesh->SetupAttachment(RootComponent);
-	OrbCollider->SetupAttachment(OrbMesh);
-
 	bReplicates = true;
 
+	Tags.Add("DeathOrb");
+
+	//OrbCollider = CreateDefaultSubobject<USphereComponent>(TEXT("OrbCollider"));
+	//OrbCollider->InitSphereRadius(230.0f);
+
+	OrbMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OrbMesh"));
+	OrbMesh->SetWorldScale3D(FVector3d(2.0f,2.0f,2.0f));
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh>MeshAsset(TEXT("/Script/Engine.StaticMesh'/Engine/EngineMeshes/Sphere.Sphere'"));
+	OrbMesh->SetStaticMesh(MeshAsset.Object);
+
+	static ConstructorHelpers::FObjectFinder<UMaterial>MeshMaterial(TEXT("/Script/Engine.Material'/Game/Enemy/Boss_ConsecratedMind/FX/Alert_Circle.Alert_Circle'"));
+	OrbMesh->SetMaterial(0,MeshMaterial.Object);
+
+	OrbMesh->SetupAttachment(RootComponent);
+	//OrbCollider->SetupAttachment(OrbMesh);
 }
 
 // Called when the game starts or when spawned
@@ -35,21 +42,23 @@ void ACPP_DeathOrb::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(ACPP_DeathOrb, DeadPlayer);  // DeadPlayer를 리플리케이션
+    //DOREPLIFETIME(ACPP_DeathOrb, DeadPlayer);  // DeadPlayer를 리플리케이션
 }
 
-void ACPP_DeathOrb::ServerOnInteract_Implementation(ADestinyFPSBase* InteractingPlayer)
+void ACPP_DeathOrb::ServerOnInteract_Implementation()
 {
     if (DeadPlayer)
     {
         // 죽은 플레이어 소생 처리
-        DeadPlayer->Revive();
+        DeadPlayer->SetIsPlayerAlive(true);
+		DeadPlayer->SwitchToFirstPerson();
+		DeadPlayer->SetCurrHP(DeadPlayer->GetMaxHP());
 
         Destroy();
     }
 }
 
-bool ACPP_DeathOrb::ServerOnInteract_Validate(ADestinyFPSBase* InteractingPlayer)
+bool ACPP_DeathOrb::ServerOnInteract_Validate()
 {
     return true;  // 간단한 검증, 필요시 추가 검증 로직 구현
 }

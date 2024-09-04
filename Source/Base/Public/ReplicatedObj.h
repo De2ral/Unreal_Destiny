@@ -82,10 +82,4 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetObjIsFill(bool value) { bIsFill = value; }
 
-	UFUNCTION()
-	void SetDeadPlayer(class ADestinyFPSBase* Player) { DeadPlayer = Player; }
-
-	UFUNCTION()
-	ADestinyFPSBase* GetDeadPlayer() { return DeadPlayer; }
-
 };
