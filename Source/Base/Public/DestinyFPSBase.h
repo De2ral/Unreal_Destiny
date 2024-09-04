@@ -264,10 +264,8 @@ public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bPlayerIsMoving = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<AActor> DeathOrbTest;
-
-	AActor* SpawnedDeathOrb;
+	UPROPERTY(Replicated,EditDefaultsOnly, BlueprintReadOnly)
+	class AReplicatedObj* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
 

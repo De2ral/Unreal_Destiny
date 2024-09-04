@@ -405,9 +405,6 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 
 			PosTickCoolTime = 400.0f;
 
-			//if(DeathOrbTest) GetWorld()->
-			//Actor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
-
 		}
 	} 
 
@@ -474,6 +471,8 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 	DOREPLIFETIME(ADestinyFPSBase, CurUltimateDuration);   
 	DOREPLIFETIME(ADestinyFPSBase, CurSmashCoolTime);   
 	DOREPLIFETIME(ADestinyFPSBase, CurMeleeAttackCoolTime);   
+
+	DOREPLIFETIME(ADestinyFPSBase, SpawnedDeathOrb);   
 }
 
 void ADestinyFPSBase::InvenOpenClose()
@@ -1360,12 +1359,19 @@ void ADestinyFPSBase::Death()
 
 	if(!SpawnedDeathOrb)
 	{
-		SpawnedDeathOrb = GetWorld()->SpawnActor<AActor>(DeathOrbTest,LastPlayerPos,GetActorRotation());
+		SpawnedDeathOrb = GetWorld()->SpawnActor<AReplicatedObj>(AReplicatedObj::StaticClass(),LastPlayerPos,GetActorRotation());
+
+		SpawnedDeathOrb->Tags.Add(FName("InterObj"));
+		SpawnedDeathOrb->Tags.Add(FName("DeathOrb"));
 		SetActorLocation(LastPlayerPos);
 		SwitchToThirdPerson();
+
 		TppMesh->SetOwnerNoSee(true);
 		FppMesh->SetOwnerNoSee(true);
+
 		if(bIsCarrying) PlayerCarryingEnd();
+
+		SpawnedDeathOrb->SetDeadPlayer(this);
         
     }
 }
@@ -1374,7 +1380,6 @@ void ADestinyFPSBase::Revive()
 {
 	bIsPlayerAlive = true;
 
-	//사망 테스트를 위해 추가한 기능 (추후 멀티플레이 구현 시 삭제 요망)
 	if(SpawnedDeathOrb != nullptr)
 	{
 		SpawnedDeathOrb->Destroy();
@@ -1443,7 +1448,7 @@ float ADestinyFPSBase::TakeDamage(float DamageAmount, FDamageEvent const &Damage
     HP -= (bIsInWarlockAura && DamageAmount > 0) ? (DamageAmount * 0.8) : DamageAmount;
     
 	if(bIsPlayerAlive && HP <= 0.0f) Death();
-	else if (!bIsPlayerAlive && HP > 0.0f) Revive();
+	//else if (!bIsPlayerAlive && HP > 0.0f) Revive();
 
     return Damage;
 }
@@ -1451,7 +1456,7 @@ float ADestinyFPSBase::TakeDamage(float DamageAmount, FDamageEvent const &Damage
 void ADestinyFPSBase::HPDamageTest(const FInputActionValue &Value)
 {
 	if(HP > 0.0f) HP -= 10.0f;
-	else if(HP <= 0.0f) HP = MaxHp;
+	else if(HP <= 0.0f) Death();
 }
 
 void ADestinyFPSBase::OnSpearOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
@@ -1628,7 +1633,6 @@ void ADestinyFPSBase::InterObjAction()
 {
 	if(HasAuthority())
 	{	
-
 		if(InterObj->ActorHasTag("Stash"))
 		{
 			int32 ItemCount = FMath::RandRange(InterObj->MinItemValue,InterObj->MaxItemValue);
@@ -1655,6 +1659,12 @@ void ADestinyFPSBase::InterObjAction()
 				InterObj->SetObjIsFill(true);
 			}
 
+		}
+
+		if(InterObj->ActorHasTag("DeathOrb"))
+		{
+			InterObj->GetDeadPlayer()->Revive();
+			InterObj->Destroy();
 		}
 
 	} else ServerInterObjAction();

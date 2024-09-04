@@ -26,6 +26,13 @@ AReplicatedObj::AReplicatedObj()
 
 }
 
+void AReplicatedObj::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(AReplicatedObj, DeadPlayer);  // DeadPlayer를 리플리케이션
+}
+
 // Called when the game starts or when spawned
 void AReplicatedObj::BeginPlay()
 {
