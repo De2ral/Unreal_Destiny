@@ -72,8 +72,10 @@ void AAIController_Wraith::SetBlackboardValue(const FName &KeyName, bool Value)
 
 void AAIController_Wraith::HandleDeath()
 {
-	GetBlackboardComponent()->SetValueAsBool(TEXT("IsDead"),true);	
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("BBBBBBBBBBBBBBBB -- HP ")));
 
+	GetBlackboardComponent()->SetValueAsBool(TEXT("IsDead"),true);	
+    
 }
 
 
