@@ -99,7 +99,7 @@ void UWeaponComponent::BeginPlay()
         SetSlot2Weapon(TEXT("Pistol1"));
         SetSlot3Weapon(TEXT("Launcher1"));
 
-        //EquipWeapon1();
+        EquipWeapon1();
     }
 	else
 	{
@@ -134,8 +134,17 @@ bool UWeaponComponent::ServerFire_Validate()
 }
 void UWeaponComponent::MulticastTakeFire_Implementation()
 {
-    UseAmmo();
-    UE_LOG(LogTemp, Warning, TEXT("Fire"));
+    if(CurrentAmmo() < 1)
+    {
+        StopAiming();
+        StopFiring();
+        Reload();
+        return;
+    }
+    if(CurrentWeapon.AutoFire)
+        UseAmmo();
+    //UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter called failed."));
+    UE_LOG(LogTemp, Warning, TEXT("Fire %d"), CurrentAmmo());
 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -225,7 +234,7 @@ void UWeaponComponent::MulticastTakeFire_Implementation()
         if (PlayerController != nullptr)
     	{
             if(bIsAiming)
-    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
+    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.1f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
    		}
@@ -275,7 +284,15 @@ bool UWeaponComponent::ServerFireInRange_Validate()
 }
 void UWeaponComponent::MulticastTakeFireInRange_Implementation()
 {
-    UseAmmo();
+    if(CurrentAmmo() < 1)
+    {
+        StopAiming();
+        StopFiring();
+        Reload();
+        return;
+    }
+    if(CurrentWeapon.AutoFire)
+        UseAmmo();
     UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
     UWorld* const World = GetWorld();
@@ -355,7 +372,7 @@ void UWeaponComponent::MulticastTakeFireInRange_Implementation()
         if (PlayerController != nullptr)
         {
             if (bIsAiming)
-                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
+                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.1f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
         }
@@ -385,7 +402,15 @@ bool UWeaponComponent::ServerFireLauncher_Validate()
 }
 void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
 {
-    UseAmmo();
+    if(CurrentAmmo() < 1)
+    {
+        StopAiming();
+        StopFiring();
+        Reload();
+        return;
+    }
+    if(CurrentWeapon.AutoFire)
+        UseAmmo();
     UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
  
 	UWorld* const World = GetWorld();
@@ -452,7 +477,7 @@ void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
         if (PlayerController != nullptr)
     	{
             if(bIsAiming)
-    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
+    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.1f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
    		}
@@ -484,6 +509,7 @@ void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
 
 void UWeaponComponent::StartFiring()
 {
+    UseAmmo();
     if(!Character->isUltimate && !Character->isMeleeAttack && !Character->isGrenade)
     {
         if(!IsReloading)
