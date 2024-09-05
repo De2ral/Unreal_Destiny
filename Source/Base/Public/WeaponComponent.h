@@ -197,12 +197,12 @@ public:
     void ChangeGunPose(int inbool);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
-    bool bIsAiming = false;
+    bool bIsAiming;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bIsFiring = false;
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
-
-
-    
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetCurrentWeaponMeshVisibility(bool isVisible);
@@ -236,9 +236,8 @@ public:
     UStaticMeshComponent* CurrentStaticMeshComponent_TPP;
 
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
-
-   
-    bool bIsFiring = false;                
+    UStaticMeshComponent* CurrentMultiStaticMeshComponent;
+    USkeletalMeshComponent* CurrentMultiSkeletalMeshComponent;
 
     FVector DefaultOffset;
     FRotator DefaultRotation;

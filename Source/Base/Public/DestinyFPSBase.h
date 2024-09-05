@@ -330,7 +330,7 @@ public:
 	void Death();
 	void Revive();
 
-	UPROPERTY(EditAnywhere, Category = "Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
 
 	UPROPERTY(EditAnyWhere)
@@ -343,6 +343,7 @@ public:
 	void SetHasRifle(bool bNewHasRifle);
 	
 	USkeletalMeshComponent* GetFppMesh() const { return FppMesh; }
+	USkeletalMeshComponent* GetTppMesh() const { return TppMesh; }
 
 	void Throw();
 	void EndUltimate();
