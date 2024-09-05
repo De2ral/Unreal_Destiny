@@ -585,8 +585,8 @@ private:
 	int jumpCount = 0;
 	float DefaultCapsuleHeight;
 	FVector LastPlayerPos;
-	float PosTickCoolTime = 400.0f;
-	float ReviveCoolTime = 300.0f;
+	float PosTickCoolTime = 50.0f;
+	float ReviveCoolTime = 80.0f;
 	bool bIsPlayerAlive = true;
 	bool bIsCarrying = false;
 	bool bIsInWarlockAura = false;

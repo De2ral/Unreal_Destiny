@@ -469,7 +469,7 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 				FColor::Blue,
 				FString::Printf(TEXT("LastPlayerPos = X=%f,Y=%f,Z=%f"),LastPlayerPos.X,LastPlayerPos.Y,LastPlayerPos.Z));
 
-			PosTickCoolTime = 400.0f;
+			PosTickCoolTime = 50.0f;
 
 		}
 	} 
@@ -1607,7 +1607,7 @@ void ADestinyFPSBase::Revive()
 	SwitchToFirstPerson();
 	HP = MaxHp;
 
-	ReviveCoolTime = 300.0f;
+	ReviveCoolTime = 80.0f;
 
 	//if(RespawnUIInstance) RespawnUIInstance->RemoveFromParent();
 
