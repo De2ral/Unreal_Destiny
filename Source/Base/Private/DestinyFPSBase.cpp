@@ -172,8 +172,6 @@ ADestinyFPSBase::ADestinyFPSBase()
     if (HunterMontageAsset.Succeeded())
         HunterComboMontage = HunterMontageAsset.Object;
 
-	PlayerClass = EPlayerClassEnum::HUNTER;
-
 	LastPlayerPos = GetActorLocation();
 
 	HunterComboStage = 0;
@@ -1714,8 +1712,10 @@ void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 		{
 			isUltimate = value;
 			CurUltimateCoolTime = 0.f;
-			CurUltimateDuration = 0.f;
-			Multicast_UpdateSpearMeshVisibility(isUltimate);
+			if (PlayerClass == EPlayerClassEnum::TITAN || PlayerClass == EPlayerClassEnum::HUNTER)
+				CurUltimateDuration = 0.f;
+			if (PlayerClass == EPlayerClassEnum::HUNTER)
+				Multicast_UpdateSpearMeshVisibility(true);
 		}
 	}
 	else

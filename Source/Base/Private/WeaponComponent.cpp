@@ -767,9 +767,6 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
         CurrentStaticMeshComponent->RegisterComponent();
         CurrentMultiStaticMeshComponent->RegisterComponent();
 
-        FString name = CurrentMultiStaticMeshComponent->GetStaticMesh()->GetName();
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, *name);
-
         DefaultOffset =  CurrentStaticMeshComponent->GetRelativeLocation();
         DefaultRotation = CurrentStaticMeshComponent->GetRelativeRotation();
     }

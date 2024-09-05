@@ -150,10 +150,17 @@ public:
     int CurrentAmmo();
     int StoredAmmo();
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FGunInfo CurrentWeapon;
+
     void ChangeGunPose(int inbool);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
     bool bIsAiming;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bIsFiring = false;                
+
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
 
@@ -165,8 +172,6 @@ public:
     
 private:
     ADestinyFPSBase* Character;
-    
-    FGunInfo CurrentWeapon;
 
     FName Slot1Weapon;
     FName Slot2Weapon;
@@ -184,8 +189,6 @@ private:
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
     UStaticMeshComponent* CurrentMultiStaticMeshComponent;
     USkeletalMeshComponent* CurrentMultiSkeletalMeshComponent;
-
-    bool bIsFiring = false;                
 
     FVector DefaultOffset;
     FRotator DefaultRotation;
