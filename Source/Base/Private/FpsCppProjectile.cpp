@@ -137,9 +137,9 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
                 return;
             }
             
-            
-            // 폭발 데미지를 적용
-            UGameplayStatics::ApplyRadialDamage(
+            if (OtherActor->ActorHasTag("Enemy"))
+            {
+                UGameplayStatics::ApplyRadialDamage(
                 this,
                 Damage,
                 GetActorLocation(),
@@ -150,6 +150,10 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
                 GetInstigatorController(),
                 true
             );
+                
+            }
+            // 폭발 데미지를 적용
+            
 
             if (HitFlash_Launcher)
                 UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash_Launcher, Hit.Location,FRotator(0.0f, 0.0f, 0.0f), FVector(2.0f, 2.0f, 2.0f));
@@ -166,15 +170,18 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
                 return;
             }
             
-            
-            AController* InstigatorController = GetInstigatorController();
-            UGameplayStatics::ApplyDamage(
+            if (OtherActor->ActorHasTag("Enemy"))
+            {
+                AController* InstigatorController = GetInstigatorController();
+                UGameplayStatics::ApplyDamage(
                 OtherActor,
                 Damage,
                 InstigatorController,
                 this,
                 UDamageType::StaticClass()
             );
+            }
+            
 
             if (HitFlash)
                 UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, Hit.Location,FRotator(0.0f, 0.0f, 0.0f), FVector(0.25f, 0.25f, 0.25f));

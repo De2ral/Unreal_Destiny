@@ -99,7 +99,7 @@ void UWeaponComponent::BeginPlay()
         SetSlot2Weapon(TEXT("Pistol1"));
         SetSlot3Weapon(TEXT("Launcher1"));
 
-        //EquipWeapon1();
+        EquipWeapon1();
     }
 	else
 	{
@@ -134,8 +134,17 @@ bool UWeaponComponent::ServerFire_Validate()
 }
 void UWeaponComponent::MulticastTakeFire_Implementation()
 {
-    UseAmmo();
-    UE_LOG(LogTemp, Warning, TEXT("Fire"));
+    if(CurrentAmmo() < 1)
+    {
+        StopAiming();
+        StopFiring();
+        Reload();
+        return;
+    }
+    if(CurrentWeapon.AutoFire)
+        UseAmmo();
+    //UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter called failed."));
+    UE_LOG(LogTemp, Warning, TEXT("Fire %d"), CurrentAmmo());
 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -225,7 +234,7 @@ void UWeaponComponent::MulticastTakeFire_Implementation()
         if (PlayerController != nullptr)
     	{
             if(bIsAiming)
-    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
+    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.1f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
    		}
@@ -275,7 +284,15 @@ bool UWeaponComponent::ServerFireInRange_Validate()
 }
 void UWeaponComponent::MulticastTakeFireInRange_Implementation()
 {
-    UseAmmo();
+    if(CurrentAmmo() < 1)
+    {
+        StopAiming();
+        StopFiring();
+        Reload();
+        return;
+    }
+    if(CurrentWeapon.AutoFire)
+        UseAmmo();
     UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
     UWorld* const World = GetWorld();
@@ -355,7 +372,7 @@ void UWeaponComponent::MulticastTakeFireInRange_Implementation()
         if (PlayerController != nullptr)
         {
             if (bIsAiming)
-                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
+                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.1f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
         }
@@ -385,7 +402,15 @@ bool UWeaponComponent::ServerFireLauncher_Validate()
 }
 void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
 {
-    UseAmmo();
+    if(CurrentAmmo() < 1)
+    {
+        StopAiming();
+        StopFiring();
+        Reload();
+        return;
+    }
+    if(CurrentWeapon.AutoFire)
+        UseAmmo();
     UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
  
 	UWorld* const World = GetWorld();
@@ -452,7 +477,7 @@ void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
         if (PlayerController != nullptr)
     	{
             if(bIsAiming)
-    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
+    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.1f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
    		}
@@ -484,13 +509,17 @@ void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
 
 void UWeaponComponent::StartFiring()
 {
+    UseAmmo();
     if(!Character->isUltimate && !Character->isMeleeAttack && !Character->isGrenade)
     {
         if(!IsReloading)
         {
             if (!bIsFiring)
             {
-                bIsFiring = true;
+                if (Character->HasAuthority())
+                    bIsFiring = true;
+                else
+                    ServerIsFiring(true);
 
                 if (CurrentWeapon.AutoFire)
                 {
@@ -530,7 +559,10 @@ void UWeaponComponent::StopFiring()
 {
     if (bIsFiring)
     {
-        bIsFiring = false;
+        if (Character->HasAuthority())
+            bIsFiring = false;
+        else
+            ServerIsFiring(false);
 
         if (CurrentWeapon.AutoFire)
         {
@@ -538,6 +570,17 @@ void UWeaponComponent::StopFiring()
         }
     }
 
+}
+
+bool UWeaponComponent::ServerIsFiring_Validate(bool value)
+{
+    // 필요 시 유효성 검사 추가
+    return true;
+}
+
+void UWeaponComponent::ServerIsFiring_Implementation(bool value)
+{
+    bIsFiring = value;
 }
 
 void UWeaponComponent::StartAiming()
@@ -604,6 +647,7 @@ void UWeaponComponent::StopAiming()
 
 void UWeaponComponent::EquipWeapon1()
 {
+    if (Character->isUltimate) return;
     if(GetOwner()->HasAuthority())
     {
         ServerEquipWeapon1();
@@ -624,9 +668,11 @@ void UWeaponComponent::ServerEquipWeapon1_Implementation()
 {
     if(!bIsAiming)
     {
-    LoadWeaponByName(Slot1Weapon);
-    FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+        LoadWeaponByName(Slot1Weapon);
+        FString ModelPath = CurrentWeapon.GunModelPath;
+        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+        SubWeaponName1 = Slot2Weapon;
+        SubWeaponName2 = Slot3Weapon;
     }
     //MulticastEquipWeapon1();
 }
@@ -643,6 +689,7 @@ void UWeaponComponent::MulticastEquipWeapon1_Implementation()
 
 void UWeaponComponent::EquipWeapon2()
 {
+    if (Character->isUltimate) return;
     if(GetOwner()->HasAuthority())
     {  
         ServerEquipWeapon2(); 
@@ -663,10 +710,12 @@ void UWeaponComponent::ServerEquipWeapon2_Implementation()
     
     if(!bIsAiming)
     {
-    LoadWeaponByName(Slot2Weapon);
-    FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
-    ChangeCrosshair();
+        LoadWeaponByName(Slot2Weapon);
+        FString ModelPath = CurrentWeapon.GunModelPath;
+        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+        ChangeCrosshair();
+        SubWeaponName1 = Slot1Weapon;
+        SubWeaponName2 = Slot3Weapon;
     }
     
     //MulticastEquipWeapon2();
@@ -683,7 +732,7 @@ void UWeaponComponent::MulticastEquipWeapon2_Implementation()
 
 void UWeaponComponent::EquipWeapon3()
 {
-    
+    if (Character->isUltimate) return;
     if(GetOwner()->HasAuthority())
     {
         ServerEquipWeapon3();
@@ -704,10 +753,12 @@ void UWeaponComponent::ServerEquipWeapon3_Implementation()
     
     if(!bIsAiming)
     {
-    LoadWeaponByName(Slot3Weapon);
-    FString ModelPath = CurrentWeapon.GunModelPath;
-    LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
-    ChangeCrosshair();
+        LoadWeaponByName(Slot3Weapon);
+        FString ModelPath = CurrentWeapon.GunModelPath;
+        LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+        ChangeCrosshair();
+        SubWeaponName1 = Slot1Weapon;
+        SubWeaponName2 = Slot2Weapon;
     }
     //MulticastEquipWeapon3();
 }
@@ -721,6 +772,7 @@ void UWeaponComponent::MulticastEquipWeapon3_Implementation()
     //LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
     //}
 }
+
 void UWeaponComponent::ChangeCrosshair()
 {
     UE_LOG(LogTemp, Warning, TEXT("ChangeCrosshair"));
@@ -833,7 +885,10 @@ void UWeaponComponent::Reload()
     {
         if(!IsReloading)
         {
-            IsReloading = true;
+            if (Character->HasAuthority())
+                IsReloading = true;
+            else
+                ServerIsReloading(true);
             if (ReloadAnimation != nullptr)
             {
                 ADestinyFPSBase* PlayerCharacter = Cast<ADestinyFPSBase>(GetOwner());
@@ -845,6 +900,24 @@ void UWeaponComponent::Reload()
             }
         }
     }
+}
+
+void UWeaponComponent::EndReloading()
+{
+    if (Character->HasAuthority())
+        IsReloading = false;
+    else
+        ServerIsReloading(false);
+}
+
+bool UWeaponComponent::ServerIsReloading_Validate(bool value)
+{
+    return true;
+}
+
+void UWeaponComponent::ServerIsReloading_Implementation(bool value)
+{
+    IsReloading = value;
 }
 
 void UWeaponComponent::FillAmmo()
@@ -1362,6 +1435,8 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &Out
 
     //if(CurrentWeapon.ProjectileMesh != nullptr)
     DOREPLIFETIME(UWeaponComponent, CurrentWeapon);    
+    DOREPLIFETIME(UWeaponComponent, IsReloading);
+    DOREPLIFETIME(UWeaponComponent, bIsFiring);
 }
 
 void UWeaponComponent::OnRep_CurrentWeapon()
