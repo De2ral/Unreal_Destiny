@@ -528,6 +528,9 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayComboMontage(int32 ComboStage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SwitchWeaponVisible(bool bVisible);
 	
 	
 private:

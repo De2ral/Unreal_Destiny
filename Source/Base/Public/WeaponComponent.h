@@ -154,7 +154,7 @@ public:
     void AllFillAmmo();
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    void EndReloading() {IsReloading = false;}
+    void EndReloading();
 
     
     void EquipWeapon1();
@@ -196,11 +196,15 @@ public:
 
     void ChangeGunPose(int inbool);
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
-    bool bIsAiming;
+    UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+    bool IsReloading = false;
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerIsReloading(bool value);
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
     bool bIsFiring = false;
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerIsFiring(bool value);
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
 
@@ -219,10 +223,17 @@ public:
     UFUNCTION()
     void OnRep_CurrentWeapon();
 
+    bool bIsAiming;
 
     FName Slot1Weapon;
     FName Slot2Weapon;
     FName Slot3Weapon;
+
+    UPROPERTY(BlueprintReadOnly)
+    FName SubWeaponName1;
+
+    UPROPERTY(BlueprintReadOnly)
+    FName SubWeaponName2;
 
     int Ammo1 = 0;
     int Ammo2 = 0;
@@ -253,8 +264,6 @@ public:
     float CurrentScopeSize = 0.0f;
 
     float CurrentScopeX = 1.0f;
-
-    bool IsReloading = false;
 
     UParticleSystem* PistolFlash;
     UParticleSystem* RifleFlash;

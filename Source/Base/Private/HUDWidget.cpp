@@ -43,3 +43,19 @@ void UHUDWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
         AmmoText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), CurrentAmmo, MaxAmmo)));
     }
 }
+
+void UHUDWidget::UpdateSubAmmo1(int32 StoredAmmo)
+{
+    if (SubAmmoText1)
+    {
+        SubAmmoText1->SetText(FText::FromString(FString::Printf(TEXT("%d"), StoredAmmo)));
+    }
+}
+
+void UHUDWidget::UpdateSubAmmo2(int32 StoredAmmo)
+{
+    if (SubAmmoText2)
+    {
+        SubAmmoText2->SetText(FText::FromString(FString::Printf(TEXT("%d"), StoredAmmo)));
+    }
+}

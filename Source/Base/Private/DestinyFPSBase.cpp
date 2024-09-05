@@ -405,6 +405,7 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		HUDWidget->UpdateGrenadeCoolTime(FMath::Min(CurGrenadeCoolTime, GrenadeCoolTime), GrenadeCoolTime);
 		HUDWidget->UpdateMeleeCoolTime(FMath::Min(CurMeleeAttackCoolTime, MeleeAttackCoolTime), MeleeAttackCoolTime);
 		HUDWidget->UpdateUltimateCoolTime(FMath::Min(CurUltimateCoolTime, UltimateCoolTime), UltimateCoolTime);
+		HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
 	}
 
 	if (isTitanPunch)
@@ -596,7 +597,7 @@ void ADestinyFPSBase::Skill()
 			if ((PlayerClass == EPlayerClassEnum::TITAN) || 
 			(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
 			{
-				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				Multicast_SwitchWeaponVisible(false);
 				SwitchToThirdPerson();
 			}
 		}
@@ -628,7 +629,7 @@ void ADestinyFPSBase::EndShield()
 	{
 		isSkill = false;
 		SwitchToFirstPerson();
-		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+		Multicast_SwitchWeaponVisible(true);
 	}
 	else
 	{
@@ -687,7 +688,7 @@ void ADestinyFPSBase::SwitchToFirstPerson()
 
 		TppMesh->SetOwnerNoSee(true);
 	}
-	WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+	Multicast_SwitchWeaponVisible(true);
 }
 
 void ADestinyFPSBase::SwitchToThirdPerson()
@@ -786,7 +787,7 @@ void ADestinyFPSBase::MeleeAttack()
 		{
 			isMeleeAttack = true;
 			CurMeleeAttackCoolTime = 0.f;
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+			Multicast_SwitchWeaponVisible(false);
 			SwitchToThirdPerson();
 			if(CurHunterMeleeAttackCoolTime >= HunterMeleeAttackCoolTime)
 			{
@@ -817,7 +818,7 @@ void ADestinyFPSBase::Ultimate()
 			{
 				GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Switching to Third Person"));
 				MeleeAttackCoolTime = 2.f;
-				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				Multicast_SwitchWeaponVisible(false);
 				// Titan Ultimate Start
 				if (TitanUltimateFistParticle)
 				{
@@ -840,7 +841,7 @@ void ADestinyFPSBase::Ultimate()
 			{
 				CurUltimateCoolTime = 0.f;
 				CurUltimateDuration = 0.f;
-				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				Multicast_SwitchWeaponVisible(false);
 				GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("헌터 궁극기 시전. (서버)"));
 				Multicast_UpdateSpearMeshVisibility(isUltimate);
 			}
@@ -883,7 +884,7 @@ void ADestinyFPSBase::CheckStartWarlockUltimate()
 				float Distance = FVector::Dist(StartLocation, HitResult.Location);
 				if (Distance <= MaxSpawnWarlockUltimateDistance)
 				{
-					WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+					Multicast_SwitchWeaponVisible(false);
 					SwitchToThirdPerson();
 					WarlockUltimateSpawnLocation = HitResult.Location;
 				}
@@ -935,7 +936,7 @@ void ADestinyFPSBase::TitanMeleeAttackEnd()
 		isTitanPunch = false;
 		if (!isUltimate)
 		{
-			WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+			Multicast_SwitchWeaponVisible(true);
 			SwitchToFirstPerson();
 		}
 	}
@@ -1131,7 +1132,7 @@ void ADestinyFPSBase::WarlockSkillEnd()
 		isSkill = false;
 		GetCharacterMovement()->GravityScale = 1.f;
 		SwitchToFirstPerson();
-		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+		Multicast_SwitchWeaponVisible(true);
 	}
 	else
 	{
@@ -1323,7 +1324,7 @@ void ADestinyFPSBase::EndUltimate()
 			Multicast_UpdateSpearMeshVisibility(false);
 		}
 		SwitchToFirstPerson();
-		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
+		Multicast_SwitchWeaponVisible(true);
 	}
 	else
 	{
@@ -1746,11 +1747,13 @@ void ADestinyFPSBase::Server_Skill_Implementation(bool value)
 		{
 			isSkill = value;
 			CurSkillCoolTime = 0.f;
+			Multicast_SwitchWeaponVisible(false);
 		}
 	}
 	else
 	{
 		isSkill = value;
+		Multicast_SwitchWeaponVisible(true);
 	}
 }
 
@@ -1768,6 +1771,7 @@ void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 		{
 			isUltimate = value;
 			CurUltimateCoolTime = 0.f;
+			Multicast_SwitchWeaponVisible(false);
 			if (PlayerClass == EPlayerClassEnum::TITAN || PlayerClass == EPlayerClassEnum::HUNTER)
 				CurUltimateDuration = 0.f;
 			if (PlayerClass == EPlayerClassEnum::HUNTER)
@@ -1777,6 +1781,7 @@ void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 	else
 	{
 		isUltimate = value;
+		Multicast_SwitchWeaponVisible(true);
 		if (PlayerClass == EPlayerClassEnum::TITAN)
 		{
 			isMeleeAttack = false;
@@ -1806,6 +1811,7 @@ void ADestinyFPSBase::Server_MeleeAttack_Implementation(bool value)
 		{
 			isMeleeAttack = value;
 			CurMeleeAttackCoolTime = 0.f;
+			Multicast_SwitchWeaponVisible(false);
 			if(CurHunterMeleeAttackCoolTime >= HunterMeleeAttackCoolTime)
 			{
 				isHunterMeleeAttack = true;
@@ -1817,6 +1823,7 @@ void ADestinyFPSBase::Server_MeleeAttack_Implementation(bool value)
 	{
 		isMeleeAttack = value;
 		isTitanPunch = value;
+		Multicast_SwitchWeaponVisible(true);
 	}
 }
 
@@ -1833,11 +1840,13 @@ void ADestinyFPSBase::Server_Grenade_Implementation(bool value)
 		{
 			isGrenade = value;
 			CurGrenadeCoolTime = 0.f;
+			Multicast_SwitchWeaponVisible(false);
 		}
 	}
 	else
 	{
 		isGrenade = value;
+		Multicast_SwitchWeaponVisible(true);
 	}
 }
 
@@ -1975,14 +1984,12 @@ void ADestinyFPSBase::OnRep_Skill()
 		if ((PlayerClass == EPlayerClassEnum::TITAN) || 
 		(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
 		{
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
 		}
 	}
 	else
 	{
 		SwitchToFirstPerson();
-		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 	}
 }
 
@@ -1996,7 +2003,6 @@ void ADestinyFPSBase::OnRep_Ultimate()
 		{
 			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Switching to Third Person"));
 			MeleeAttackCoolTime = 2.f;
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
 			// Titan Ultimate Start
 			if (TitanUltimateFistParticle)
@@ -2019,14 +2025,12 @@ void ADestinyFPSBase::OnRep_Ultimate()
 		else if (PlayerClass == EPlayerClassEnum::HUNTER)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, TEXT("OnRep_Ultimate: SpearMesh visible"));
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 			SwitchToThirdPerson();
 		}
 	}
 	else
 	{
 		SwitchToFirstPerson();
-		WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 	}
 }	
 
@@ -2034,14 +2038,12 @@ void ADestinyFPSBase::OnRep_MeleeAttack()
 {
 	if (isMeleeAttack)
 	{
-		WeaponComponent->SetCurrentWeaponMeshVisibility(false);
 		SwitchToThirdPerson();
 	}
 	else
 	{
 		if (!isUltimate)
 		{
-			WeaponComponent->SetCurrentWeaponMeshVisibility(true);
 			SwitchToFirstPerson();
 		}
 	}
@@ -2076,4 +2078,9 @@ void ADestinyFPSBase::Multicast_UpdateSpearMeshVisibility_Implementation(bool bV
 void ADestinyFPSBase::Multicast_PlayComboMontage_Implementation(int32 ComboStage)
 {
 	PlayMontage_Internal(ComboStage);
+}
+
+void ADestinyFPSBase::Multicast_SwitchWeaponVisible_Implementation(bool bVisible)
+{
+	WeaponComponent->SetCurrentWeaponMeshVisibility(bVisible);
 }
