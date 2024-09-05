@@ -35,7 +35,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
+	bReplicates = true; 
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 	TppMesh->SetOwnerNoSee(true);
 	TppMesh->SetupAttachment(RootComponent);
@@ -496,6 +496,7 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 	//DOREPLIFETIME(ADestinyFPSBase, SpearMesh);
     
     DOREPLIFETIME(ADestinyFPSBase, HP);    
+	DOREPLIFETIME(ADestinyFPSBase, bHasRifle);
 	DOREPLIFETIME(ADestinyFPSBase, isSkill);   
 	DOREPLIFETIME(ADestinyFPSBase, isGrenade);   
 	DOREPLIFETIME(ADestinyFPSBase, isUltimate);   
@@ -555,10 +556,19 @@ void ADestinyFPSBase::Look(const FInputActionValue& Value)
 {
 	FVector2D LookVector = Value.Get<FVector2D>();
 
+	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 	if (Controller != nullptr)
 	{
-		AddControllerYawInput(LookVector.X);
-		AddControllerPitchInput(LookVector.Y);
+		if(PlayerController->IsInputKeyDown(EKeys::RightMouseButton))
+		{
+			AddControllerYawInput(LookVector.X * 0.1f);
+			AddControllerPitchInput(LookVector.Y * 0.1f);
+		}
+		else
+		{
+			AddControllerYawInput(LookVector.X);
+			AddControllerPitchInput(LookVector.Y);
+		}
 	}
 }
 

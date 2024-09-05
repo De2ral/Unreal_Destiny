@@ -27,12 +27,12 @@ public:
     UWeaponComponent();
 
     // 투사체
-	UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
-	TSubclassOf<class AFpsCppProjectile> ProjectileClass;
+	//UPROPERTY(EditAnywhere, Category=Projectile, BlueprintReadWrite)
+	//TSubclassOf<class AFpsCppProjectile> ProjectileClass;
 
     // 투사체 발사 위치
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	FVector MuzzleOffset;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	//FVector MuzzleOffset;
 
     // 모델 장착
     void AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, UObject* Model);
@@ -65,6 +65,14 @@ public:
 
     UPROPERTY()
     UWeaponWidget* AmmoWidget;
+
+    //UPROPERTY(EditAnywhere, Category = "UI")
+    //TSubclassOf<UWeaponWidget> AmmoWidgetClass2;
+
+    //UPROPERTY()
+    //UWeaponWidget* AmmoWidget2;
+
+
 
     // 애니메이션
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -109,8 +117,22 @@ public:
     class UInputAction* Equip3Action;
 
     void Fire();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFire();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastTakeFire();
+
     void FireInRange();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFireInRange();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastTakeFireInRange();
+
     void FireLauncher();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerFireLauncher();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastTakeFireLauncher();
 
     void StartFiring();
     void StopFiring();
@@ -120,19 +142,41 @@ public:
 
     void UseAmmo();
 
+    
     void Reload();
 
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    bool GetIsAiming() {return bIsAiming;}
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void FillAmmo();
+    
+    void AllFillAmmo();
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void EndReloading() {IsReloading = false;}
 
-    void EquipWeapon1();
-    void EquipWeapon2();
-    void EquipWeapon3();
     
+    void EquipWeapon1();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerEquipWeapon1();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipWeapon1();
+
+    void EquipWeapon2();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerEquipWeapon2();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipWeapon2();
+
+    void EquipWeapon3();
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerEquipWeapon3();
+    UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipWeapon3();
+
+    void ChangeCrosshair();
+
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetSlot1Weapon(FName inweapon);
     UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -153,20 +197,28 @@ public:
     void ChangeGunPose(int inbool);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
-    bool bIsAiming;
+    bool bIsAiming = false;
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
 
-    UFUNCTION(Server, Reliable, WithValidation)
-    void ServerFire();
+
+    
 
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     void SetCurrentWeaponMeshVisibility(bool isVisible);
+
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     
-private:
+    UStaticMeshComponent* GetCurrentStaticMeshComponent_TPP() {return CurrentStaticMeshComponent_TPP;}
+public:
     ADestinyFPSBase* Character;
     
+    UPROPERTY(ReplicatedUsing=OnRep_CurrentWeapon, BlueprintReadOnly)
     FGunInfo CurrentWeapon;
+
+    UFUNCTION()
+    void OnRep_CurrentWeapon();
+
 
     FName Slot1Weapon;
     FName Slot2Weapon;
@@ -181,6 +233,8 @@ private:
     int StoredAmmo_Reinforce = 300;
 
     UStaticMeshComponent* CurrentStaticMeshComponent;
+    UStaticMeshComponent* CurrentStaticMeshComponent_TPP;
+
     USkeletalMeshComponent* CurrentSkeletalMeshComponent;
 
    

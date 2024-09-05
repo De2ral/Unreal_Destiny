@@ -336,7 +336,7 @@ public:
 	UPROPERTY(EditAnyWhere)
 	UStaticMeshComponent* CarriedMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool bHasRifle;
 
 	UFUNCTION(BlueprintCallable, Category = Weapon)
@@ -527,6 +527,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayComboMontage(int32 ComboStage);
+	
 	
 private:
 	float CurComboAttackDelay = 0.f;

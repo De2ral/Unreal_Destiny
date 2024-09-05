@@ -58,14 +58,15 @@ public:
 	void SetbExplodeOnImpact(bool inbool) {bExplodeOnImpact = inbool;}
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
+
+	void DelayedDestroy();
 private:
 	float Damage;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float ExplosionRadius = 1000.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Combat")
 	bool bExplodeOnImpact = false;
 
 	UParticleSystem* HitFlash;
