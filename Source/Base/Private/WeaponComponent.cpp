@@ -134,6 +134,7 @@ bool UWeaponComponent::ServerFire_Validate()
 }
 void UWeaponComponent::MulticastTakeFire_Implementation()
 {
+    UseAmmo();
     UE_LOG(LogTemp, Warning, TEXT("Fire"));
 
 	UWorld* const World = GetWorld();
@@ -224,7 +225,7 @@ void UWeaponComponent::MulticastTakeFire_Implementation()
         if (PlayerController != nullptr)
     	{
             if(bIsAiming)
-    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.5f);
+    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
    		}
@@ -274,6 +275,7 @@ bool UWeaponComponent::ServerFireInRange_Validate()
 }
 void UWeaponComponent::MulticastTakeFireInRange_Implementation()
 {
+    UseAmmo();
     UE_LOG(LogTemp, Warning, TEXT("FireInRange"));
 
     UWorld* const World = GetWorld();
@@ -353,7 +355,7 @@ void UWeaponComponent::MulticastTakeFireInRange_Implementation()
         if (PlayerController != nullptr)
         {
             if (bIsAiming)
-                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.5f);
+                PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
         }
@@ -383,6 +385,7 @@ bool UWeaponComponent::ServerFireLauncher_Validate()
 }
 void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
 {
+    UseAmmo();
     UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
  
 	UWorld* const World = GetWorld();
@@ -449,7 +452,7 @@ void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
         if (PlayerController != nullptr)
     	{
             if(bIsAiming)
-    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.5f);
+    		    PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound * 0.0f);
             else
                 PlayerController->ClientStartCameraShake(UMyLegacyCameraShake::StaticClass(), CurrentWeapon.Rebound);
    		}
@@ -481,7 +484,6 @@ void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
 
 void UWeaponComponent::StartFiring()
 {
-    UseAmmo();
     if(!Character->isUltimate && !Character->isMeleeAttack && !Character->isGrenade)
     {
         if(!IsReloading)
@@ -788,10 +790,13 @@ int UWeaponComponent::CurrentAmmo()
     return CurrentTempAmmo;
 }
 
-int UWeaponComponent::StoredAmmo()
+int UWeaponComponent::StoredAmmo(FName SlotWeapon)
 {
     int StoredTempAmmo = 0;
-    switch (CurrentWeapon.BulletType)
+
+    FGunInfo* WeaponData = WeaponDataTable->FindRow<FGunInfo>(SlotWeapon, "");
+
+    switch (WeaponData->BulletType)
     {
         case BulletTypeList::REGULAR:
             StoredTempAmmo = StoredAmmo_Regular;
@@ -890,6 +895,33 @@ void UWeaponComponent::ServerIsReloading_Implementation(bool value)
 
 void UWeaponComponent::FillAmmo()
 {
+
+    switch (CurrentWeapon.BulletType)
+    {
+        case BulletTypeList::REGULAR:
+        {
+            StoredAmmo_Regular -= CurrentWeapon.Max_capacity - Ammo1;
+            if(StoredAmmo_Regular < 0)
+                StoredAmmo_Regular = 0;
+            break;
+        }
+        case BulletTypeList::SPECIAL:
+        {
+            StoredAmmo_Special -= CurrentWeapon.Max_capacity - Ammo2;
+            if(StoredAmmo_Special < 0)
+                StoredAmmo_Special = 0;
+            break;
+        }
+            
+        case BulletTypeList::REINFORCE:
+        {
+            StoredAmmo_Reinforce -= CurrentWeapon.Max_capacity - Ammo3;
+            if(StoredAmmo_Reinforce < 0)
+                StoredAmmo_Reinforce = 0;
+            break;
+        } 
+    }
+
     if(CurrentWeapon.GunName == Slot1Weapon)
     {
         UE_LOG(LogTemp, Warning, TEXT("Slot1Weapon"));
@@ -906,25 +938,7 @@ void UWeaponComponent::FillAmmo()
         Ammo3 = CurrentWeapon.Max_capacity;
     }
 
-    switch (CurrentWeapon.BulletType)
-    {
-        case BulletTypeList::REGULAR:
-        {
-            StoredAmmo_Regular -= CurrentWeapon.Max_capacity;
-            break;
-        }
-        case BulletTypeList::SPECIAL:
-        {
-            StoredAmmo_Special -= CurrentWeapon.Max_capacity;
-            break;
-        }
-            
-        case BulletTypeList::REINFORCE:
-        {
-            StoredAmmo_Reinforce -= CurrentWeapon.Max_capacity;
-            break;
-        } 
-    }
+    
 
     //if(GetOwner()->HasAuthority())
        // AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());

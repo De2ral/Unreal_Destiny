@@ -8,7 +8,6 @@
 #include "WeaponComponent.h"
 #include "SkillWidget.h"
 #include "HUDWidget.h"
-
 #include "DestinyFPSBase.generated.h"
 
 class UCharacterMovementComponent;
@@ -56,11 +55,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* FppMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* TppMesh;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* SpearMesh;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* DeathMesh;
 
 	UPROPERTY(VisibleAnywhere)
 	class AReplicatedObj* InterObj;
@@ -279,6 +281,11 @@ public:
  	UPROPERTY()
     UHUDWidget* HUDWidget;
 
+	//UPROPERTY(EditAnywhere, Category="UI")
+	//TSubclassOf<UUserWidget> RespawnUIClass;
+
+	//UUserWidget* RespawnUIInstance;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<class AGrenade> GrenadeClass;
 
@@ -296,9 +303,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bPlayerIsMoving = false;
-
-	UPROPERTY(Replicated,EditDefaultsOnly, BlueprintReadOnly)
-	class AReplicatedObj* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
 
@@ -329,6 +333,7 @@ public:
 
 	void Death();
 	void Revive();
+	void CreateDeathOrb();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
@@ -438,6 +443,9 @@ public:
 	bool GetIsPlayerAlive() {return bIsPlayerAlive;}
 
 	UFUNCTION(BlueprintCallable)
+	void SetIsPlayerAlive(bool value) {bIsPlayerAlive = value;}
+
+	UFUNCTION(BlueprintCallable)
 	bool GetIsPlayerCarrying() {return bIsCarrying;}
 
 	UFUNCTION(BlueprintCallable, Category = "HP")
@@ -485,8 +493,20 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerInterObjAction();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MultiInterObjAction();
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDeath();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRevive();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void MulticastRevive();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerCreateDeathOrb();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void MulticastCreateDeathOrb();
 
 	void InterObjAction();
 
@@ -523,6 +543,9 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	float CurHunterMeleeAttackCoolTime;
 
+	UFUNCTION(BlueprintCallable)
+	float GetReviveCoolTime() { return ReviveCoolTime; }
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdateSpearMeshVisibility(bool bVisible);
 
@@ -531,6 +554,13 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SwitchWeaponVisible(bool bVisible);
+	
+	int GetMaxHP() {return MaxHp;}
+	void SetMaxHP(int value) {MaxHp = value;}
+
+	int GetCurrHP() {return HP;}
+	void SetCurrHP(int value) {HP = value;}
+
 	
 	
 private:
@@ -560,7 +590,8 @@ private:
 	int jumpCount = 0;
 	float DefaultCapsuleHeight;
 	FVector LastPlayerPos;
-	float PosTickCoolTime = 400.0f;
+	float PosTickCoolTime = 50.0f;
+	float ReviveCoolTime = 80.0f;
 	bool bIsPlayerAlive = true;
 	bool bIsCarrying = false;
 	bool bIsInWarlockAura = false;
