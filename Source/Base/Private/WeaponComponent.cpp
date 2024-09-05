@@ -746,6 +746,7 @@ void UWeaponComponent::MulticastEquipWeapon3_Implementation()
     //LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
     //}
 }
+
 void UWeaponComponent::ChangeCrosshair()
 {
     UE_LOG(LogTemp, Warning, TEXT("ChangeCrosshair"));

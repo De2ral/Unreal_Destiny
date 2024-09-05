@@ -240,7 +240,9 @@ void ADestinyFPSBase::BeginPlay()
 			if (HUDWidget)
 			{
 				HUDWidget->AddToViewport();
-				//HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
+				HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo(WeaponComponent->CurrentWeapon.GunName));
+				HUDWidget->UpdateSubAmmo1(WeaponComponent->StoredAmmo(WeaponComponent->SubWeaponName1));
+				HUDWidget->UpdateSubAmmo2(WeaponComponent->StoredAmmo(WeaponComponent->SubWeaponName2));
 				HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
 				HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 				HUDWidget->UpdateMeleeCoolTime(CurMeleeAttackCoolTime, MeleeAttackCoolTime);
@@ -417,7 +419,9 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		HUDWidget->UpdateGrenadeCoolTime(FMath::Min(CurGrenadeCoolTime, GrenadeCoolTime), GrenadeCoolTime);
 		HUDWidget->UpdateMeleeCoolTime(FMath::Min(CurMeleeAttackCoolTime, MeleeAttackCoolTime), MeleeAttackCoolTime);
 		HUDWidget->UpdateUltimateCoolTime(FMath::Min(CurUltimateCoolTime, UltimateCoolTime), UltimateCoolTime);
-		HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
+		HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo(WeaponComponent->CurrentWeapon.GunName));
+		HUDWidget->UpdateSubAmmo1(WeaponComponent->StoredAmmo(WeaponComponent->SubWeaponName1));
+		HUDWidget->UpdateSubAmmo2(WeaponComponent->StoredAmmo(WeaponComponent->SubWeaponName2));
 	}
 
 	if (isTitanPunch)

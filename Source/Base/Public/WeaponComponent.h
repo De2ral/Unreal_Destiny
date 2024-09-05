@@ -229,10 +229,10 @@ public:
     FName Slot2Weapon;
     FName Slot3Weapon;
 
-    UPROPERTY(BlueprintReadOnly)
+    UPROPERTY(Replicated, BlueprintReadOnly)
     FName SubWeaponName1;
 
-    UPROPERTY(BlueprintReadOnly)
+    UPROPERTY(Replicated, BlueprintReadOnly)
     FName SubWeaponName2;
 
     int Ammo1 = 0;
