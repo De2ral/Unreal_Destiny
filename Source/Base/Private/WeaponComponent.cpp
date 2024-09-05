@@ -63,7 +63,7 @@ void UWeaponComponent::BeginPlay()
         UE_LOG(LogTemp, Warning, TEXT("Player Index: %d"), PlayerIndex);
     }
 
-    if(PlayerCharacter->IsLocallyControlled())
+    //if(PlayerCharacter->IsLocallyControlled())
     {
         if (AmmoWidgetClass)
 	    {

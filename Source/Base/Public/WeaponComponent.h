@@ -196,7 +196,7 @@ public:
 
     void ChangeGunPose(int inbool);
 
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
     bool bIsAiming = false;
     //int32 CurrentAmmo;
     //int32 MaxAmmo = 30;
