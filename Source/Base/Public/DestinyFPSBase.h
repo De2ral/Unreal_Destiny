@@ -59,8 +59,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* TppMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* SpearMesh;
+
+	UPROPERTY(VisibleAnywhere)
+	class AReplicatedObj* InterObj;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputMappingContext* DefaultMappingContext;
@@ -107,10 +110,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UInputAction* DeathReviveAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Replicated)
 	bool bIsSliding = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Replicated)
 	bool bPlayerSprint = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -134,27 +137,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlayerInteractable = false;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly,Replicated)
 	FVector SlideVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPlayerClassEnum PlayerClass;
 
 	// Skill Variable
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Skill, EditAnywhere, BlueprintReadWrite)
 	bool isSkill = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isGrenade = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_Ultimate, EditAnywhere, BlueprintReadWrite)
 	bool isUltimate = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool isSmash = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_MeleeAttack, EditAnywhere, BlueprintReadWrite)
 	bool isMeleeAttack = false;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	bool isSwordAura = false;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	bool isHunterMeleeAttack = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SkillCoolTime = 3.f;
@@ -176,6 +185,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MeleeAttackCoolTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HunterMeleeAttackCoolTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SwordAuraCoolTime = 2.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HunterPunchDamage = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HunterPunchRadius = 200.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TitanUltimateDamage = 100.f;
@@ -201,7 +222,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HunterUltimateAttackDamage = 40.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated)
+	float SlideSpeedScale = 2.3f;
+
+	UPROPERTY(Replicated)
+	float SlideCapsuleHeight = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	class UAnimMontage* HunterComboMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision")
@@ -234,6 +261,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
     class UParticleSystem* WarlockSkillLandParticle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* SpearParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* SpearAttackParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* HunterPunchParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    class UParticleSystem* HunterThunderPunchParticle;
+
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
 
@@ -249,35 +288,37 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<class AWarlock_Melee_Fireball> WarlockFireballClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<class AHunter_Skill_SwordAura> HunterSwordAuraClass;
+
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bIsInvenOpen = false;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
 	bool bPlayerIsMoving = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<AActor> DeathOrbTest;
-
-	AActor* SpawnedDeathOrb;
+	UPROPERTY(Replicated,EditDefaultsOnly, BlueprintReadOnly)
+	class AReplicatedObj* SpawnedDeathOrb;
 	
 	void InvenOpenClose();
 
 	void Move(const FInputActionValue& Value);
 
 	void Look(const FInputActionValue& Value);
-	void Skill(const FInputActionValue& Value);
-	void Grenade(const FInputActionValue& Value);
-	void MeleeAttack(const FInputActionValue& Value);
+	void Skill();
+	void Grenade();
+	void MeleeAttack();
 
 	void jump(const FInputActionValue& Value);
 	void jumpEnd(const FInputActionValue& Value);
-	void Ultimate(const FInputActionValue& Value);
+	void Ultimate();
 
 	void Sprint(const FInputActionValue& Value);
 	void SprintEnd(const FInputActionValue& Value);
 
 	void Slide(const FInputActionValue& Value);
-	void SlideEnd(const FInputActionValue& Value);
+	
+	void OnRep_Slide();
 
 	void StartInteract(const FInputActionValue& Value);
 	void EndInteract(const FInputActionValue& Value);
@@ -367,6 +408,18 @@ public:
 	void WarlockUltimateEnd();
 
 	UFUNCTION(BlueprintCallable)
+	void HunterSwordAura();
+
+	UFUNCTION(BlueprintCallable)
+	void HunterSwordAuraEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void HunterMeleePunch();
+
+	UFUNCTION(BlueprintCallable)
+	void HunterMeleeEnd();
+
+	UFUNCTION(BlueprintCallable)
 	void SwitchToFirstPerson();
 
 	UFUNCTION(BlueprintCallable)
@@ -374,7 +427,7 @@ public:
 
 	void SetClassValue();
 	void TitanPunchCollisionEvents();
-	void PlayerCarryingStart(ACarriableObject* CarriableObject);
+	void PlayerCarryingStart(AReplicatedObj* CarriableObject);
 	void PlayerCarryingEnd();
 
 	UFUNCTION(BlueprintCallable)
@@ -393,35 +446,103 @@ public:
     AActor* DamageCauser)override;
 
 	UFUNCTION()
-    void OnSpearOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
-                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
-                             bool bFromSweep, const FHitResult& SweepResult);
+    void OnSpearOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void SetIsInWarlockAura(bool Value) { bIsInWarlockAura = Value;}
 
 	void PerformComboAttack();
+	void PlayMontage_Internal(int32 ComboStage);
 	void ResetCombo();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Skill(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Ultimate(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_MeleeAttack(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Grenade(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Smash(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_PerformComboAttack(int32 ComboStage);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SwordAura(bool value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerInterObjAction();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiInterObjAction();
+
+	void InterObjAction();
+
+	UFUNCTION()
+	void OnRep_Skill();
+
+	UFUNCTION()
+	void OnRep_Ultimate();
+
+	UFUNCTION()
+	void OnRep_MeleeAttack();
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurSkillCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurGrenadeCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurUltimateCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurUltimateDuration;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurSmashCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurMeleeAttackCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurSwordAuraCoolTime;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float CurHunterMeleeAttackCoolTime;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateSpearMeshVisibility(bool bVisible);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayComboMontage(int32 ComboStage);
 	
 	
 private:
-	float CurSkillCoolTime = SkillCoolTime;
-	float CurGrenadeCoolTime = GrenadeCoolTime;
-	float CurUltimateCoolTime;
-	float CurUltimateDuration = UltimateDuration;
-	float CurSmashCoolTime = SmashCoolTime;
-	float CurMeleeAttackCoolTime;
-	
 	float CurComboAttackDelay = 0.f;
 	float ComboAttackDelay = 0.4f;
 
 	bool isTitanPunch = false;
 	bool isWarlockSkill = false;
+	bool isSpearAttack = false;
 
 	USkeletalMesh* HunterMesh;
 	USkeletalMesh* TitanMesh;
 	USkeletalMesh* WarlockMesh;
 
 	UStaticMesh* HunterSpearMesh;
+	UParticleSystemComponent* HunterSpearSpawnedEmitter;
 
 	TSubclassOf<UAnimInstance> HunterAnimInstanceClass;
 	TSubclassOf<UAnimInstance> TitanAnimInstanceClass;
@@ -434,8 +555,6 @@ private:
 	
 	int jumpCount = 0;
 	float DefaultCapsuleHeight;
-    float SlideCapsuleHeight;
-	float SlideSpeedScale = 2.3f;
 	FVector LastPlayerPos;
 	float PosTickCoolTime = 400.0f;
 	bool bIsPlayerAlive = true;
@@ -444,7 +563,7 @@ private:
 
 	int32 HunterComboStage;
 	bool bIsHunterAttacking;
-	bool bHasNextComboQueued;
+	bool isHasNexCombo;
 	float ComboInputWindow;
 	FTimerHandle ComboResetTimer;
 };

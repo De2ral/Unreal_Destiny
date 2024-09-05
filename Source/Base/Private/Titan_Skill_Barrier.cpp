@@ -3,6 +3,7 @@
 
 #include "Titan_Skill_Barrier.h"
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 
 // Sets default values
@@ -10,11 +11,11 @@ ATitan_Skill_Barrier::ATitan_Skill_Barrier()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 
-	Mesh->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	Mesh->OnComponentHit.AddDynamic(this, &ATitan_Skill_Barrier::OnHit);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     Mesh->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
@@ -43,7 +44,7 @@ void ATitan_Skill_Barrier::Tick(float DeltaTime)
 	if (MoveTime > 0.f)
 	{
 		FVector P0 = GetActorLocation();
-		FVector vt = -GetActorRightVector() * MoveSpeed * DeltaTime;
+		FVector vt = GetActorForwardVector() * MoveSpeed * DeltaTime;
 		FVector P = P0 + vt;
 		SetActorLocation(P);
 		MoveTime -= DeltaTime;

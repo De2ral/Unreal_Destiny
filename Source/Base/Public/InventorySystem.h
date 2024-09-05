@@ -86,6 +86,12 @@ public:
 	UFUNCTION()
 	float GetWeaponMaxDamage() {return MaxTotalDamage; }
 
+	float GetSlot1WpnDmgInc() {return Slot1DamageIncrease;}
+
+	float GetSlot2WpnDmgInc() {return Slot2DamageIncrease;}
+
+	float GetSlot3WpnDmgInc() {return Slot3DamageIncrease;}
+
 
 	UFUNCTION()
 	void AddWeaponToInventory();
@@ -110,6 +116,10 @@ private:
 	void InvenOpenClose();
 	float MaxGunDamage = 10.0f;
 	float MaxTotalDamage = 100.0f;
+
+	float Slot1DamageIncrease = 0.0f;
+	float Slot2DamageIncrease = 0.0f;
+	float Slot3DamageIncrease = 0.0f;
 
 		
 };

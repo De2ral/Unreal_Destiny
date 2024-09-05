@@ -540,46 +540,49 @@ void UWeaponComponent::StopFiring()
 
 void UWeaponComponent::StartAiming()
 {
-    UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
-    bIsAiming = true;
-    //if(GetOwner()->HasAuthority())
-        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
-    //else
-    //    AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
-
-    if(CurrentScopeX <= 0.1f)
+    if(!Character->isUltimate && !Character->isGrenade && !Character->isMeleeAttack)
     {
-        FVector MeshTargetLocation = Character->GetFppMesh()->GetRelativeLocation();
-        FRotator MeshTargetRotation;
+        UE_LOG(LogTemp, Warning, TEXT("StartAiming"));
+        bIsAiming = true;
+        //if(GetOwner()->HasAuthority())
+            AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
+        //else
+        //    AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType),true);
 
-        MeshTargetLocation.Y = CurrentWeapon.AimLocation;
-        MeshTargetLocation.Z = -160.0f - 1.0f;
-        MeshTargetRotation.Yaw = CurrentWeapon.AimRotation;
-
-        APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
-        FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
-        FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-        FVector ForwardVector = CameraRotation.Vector();
-        FVector RightVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Y);
-        FVector UpVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Z);
-        
-        FVector TargetLocation = CameraLocation + (ForwardVector * 50.0f); 
-        TargetLocation -= UpVector * CurrentWeapon.AimLocation;
-
-        FQuat QuatRotation = FQuat(CameraRotation);
-        FRotator TargetRotation = QuatRotation.Rotator();
-        QuatRotation = QuatRotation * FQuat(FRotator(0.0f, CurrentWeapon.AimRotation, 0.0f)); // 기존 Yaw 조정 부분을 쿼터니언으로 처리
-        TargetRotation = QuatRotation.Rotator();
-
-        if(CurrentWeapon.GunType == GunTypeList::PISTOL)
+        if(CurrentScopeX <= 0.1f)
         {
-            Character->GetFppMesh()->SetRelativeLocation(MeshTargetLocation);
-            Character->GetFppMesh()->SetRelativeRotation(MeshTargetRotation);
-        }
-        else
-        {
-            CurrentStaticMeshComponent->SetWorldLocation(TargetLocation);
-            CurrentStaticMeshComponent->SetWorldRotation(TargetRotation);
+            FVector MeshTargetLocation = Character->GetFppMesh()->GetRelativeLocation();
+            FRotator MeshTargetRotation;
+    
+            MeshTargetLocation.Y = CurrentWeapon.AimLocation;
+            MeshTargetLocation.Z = -160.0f - 1.0f;
+            MeshTargetRotation.Yaw = CurrentWeapon.AimRotation;
+    
+            APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+            FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
+            FRotator CameraRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+            FVector ForwardVector = CameraRotation.Vector();
+            FVector RightVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Y);
+            FVector UpVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Z);
+            
+            FVector TargetLocation = CameraLocation + (ForwardVector * 50.0f); 
+            TargetLocation -= UpVector * CurrentWeapon.AimLocation;
+    
+            FQuat QuatRotation = FQuat(CameraRotation);
+            FRotator TargetRotation = QuatRotation.Rotator();
+            QuatRotation = QuatRotation * FQuat(FRotator(0.0f, CurrentWeapon.AimRotation, 0.0f)); // 기존 Yaw 조정 부분을 쿼터니언으로 처리
+            TargetRotation = QuatRotation.Rotator();
+    
+            if(CurrentWeapon.GunType == GunTypeList::PISTOL)
+            {
+                Character->GetFppMesh()->SetRelativeLocation(MeshTargetLocation);
+                Character->GetFppMesh()->SetRelativeRotation(MeshTargetRotation);
+            }
+            else
+            {
+                CurrentStaticMeshComponent->SetWorldLocation(TargetLocation);
+                CurrentStaticMeshComponent->SetWorldRotation(TargetRotation);
+            }
         }
     }
 }
