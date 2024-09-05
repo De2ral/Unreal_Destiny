@@ -218,7 +218,7 @@ void UWeaponComponent::MulticastTakeFire_Implementation()
         ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 		//bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
         bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, ObjectQueryParams, CollisionParams);
-		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
+		//DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
         if (FireAnimation != nullptr && !bIsAiming && (CurrentWeapon.GunType == GunTypeList::RIFLE))
@@ -242,7 +242,7 @@ void UWeaponComponent::MulticastTakeFire_Implementation()
 		if (bHit)
 		{    
             ProjectileDirection = (HitResult.Location - MuzzleLocation).GetSafeNormal();
-            DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+            //DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
            
             if(CurrentWeapon.Linetracing)
             {
@@ -338,7 +338,7 @@ void UWeaponComponent::MulticastTakeFireInRange_Implementation()
                 FCollisionObjectQueryParams ObjectQueryParams;
                 ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
                 bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, PelletEnd, ObjectQueryParams, CollisionParams);
-                DrawDebugLine(World, TraceStart, PelletEnd, FColor::Red, false, 1, 0, 1);
+                //DrawDebugLine(World, TraceStart, PelletEnd, FColor::Red, false, 1, 0, 1);
 
                 if (bHit)
                 {
@@ -348,7 +348,7 @@ void UWeaponComponent::MulticastTakeFireInRange_Implementation()
                         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFlash, HitResult.Location, FRotator(0.0f,0.0f, 0.0f), FVector(0.25f ,0.25f, 0.25f));
                         if (HitResult.GetActor()->ActorHasTag("Enemy"))
                         {
-                            DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+                            //DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
                             UGameplayStatics::ApplyDamage(HitResult.GetActor(), CurrentWeapon.GunDamage * 0.1f, PlayerController, GetOwner(), UDamageType::StaticClass());
                             return;
                         }
@@ -402,13 +402,6 @@ bool UWeaponComponent::ServerFireLauncher_Validate()
 }
 void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
 {
-    if(CurrentAmmo() < 1)
-    {
-        StopAiming();
-        StopFiring();
-        Reload();
-        return;
-    }
     if(CurrentWeapon.AutoFire)
         UseAmmo();
     UE_LOG(LogTemp, Warning, TEXT("FireLauncher"));
@@ -460,8 +453,8 @@ void UWeaponComponent::MulticastTakeFireLauncher_Implementation()
         ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 		//bool bHit = World->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
         bool bHit = World->LineTraceSingleByObjectType(HitResult, TraceStart, TraceEnd, ObjectQueryParams, CollisionParams);
-		DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
-        DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
+		//DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1, 0, 1);
+        //DrawDebugSphere(World, HitResult.Location, 10.0f, 12, FColor::Green, false, 1.0f);
 		FVector ProjectileDirection = SpawnRotation.Vector();
 		
         if (FireAnimation != nullptr && !bIsAiming)

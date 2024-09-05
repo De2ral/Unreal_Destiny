@@ -75,6 +75,7 @@ void UWeaponWidget::ImageMove(float NewX, UStaticMeshComponent* Object, bool IsR
 
 void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
 {
+    return;
     UE_LOG(LogTemp, Warning, TEXT("SetTextureBasedOnGunType"));
     UE_LOG(LogTemp, Warning, TEXT("GunType %d"),GunType);
     FString TexturePath;
