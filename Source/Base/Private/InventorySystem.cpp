@@ -61,24 +61,30 @@ void UInventorySystem::BeginPlay()
 void UInventorySystem::AddWeaponToInventory()
 {	
 
-	uint8 randomSeed = FMath::RandRange(2, 6);
+	uint8 randomSeed = FMath::RandRange(1, 7);
 	FName wpnName;
 	switch (randomSeed)
 	{
-	case 2:
+	case 1:
 	    wpnName = FName("Pistol1");
 	    break;
+	case 2:
+	    wpnName = FName("Pistol3");
+	    break;
 	case 3:
-	    wpnName = FName("Pistol2");
+	    wpnName = FName("Rifle1");
 	    break;
 	case 4:
-	    wpnName = FName("Pistol3");
+	    wpnName = FName("Rifle2");
 	    break;
 	case 5:
 	    wpnName = FName("Rifle3");
 	    break;
 	case 6:
 	    wpnName = FName("Sniper3");
+	    break;
+	case 7:
+	    wpnName = FName("Launcher1");
 	    break;
 	default:
 	    break;
