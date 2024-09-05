@@ -35,7 +35,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	bReplicates = true; 
+
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 	TppMesh->SetOwnerNoSee(true);
 	TppMesh->SetupAttachment(RootComponent);
@@ -224,18 +224,15 @@ void ADestinyFPSBase::BeginPlay()
 	{
 		if (HUDWidgetClass)
 		{
-			if (HUDWidgetClass)
+			HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
+			if (HUDWidget)
 			{
-				HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
-				if (HUDWidget)
-				{
-					HUDWidget->AddToViewport();
-					HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
-					HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
-					HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
-					HUDWidget->UpdateMeleeCoolTime(CurMeleeAttackCoolTime, MeleeAttackCoolTime);
-					HUDWidget->SetOwningPlayer(PlayerController);
-				}
+				HUDWidget->AddToViewport();
+				HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
+				HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
+				HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
+				HUDWidget->UpdateMeleeCoolTime(CurMeleeAttackCoolTime, MeleeAttackCoolTime);
+				HUDWidget->SetOwningPlayer(PlayerController);
 			}
 		}
 	}
