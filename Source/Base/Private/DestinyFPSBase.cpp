@@ -233,6 +233,11 @@ void ADestinyFPSBase::BeginPlay()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this,&ADestinyFPSBase::OnOverlapBegin);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this,&ADestinyFPSBase::OnOverlapEnd);
 
+	//if(RespawnUIClass)
+	//{
+	//	RespawnUIInstance = CreateWidget<UUserWidget>(GetWorld(), RespawnUIClass);
+	//}
+
 	if (HUDWidgetClass)
 	{
 		HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
@@ -1590,6 +1595,7 @@ void ADestinyFPSBase::Death()
 
 	ServerCreateDeathOrb();
 
+	//if(RespawnUIInstance) RespawnUIInstance->AddToViewport();
 	
 }
 
@@ -1602,6 +1608,8 @@ void ADestinyFPSBase::Revive()
 	HP = MaxHp;
 
 	ReviveCoolTime = 300.0f;
+
+	//if(RespawnUIInstance) RespawnUIInstance->RemoveFromParent();
 
 	ServerRevive();
 
@@ -1983,8 +1991,6 @@ void ADestinyFPSBase::InterObjAction()
 			InterObj->ItemDrop(ItemCount);
 			InterObj->Destroy();
 		}
-
-		if(InterObj->ActorHasTag("NPC")) InterObj->ShowQuestUI();
 
 		if(InterObj->ActorHasTag("Carriable"))
 		{

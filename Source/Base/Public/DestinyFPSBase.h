@@ -8,7 +8,6 @@
 #include "WeaponComponent.h"
 #include "SkillWidget.h"
 #include "HUDWidget.h"
-
 #include "DestinyFPSBase.generated.h"
 
 class UCharacterMovementComponent;
@@ -282,6 +281,11 @@ public:
  	UPROPERTY()
     UHUDWidget* HUDWidget;
 
+	//UPROPERTY(EditAnywhere, Category="UI")
+	//TSubclassOf<UUserWidget> RespawnUIClass;
+
+	//UUserWidget* RespawnUIInstance;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<class AGrenade> GrenadeClass;
 
@@ -538,6 +542,9 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	float CurHunterMeleeAttackCoolTime;
 
+	UFUNCTION(BlueprintCallable)
+	float GetReviveCoolTime() { return ReviveCoolTime; }
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdateSpearMeshVisibility(bool bVisible);
 
@@ -549,6 +556,7 @@ public:
 
 	int GetCurrHP() {return HP;}
 	void SetCurrHP(int value) {HP = value;}
+
 	
 private:
 	float CurComboAttackDelay = 0.f;
