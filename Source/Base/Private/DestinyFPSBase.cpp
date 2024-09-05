@@ -535,7 +535,7 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	//DOREPLIFETIME(ADestinyFPSBase, SpearMesh);
+	DOREPLIFETIME(ADestinyFPSBase, SpearMesh);
     
     DOREPLIFETIME(ADestinyFPSBase, HP);    
 	DOREPLIFETIME(ADestinyFPSBase, bHasRifle);
@@ -556,6 +556,8 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 
 	DOREPLIFETIME(ADestinyFPSBase, DeathMesh);
 	DOREPLIFETIME(ADestinyFPSBase, TppMesh);
+	
+	//DOREPLIFETIME(ADestinyFPSBase, PlayerClass);
 
 	
 }
