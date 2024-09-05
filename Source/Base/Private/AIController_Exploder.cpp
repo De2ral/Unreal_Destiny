@@ -45,7 +45,7 @@ void AAIController_Exploder::Tick(float DeltaTime)
     
 	GetBlackboardComponent()->SetValueAsVector(TEXT("TargetLocation"), PlayerPawn->GetActorLocation());		
 
-	if (GetPawn()->GetDistanceTo(PlayerPawn) <= 300)
+	if (GetPawn()->GetDistanceTo(PlayerPawn) <= 450)
 	{
 		GetBlackboardComponent()->SetValueAsBool(TEXT("Attacking"), true);
 	}
