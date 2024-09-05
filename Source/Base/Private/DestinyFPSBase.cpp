@@ -626,11 +626,11 @@ void ADestinyFPSBase::Skill()
 	{
 		if (CurSkillCoolTime >= SkillCoolTime)
 		{
-			isSkill = true;
-			CurSkillCoolTime = 0.f;
 			if ((PlayerClass == EPlayerClassEnum::TITAN) || 
-			(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
+			(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()) || (PlayerClass == EPlayerClassEnum::HUNTER))
 			{
+				isSkill = true;
+				CurSkillCoolTime = 0.f;
 				Multicast_SwitchWeaponVisible(false);
 				SwitchToThirdPerson();
 			}
@@ -1055,8 +1055,6 @@ void ADestinyFPSBase::TitanSmashDown()
 		GetInstigatorController(),
 		true
 	);
-
-	DrawDebugSphere(GetWorld(), GetActorLocation(), SmashRadius, 12, FColor::Green, false, 1.0f);
 }
 
 void ADestinyFPSBase::TitanSmashEnd(float DelayTime)
@@ -1793,15 +1791,23 @@ void ADestinyFPSBase::Server_Skill_Implementation(bool value)
 	{
 		if (CurSkillCoolTime >= SkillCoolTime)
 		{
-			isSkill = value;
-			CurSkillCoolTime = 0.f;
-			Multicast_SwitchWeaponVisible(false);
+			if ((PlayerClass == EPlayerClassEnum::TITAN) || 
+			(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()) || (PlayerClass == EPlayerClassEnum::HUNTER))
+			{
+				isSkill = value;
+				CurSkillCoolTime = 0.f;
+				Multicast_SwitchWeaponVisible(false);
+			}
 		}
 	}
 	else
 	{
-		isSkill = value;
-		Multicast_SwitchWeaponVisible(true);
+		if ((PlayerClass == EPlayerClassEnum::TITAN) || 
+		(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()) || (PlayerClass == EPlayerClassEnum::HUNTER))
+		{
+			isSkill = value;
+			Multicast_SwitchWeaponVisible(true);
+		}
 	}
 }
 
