@@ -28,6 +28,14 @@ void UHUDWidget::UpdateMeleeCoolTime(float cur, float max)
     }
 }
 
+void UHUDWidget::UpdateUltimateCoolTime(float cur, float max)
+{
+    if (UltimateCoolTimeHUD)
+    {
+        UltimateCoolTimeHUD->SetPercent(cur / max);
+    }
+}
+
 void UHUDWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
 {
     if (AmmoText)

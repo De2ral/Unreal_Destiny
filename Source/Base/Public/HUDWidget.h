@@ -19,6 +19,7 @@ public:
     void UpdateSkillCoolTime(float cur, float max);
     void UpdateGrenadeCoolTime(float cur, float max);
     void UpdateMeleeCoolTime(float cur, float max);
+    void UpdateUltimateCoolTime(float cur, float max);
 
 protected:
     UPROPERTY(meta = (BindWidget))
@@ -32,4 +33,7 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     class UProgressBar* MeleeCoolTimeHUD;
+
+    UPROPERTY(meta = (BindWidget))
+    class UProgressBar* UltimateCoolTimeHUD;
 };

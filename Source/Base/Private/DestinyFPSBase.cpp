@@ -215,9 +215,6 @@ void ADestinyFPSBase::BeginPlay()
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
-	CurSkillCoolTime = SkillCoolTime;
-	CurGrenadeCoolTime = GrenadeCoolTime;
-
 	if (IsLocallyControlled())
 	{
 		if (HUDWidgetClass)
@@ -402,6 +399,7 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		HUDWidget->UpdateSkillCoolTime(FMath::Min(CurSkillCoolTime, SkillCoolTime), SkillCoolTime);
 		HUDWidget->UpdateGrenadeCoolTime(FMath::Min(CurGrenadeCoolTime, GrenadeCoolTime), GrenadeCoolTime);
 		HUDWidget->UpdateMeleeCoolTime(FMath::Min(CurMeleeAttackCoolTime, MeleeAttackCoolTime), MeleeAttackCoolTime);
+		HUDWidget->UpdateUltimateCoolTime(FMath::Min(CurUltimateCoolTime, UltimateCoolTime), UltimateCoolTime);
 	}
 
 	if (isTitanPunch)
@@ -570,13 +568,16 @@ void ADestinyFPSBase::Skill()
 	if(bIsCarrying) return;
 	if(HasAuthority())
 	{
-		isSkill = true;
-		CurSkillCoolTime = 0.f;
-		if ((PlayerClass == EPlayerClassEnum::TITAN) || 
-		(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
+		if (CurSkillCoolTime >= SkillCoolTime)
 		{
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-			SwitchToThirdPerson();
+			isSkill = true;
+			CurSkillCoolTime = 0.f;
+			if ((PlayerClass == EPlayerClassEnum::TITAN) || 
+			(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
+			{
+				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				SwitchToThirdPerson();
+			}
 		}
 	}
 	else
@@ -619,8 +620,11 @@ void ADestinyFPSBase::Grenade()
 	if(bIsCarrying) return;
 	if (HasAuthority())
 	{
-		isGrenade = true;
-		CurGrenadeCoolTime = 0.f;
+		if (CurGrenadeCoolTime >= GrenadeCoolTime)
+		{
+			isGrenade = true;
+			CurGrenadeCoolTime = 0.f;
+		}
 	}
 	else
 	{
@@ -782,41 +786,44 @@ void ADestinyFPSBase::Ultimate()
 	if(bIsCarrying) return;
 	if(HasAuthority())
 	{
-		isUltimate = true;
-		CurUltimateCoolTime = 0.f;
-		CurUltimateDuration = 0.f;
-		SwitchToThirdPerson();
-		GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
-		if (PlayerClass == EPlayerClassEnum::TITAN)
+		if (CurUltimateCoolTime >= UltimateCoolTime)
 		{
-			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Switching to Third Person"));
-			MeleeAttackCoolTime = 2.f;
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-			// Titan Ultimate Start
-			if (TitanUltimateFistParticle)
-			{
-				UGameplayStatics::SpawnEmitterAttached(
-					TitanUltimateFistParticle,
-					TppMesh,
-					FName("TitanUltimateFistSocket"),
-					FVector::ZeroVector, 
-					FRotator::ZeroRotator,
-					EAttachLocation::SnapToTarget,
-					true
-				);
-			}
-		}
-		else if (PlayerClass == EPlayerClassEnum::WARLOCK)
-		{
-			CheckStartWarlockUltimate();
-		}
-		else if (PlayerClass == EPlayerClassEnum::HUNTER)
-		{
+			isUltimate = true;
 			CurUltimateCoolTime = 0.f;
 			CurUltimateDuration = 0.f;
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("헌터 궁극기 시전. (서버)"));
-			Multicast_UpdateSpearMeshVisibility(isUltimate);
+			SwitchToThirdPerson();
+			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
+			if (PlayerClass == EPlayerClassEnum::TITAN)
+			{
+				GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Switching to Third Person"));
+				MeleeAttackCoolTime = 2.f;
+				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				// Titan Ultimate Start
+				if (TitanUltimateFistParticle)
+				{
+					UGameplayStatics::SpawnEmitterAttached(
+						TitanUltimateFistParticle,
+						TppMesh,
+						FName("TitanUltimateFistSocket"),
+						FVector::ZeroVector, 
+						FRotator::ZeroRotator,
+						EAttachLocation::SnapToTarget,
+						true
+					);
+				}
+			}
+			else if (PlayerClass == EPlayerClassEnum::WARLOCK)
+			{
+				CheckStartWarlockUltimate();
+			}
+			else if (PlayerClass == EPlayerClassEnum::HUNTER)
+			{
+				CurUltimateCoolTime = 0.f;
+				CurUltimateDuration = 0.f;
+				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("헌터 궁극기 시전. (서버)"));
+				Multicast_UpdateSpearMeshVisibility(isUltimate);
+			}
 		}
 	}
 	else

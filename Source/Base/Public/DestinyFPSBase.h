@@ -329,7 +329,7 @@ public:
 	void Death();
 	void Revive();
 
-	UPROPERTY(EditAnywhere, Category = "Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
     UWeaponComponent* WeaponComponent;
 
 	UPROPERTY(EditAnyWhere)

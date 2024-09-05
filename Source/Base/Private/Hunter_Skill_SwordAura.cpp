@@ -86,7 +86,7 @@ void AHunter_Skill_SwordAura::SetSwordAuraDirection(const FVector& Direction)
 
 void AHunter_Skill_SwordAura::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && !(OtherActor->IsA(ADestinyFPSBase::StaticClass())) && !(OtherActor->IsA(AWarlock_Melee_Fireball::StaticClass())))
+	if (OtherActor && !(OtherActor->IsA(ADestinyFPSBase::StaticClass())) && !(OtherActor->IsA(AHunter_Skill_SwordAura::StaticClass())))
 	{
 		ApplyDamage();
 		//PlayExlodeParticle();
