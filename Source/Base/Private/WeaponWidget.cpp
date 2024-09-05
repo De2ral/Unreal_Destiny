@@ -15,15 +15,6 @@ void UWeaponWidget::NativeConstruct()
     ScopeCrossImage2->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void UWeaponWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
-{
-    if (AmmoText)
-    {
-        AmmoText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), CurrentAmmo, MaxAmmo)));
-    }
-}
-
-
 
 void UWeaponWidget::SetScopeSize(float NewSize)
 {
@@ -123,13 +114,16 @@ void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
     }
 
     UE_LOG(LogTemp, Warning, TEXT("GunType %s"),*TexturePath);
-
     UTexture2D* LoadedTexture = LoadObject<UTexture2D>(nullptr, *TexturePath);
     if (LoadedTexture)
     {
-        UE_LOG(LogTemp, Warning, TEXT("SetTextureBasedOnGunType success"));
-        if(BaseCrossImage)
+        if(BaseCrossImage != nullptr)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("SetTextureBasedOnGunType success"));
             BaseCrossImage->SetBrushFromTexture(LoadedTexture);
+        }
+        else
+            return;
     }
     else
     {

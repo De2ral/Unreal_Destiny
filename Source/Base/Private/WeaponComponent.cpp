@@ -599,10 +599,10 @@ void UWeaponComponent::StopAiming()
 
 void UWeaponComponent::EquipWeapon1()
 {
-    //ChangeCrosshair();
     if(GetOwner()->HasAuthority())
     {
         ServerEquipWeapon1();
+        ChangeCrosshair();
     }
     else
     {
@@ -617,21 +617,27 @@ bool UWeaponComponent::ServerEquipWeapon1_Validate()
 }
 void UWeaponComponent::ServerEquipWeapon1_Implementation()
 {
-    MulticastEquipWeapon1();
-}
-void UWeaponComponent::MulticastEquipWeapon1_Implementation()
-{
     if(!bIsAiming)
     {
     LoadWeaponByName(Slot1Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
     }
+    //MulticastEquipWeapon1();
+}
+void UWeaponComponent::MulticastEquipWeapon1_Implementation()
+{
+    //ChangeCrosshair();
+    //if(!bIsAiming)
+    //{
+    //LoadWeaponByName(Slot1Weapon);
+    //FString ModelPath = CurrentWeapon.GunModelPath;
+    //LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+    //}
 }
 
 void UWeaponComponent::EquipWeapon2()
 {
-    //ChangeCrosshair();
     if(GetOwner()->HasAuthority())
     {  
         ServerEquipWeapon2(); 
@@ -649,21 +655,30 @@ bool UWeaponComponent::ServerEquipWeapon2_Validate()
 }
 void UWeaponComponent::ServerEquipWeapon2_Implementation()
 {
-    MulticastEquipWeapon2();
-}
-void UWeaponComponent::MulticastEquipWeapon2_Implementation()
-{
+    
     if(!bIsAiming)
     {
     LoadWeaponByName(Slot2Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+    ChangeCrosshair();
     }
+    
+    //MulticastEquipWeapon2();
+}
+void UWeaponComponent::MulticastEquipWeapon2_Implementation()
+{
+    //if(!bIsAiming)
+    //{
+    //LoadWeaponByName(Slot2Weapon);
+    //FString ModelPath = CurrentWeapon.GunModelPath;
+    //LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+    //}
 }
 
 void UWeaponComponent::EquipWeapon3()
 {
-    //ChangeCrosshair();
+    
     if(GetOwner()->HasAuthority())
     {
         ServerEquipWeapon3();
@@ -681,31 +696,33 @@ bool UWeaponComponent::ServerEquipWeapon3_Validate()
 }
 void UWeaponComponent::ServerEquipWeapon3_Implementation()
 {
-    MulticastEquipWeapon3();
-}
-void UWeaponComponent::MulticastEquipWeapon3_Implementation()
-{
+    
     if(!bIsAiming)
     {
     LoadWeaponByName(Slot3Weapon);
     FString ModelPath = CurrentWeapon.GunModelPath;
     LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+    ChangeCrosshair();
     }
+    //MulticastEquipWeapon3();
+}
+void UWeaponComponent::MulticastEquipWeapon3_Implementation()
+{
+    //ChangeCrosshair();
+    //if(!bIsAiming)
+    //{
+    //LoadWeaponByName(Slot3Weapon);
+    //FString ModelPath = CurrentWeapon.GunModelPath;
+    //LoadAndAttachModelToCharacter(Cast<ADestinyFPSBase>(GetOwner()), ModelPath); 
+    //}
 }
 void UWeaponComponent::ChangeCrosshair()
 {
     UE_LOG(LogTemp, Warning, TEXT("ChangeCrosshair"));
-    //if(GetOwner()->HasAuthority())
-    {
-        AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
-        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-    }
-    //else
-    //{
-    //    AmmoWidget2->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
-    //    AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
-    //}
-    
+   
+    AmmoWidget->SetTextureBasedOnGunType(int(CurrentWeapon.GunType), false);
+    //AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+   
 }
 
 void UWeaponComponent::SetSlot1Weapon(FName inweapon)
@@ -797,7 +814,7 @@ void UWeaponComponent::UseAmmo()
         Ammo3--;
     }
     //if(GetOwner()->HasAuthority())
-        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+        //AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
     //else
     //    AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
@@ -861,7 +878,7 @@ void UWeaponComponent::FillAmmo()
     }
 
     //if(GetOwner()->HasAuthority())
-        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+       // AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
     //else
     //    AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
@@ -882,7 +899,7 @@ void UWeaponComponent::AllFillAmmo()
         Ammo3 = WeaponData->Max_capacity;
        
     //if(GetOwner()->HasAuthority())
-        AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
+        //AmmoWidget->UpdateAmmo(CurrentAmmo(), StoredAmmo());
     //else
     //    AmmoWidget2->UpdateAmmo(CurrentAmmo(), StoredAmmo());
 }
@@ -1058,11 +1075,11 @@ void UWeaponComponent::SetCurrentWeapon(const FGunInfo& NewWeapon)
 
 void UWeaponComponent::LoadWeaponByName(FName WeaponName)
 {
-    if (!GetOwner()->HasAuthority())
-    {
+    //if (!GetOwner()->HasAuthority())
+    //{
         // 서버 권한이 없으면 함수 종료
-        return;
-    }
+        //return;
+    //}
 
     if (WeaponDataTable)
     {
@@ -1317,5 +1334,6 @@ void UWeaponComponent::OnRep_CurrentWeapon()
         UE_LOG(LogTemp, Log, TEXT("PlayerCharacter called"));
         LoadWeaponByName(CurrentWeapon.GunName);
         LoadAndAttachModelToCharacter(PlayerCharacter, CurrentWeapon.GunModelPath);
+        //ChangeCrosshair();
     }
 }
