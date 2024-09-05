@@ -12,7 +12,7 @@
 
 #include "Net/UnrealNetwork.h" 
 
-
+#include "DestinyFPSBase.h"
 #include "Kismet/GameplayStatics.h"
 
 AFpsCppProjectile::AFpsCppProjectile() 
@@ -127,7 +127,7 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	UE_LOG(LogTemp, Warning, TEXT("OnHit."));
     UE_LOG(LogTemp, Warning, TEXT("Damage : %f"), Damage);
 
-    if (OtherActor && OtherActor != this)
+    if (OtherActor && OtherActor != this && !(OtherActor->IsA(ADestinyFPSBase::StaticClass())))
     {
        if (bExplodeOnImpact)
         {
@@ -164,22 +164,22 @@ void AFpsCppProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
         }
         else
         {
+            GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, FString::Printf(TEXT("충돌 객체 이름 : %s"), *OtherActor->GetName()));
             if (OtherActor->GetClass() == GetClass())
             {
-                Destroy();
                 return;
             }
             
             if (OtherActor->ActorHasTag("Enemy"))
             {
                 AController* InstigatorController = GetInstigatorController();
-                UGameplayStatics::ApplyDamage(
-                OtherActor,
-                Damage,
-                InstigatorController,
-                this,
-                UDamageType::StaticClass()
-            );
+                    UGameplayStatics::ApplyDamage(
+                    OtherActor,
+                    Damage,
+                    InstigatorController,
+                    this,
+                    UDamageType::StaticClass()
+                );
             }
             
 
