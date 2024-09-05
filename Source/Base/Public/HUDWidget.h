@@ -15,7 +15,8 @@ class BASE_API UHUDWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-    void UpdateAmmo(int32 CurrentAmmo, int32 StoredAmmo);
+    void UpdateCurAmmo(int32 CurAmmo);
+    void UpdateCurStoredAmmo(int32 StoredAmmo);
     void UpdateSubAmmo1(int32 StoredAmmo);
     void UpdateSubAmmo2(int32 StoredAmmo);
     void UpdateSkillCoolTime(float cur, float max);
@@ -25,7 +26,10 @@ public:
 
 protected:
     UPROPERTY(meta = (BindWidget))
-    class UTextBlock* AmmoText;
+    class UTextBlock* CurAmmoText;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* CurStoredAmmoText;
 
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* SubAmmoText1;
