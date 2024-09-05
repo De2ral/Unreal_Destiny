@@ -28,6 +28,7 @@
 #include "EngineUtils.h"
 #include "Hunter_Skill_SwordAura.h"
 #include "ReplicatedObj.h"
+#include "CPP_DeathOrb.h"
 
 
 // Sets default values
@@ -35,7 +36,7 @@ ADestinyFPSBase::ADestinyFPSBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	bReplicates = true; 
+
 	TppMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TPPMesh"));
 	TppMesh->SetOwnerNoSee(true);
 	TppMesh->SetupAttachment(RootComponent);
@@ -60,7 +61,18 @@ ADestinyFPSBase::ADestinyFPSBase()
 
 	SpearMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpearMesh"));
 
+	DeathMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DeathMesh"));
+	DeathMesh->SetHiddenInGame(true);
+	DeathMesh->SetupAttachment(RootComponent);
+
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
+
+
+	//if(SpawnedDeathOrb)
+	//{
+	//	SpawnedDeathOrb->SetActorHiddenInGame(true);
+	//	SpawnedDeathOrb->SetActorEnableCollision(false);
+	//}
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmashParticleAsset(
 		TEXT("/Script/Engine.ParticleSystem'/Game/InfinityBladeEffects/Effects/FX_Skill_RockBurst/P_RBurst_Fire_Charge_Slam_2.P_RBurst_Fire_Charge_Slam_2'"));
@@ -172,8 +184,6 @@ ADestinyFPSBase::ADestinyFPSBase()
     if (HunterMontageAsset.Succeeded())
         HunterComboMontage = HunterMontageAsset.Object;
 
-	PlayerClass = EPlayerClassEnum::HUNTER;
-
 	LastPlayerPos = GetActorLocation();
 
 	HunterComboStage = 0;
@@ -215,21 +225,27 @@ void ADestinyFPSBase::BeginPlay()
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
+	
 	CurSkillCoolTime = SkillCoolTime;
 	CurGrenadeCoolTime = GrenadeCoolTime;
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this,&ADestinyFPSBase::OnOverlapBegin);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this,&ADestinyFPSBase::OnOverlapEnd);
 
-	if (HUDWidgetClass)
+	if (IsLocallyControlled())
 	{
-		HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
-		if (HUDWidget)
+		if (HUDWidgetClass)
 		{
-			HUDWidget->AddToViewport();
-			HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
-			HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
-			HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
+			HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
+			if (HUDWidget)
+			{
+				HUDWidget->AddToViewport();
+				HUDWidget->UpdateAmmo(WeaponComponent->CurrentAmmo(), WeaponComponent->StoredAmmo());
+				HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
+				HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
+				HUDWidget->UpdateMeleeCoolTime(CurMeleeAttackCoolTime, MeleeAttackCoolTime);
+				HUDWidget->SetOwningPlayer(PlayerController);
+			}
 		}
 	}
 
@@ -353,13 +369,12 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		if (CurSkillCoolTime < SkillCoolTime)
 		{
 			CurSkillCoolTime += DeltaTime;
-			HUDWidget->UpdateSkillCoolTime(CurSkillCoolTime, SkillCoolTime);
+			
 		}
 
 		if (CurGrenadeCoolTime < GrenadeCoolTime)
 		{
 			CurGrenadeCoolTime += DeltaTime;
-			HUDWidget->UpdateGrenadeCoolTime(CurGrenadeCoolTime, GrenadeCoolTime);
 		}
 
 		if (CurUltimateCoolTime < UltimateCoolTime)
@@ -395,6 +410,15 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 		}
 	}
 
+	if (HUDWidget)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1,0.5f,FColor::Red, TEXT("위젯 업데이트"));
+		HUDWidget->UpdateSkillCoolTime(FMath::Min(CurSkillCoolTime, SkillCoolTime), SkillCoolTime);
+		HUDWidget->UpdateGrenadeCoolTime(FMath::Min(CurGrenadeCoolTime, GrenadeCoolTime), GrenadeCoolTime);
+		HUDWidget->UpdateMeleeCoolTime(FMath::Min(CurMeleeAttackCoolTime, MeleeAttackCoolTime), MeleeAttackCoolTime);
+		HUDWidget->UpdateUltimateCoolTime(FMath::Min(CurUltimateCoolTime, UltimateCoolTime), UltimateCoolTime);
+	}
+
 	if (isTitanPunch)
 	{
 		TitanPunchCollisionEvents();
@@ -418,10 +442,23 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 
 	if(InterObj && bIsInteractComplete)
 	{
-		
 		InterObjAction();
 		bIsInteractComplete = false;
 	} 
+
+	//if(OtherPlayerDeathOrb && bIsInteractComplete)
+	//{
+	//	Revive();
+	//	bIsInteractComplete = false;
+	//}
+
+	if(!bIsPlayerAlive)
+	{
+		ReviveCoolTime -= 1;
+		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf(TEXT("ReviveCoolTime = %f"),ReviveCoolTime));
+	}
+
+	if(ReviveCoolTime <= 0.0f && !bIsPlayerAlive) Revive();
 
 	//->AddOnScreenDebugMessage(-1,1.0f,FColor::Cyan,FString::Printf("MaxWalkSpeed = %f",GetCharacterMovement()->MaxWalkSpeed));
 
@@ -439,7 +476,7 @@ void ADestinyFPSBase::Tick(float DeltaTime)
 				FColor::Blue,
 				FString::Printf(TEXT("LastPlayerPos = X=%f,Y=%f,Z=%f"),LastPlayerPos.X,LastPlayerPos.Y,LastPlayerPos.Z));
 
-			PosTickCoolTime = 400.0f;
+			PosTickCoolTime = 50.0f;
 
 		}
 	} 
@@ -459,8 +496,7 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Look);
 		Input->BindAction(DeathReviveAction, ETriggerEvent::Started, this, &ADestinyFPSBase::HPDamageTest);
 
-		if(bIsPlayerAlive)
-		{
+		
 			Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADestinyFPSBase::Move);
 
 			Input->BindAction(SkillAction, ETriggerEvent::Started, this, &ADestinyFPSBase::Skill);
@@ -484,7 +520,6 @@ void ADestinyFPSBase::SetupPlayerInputComponent(UInputComponent *PlayerInputComp
 			Input->BindAction(InterAction, ETriggerEvent::Completed, this, &ADestinyFPSBase::EndInteract);
 
 			Input->BindAction(InventoryAction,ETriggerEvent::Completed, this, &ADestinyFPSBase::InvenOpenClose);
-		}
 		
 	}
 }
@@ -512,7 +547,10 @@ void ADestinyFPSBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutL
 	DOREPLIFETIME(ADestinyFPSBase, CurMeleeAttackCoolTime);   
 	DOREPLIFETIME(ADestinyFPSBase, CurHunterMeleeAttackCoolTime); 
 
-	DOREPLIFETIME(ADestinyFPSBase, SpawnedDeathOrb);   
+	DOREPLIFETIME(ADestinyFPSBase, DeathMesh);
+	DOREPLIFETIME(ADestinyFPSBase, TppMesh);
+
+	
 }
 
 void ADestinyFPSBase::InvenOpenClose()
@@ -577,13 +615,16 @@ void ADestinyFPSBase::Skill()
 	if(bIsCarrying || !bIsPlayerAlive) return;
 	if(HasAuthority())
 	{
-		isSkill = true;
-		CurSkillCoolTime = 0.f;
-		if ((PlayerClass == EPlayerClassEnum::TITAN) || 
-		(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
+		if (CurSkillCoolTime >= SkillCoolTime)
 		{
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-			SwitchToThirdPerson();
+			isSkill = true;
+			CurSkillCoolTime = 0.f;
+			if ((PlayerClass == EPlayerClassEnum::TITAN) || 
+			(PlayerClass == EPlayerClassEnum::WARLOCK && GetCharacterMovement()->IsFalling()))
+			{
+				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				SwitchToThirdPerson();
+			}
 		}
 	}
 	else
@@ -623,11 +664,14 @@ void ADestinyFPSBase::EndShield()
 
 void ADestinyFPSBase::Grenade()
 {
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 	if (HasAuthority())
 	{
-		isGrenade = true;
-		CurGrenadeCoolTime = 0.f;
+		if (CurGrenadeCoolTime >= GrenadeCoolTime)
+		{
+			isGrenade = true;
+			CurGrenadeCoolTime = 0.f;
+		}
 	}
 	else
 	{
@@ -788,41 +832,44 @@ void ADestinyFPSBase::Ultimate()
 	if(bIsCarrying) return;
 	if(HasAuthority())
 	{
-		isUltimate = true;
-		CurUltimateCoolTime = 0.f;
-		CurUltimateDuration = 0.f;
-		SwitchToThirdPerson();
-		GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
-		if (PlayerClass == EPlayerClassEnum::TITAN)
+		if (CurUltimateCoolTime >= UltimateCoolTime)
 		{
-			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Switching to Third Person"));
-			MeleeAttackCoolTime = 2.f;
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-			// Titan Ultimate Start
-			if (TitanUltimateFistParticle)
-			{
-				UGameplayStatics::SpawnEmitterAttached(
-					TitanUltimateFistParticle,
-					TppMesh,
-					FName("TitanUltimateFistSocket"),
-					FVector::ZeroVector, 
-					FRotator::ZeroRotator,
-					EAttachLocation::SnapToTarget,
-					true
-				);
-			}
-		}
-		else if (PlayerClass == EPlayerClassEnum::WARLOCK)
-		{
-			CheckStartWarlockUltimate();
-		}
-		else if (PlayerClass == EPlayerClassEnum::HUNTER)
-		{
+			isUltimate = true;
 			CurUltimateCoolTime = 0.f;
 			CurUltimateDuration = 0.f;
-			WeaponComponent->SetCurrentWeaponMeshVisibility(false);
-			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("헌터 궁극기 시전. (서버)"));
-			Multicast_UpdateSpearMeshVisibility(isUltimate);
+			SwitchToThirdPerson();
+			GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Ultimate if문 진입"));
+			if (PlayerClass == EPlayerClassEnum::TITAN)
+			{
+				GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Blue, TEXT("Switching to Third Person"));
+				MeleeAttackCoolTime = 2.f;
+				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				// Titan Ultimate Start
+				if (TitanUltimateFistParticle)
+				{
+					UGameplayStatics::SpawnEmitterAttached(
+						TitanUltimateFistParticle,
+						TppMesh,
+						FName("TitanUltimateFistSocket"),
+						FVector::ZeroVector, 
+						FRotator::ZeroRotator,
+						EAttachLocation::SnapToTarget,
+						true
+					);
+				}
+			}
+			else if (PlayerClass == EPlayerClassEnum::WARLOCK)
+			{
+				CheckStartWarlockUltimate();
+			}
+			else if (PlayerClass == EPlayerClassEnum::HUNTER)
+			{
+				CurUltimateCoolTime = 0.f;
+				CurUltimateDuration = 0.f;
+				WeaponComponent->SetCurrentWeaponMeshVisibility(false);
+				GEngine->AddOnScreenDebugMessage(-1,30.0f,FColor::Cyan,TEXT("헌터 궁극기 시전. (서버)"));
+				Multicast_UpdateSpearMeshVisibility(isUltimate);
+			}
 		}
 	}
 	else
@@ -1341,7 +1388,7 @@ void ADestinyFPSBase::jumpEnd(const FInputActionValue &Value)
 
 void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 {
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 
 	bPlayerSprint = true;
 	GetCharacterMovement()->MaxWalkSpeed *= 1.5f;
@@ -1352,7 +1399,7 @@ void ADestinyFPSBase::Sprint(const FInputActionValue& Value)
 
 void ADestinyFPSBase::SprintEnd(const FInputActionValue& Value)
 {
-	if(bIsCarrying) return;
+	if(bIsCarrying || !bIsPlayerAlive) return;
 	
 	bPlayerSprint = false;
 	GetCharacterMovement()->MaxWalkSpeed /= 1.5f;
@@ -1365,7 +1412,7 @@ void ADestinyFPSBase::Slide(const FInputActionValue& Value)
 {
 	//SlidingTime만큼 슬라이딩 시작
 	
-	if(!bIsSliding)
+	if(!bIsSliding || bIsPlayerAlive)
 	{
 		SlideVector = FppCamera->GetForwardVector();
 		bIsSliding = true;
@@ -1563,39 +1610,40 @@ void ADestinyFPSBase::ResetCombo()
 
 void ADestinyFPSBase::Death()
 {
+	GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::Red,TEXT("Dying"));
+
 	bIsPlayerAlive = false;
+	if(bIsCarrying) PlayerCarryingEnd();
+	SwitchToThirdPerson();
+	TppMesh->SetOwnerNoSee(true);
+	FppMesh->SetOwnerNoSee(true);
+	SetActorLocation(LastPlayerPos);
 
-	if(!SpawnedDeathOrb)
-	{
-		SpawnedDeathOrb = GetWorld()->SpawnActor<AReplicatedObj>(AReplicatedObj::StaticClass(),LastPlayerPos,GetActorRotation());
+	ServerCreateDeathOrb();
 
-		SpawnedDeathOrb->Tags.Add(FName("InterObj"));
-		SpawnedDeathOrb->Tags.Add(FName("DeathOrb"));
-		SetActorLocation(LastPlayerPos);
-		SwitchToThirdPerson();
-
-		TppMesh->SetOwnerNoSee(true);
-		FppMesh->SetOwnerNoSee(true);
-
-		if(bIsCarrying) PlayerCarryingEnd();
-
-		SpawnedDeathOrb->SetDeadPlayer(this);
-        
-    }
+	//if(RespawnUIInstance) RespawnUIInstance->AddToViewport();
+	
 }
 
+//살아나는 함수
 void ADestinyFPSBase::Revive()
 {
+
 	bIsPlayerAlive = true;
-
-	if(SpawnedDeathOrb != nullptr)
-	{
-		SpawnedDeathOrb->Destroy();
-		SpawnedDeathOrb = nullptr;
-	}
-
 	SwitchToFirstPerson();
+	HP = MaxHp;
 
+	ReviveCoolTime = 80.0f;
+
+	//if(RespawnUIInstance) RespawnUIInstance->RemoveFromParent();
+
+	ServerRevive();
+
+}
+
+void ADestinyFPSBase::CreateDeathOrb()
+{
+	DeathMesh->SetHiddenInGame(false);
 }
 
 void ADestinyFPSBase::SetHasRifle(bool bNewHasRifle)
@@ -1691,24 +1739,37 @@ void ADestinyFPSBase::OnSpearOverlap(UPrimitiveComponent* OverlappedComp, AActor
 
 void ADestinyFPSBase::OnOverlapBegin(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	if (OtherActor->ActorHasTag("InteractObj") || OtherActor->ActorHasTag("NPC"))
-    {
-		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Yellow,TEXT("isObj"));
-        InterObj = Cast<AReplicatedObj>(OtherActor);
 
+	if (OtherActor->ActorHasTag("InteractObj"))
+    {
         if (bIsPlayerAlive)
         {
+			GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Yellow,TEXT("isObj"));
+        	InterObj = Cast<AReplicatedObj>(OtherActor);
             bPlayerInteractable = true;
             MaxInteractTime = InterObj->ObjInteractTime;
         }
         
     }
 
+	//if(OtherActor->ActorHasTag("DeathOrb"))
+	//{
+	//	if (bIsPlayerAlive)
+	//	{
+	//		GEngine->AddOnScreenDebugMessage(-1,1.0f,FColor::Black,TEXT("isDeathOrb"));
+	//		OtherPlayerDeathOrb = Cast<ACPP_DeathOrb>(OtherActor);
+	//		bPlayerInteractable = true;
+    //        MaxInteractTime = OtherPlayerDeathOrb->ObjInteractTime;
+	//	}
+	//
+	//
+	//}
+
 }
 
 void ADestinyFPSBase::OnOverlapEnd(UPrimitiveComponent *OverlappedComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor->ActorHasTag("InteractObj") || OtherActor->ActorHasTag("NPC"))
+	if (OtherActor->ActorHasTag("InteractObj"))
     {
 		if (bIsPlayerAlive) bPlayerInteractable = false;
 	
@@ -1747,8 +1808,10 @@ void ADestinyFPSBase::Server_Ultimate_Implementation(bool value)
 		{
 			isUltimate = value;
 			CurUltimateCoolTime = 0.f;
-			CurUltimateDuration = 0.f;
-			Multicast_UpdateSpearMeshVisibility(isUltimate);
+			if (PlayerClass == EPlayerClassEnum::TITAN || PlayerClass == EPlayerClassEnum::HUNTER)
+				CurUltimateDuration = 0.f;
+			if (PlayerClass == EPlayerClassEnum::HUNTER)
+				Multicast_UpdateSpearMeshVisibility(true);
 		}
 	}
 	else
@@ -1825,16 +1888,58 @@ void ADestinyFPSBase::ServerInterObjAction_Implementation()
 
 }
 
-void ADestinyFPSBase::MultiInterObjAction_Implementation()
+bool ADestinyFPSBase::ServerInterObjAction_Validate()
 {
+    return true;
+}
 
-	InterObj->GetObjMesh()->SetStaticMesh(InterObj->AfterInteractMesh->GetStaticMesh());
+void ADestinyFPSBase::ServerDeath_Implementation()
+{
+	DeathMesh->SetHiddenInGame(false);
 
 }
 
+bool ADestinyFPSBase::ServerDeath_Validate()
+{
+    return true;
+}
 
+void ADestinyFPSBase::ServerRevive_Implementation()
+{
+	MulticastRevive();
+}
 
-bool ADestinyFPSBase::ServerInterObjAction_Validate()
+bool ADestinyFPSBase::ServerRevive_Validate()
+{
+    return true;
+}
+
+void ADestinyFPSBase::MulticastRevive_Implementation()
+{
+	DeathMesh->SetHiddenInGame(true);
+}
+
+bool ADestinyFPSBase::MulticastRevive_Validate()
+{
+    return true;
+}
+
+void ADestinyFPSBase::ServerCreateDeathOrb_Implementation()
+{
+	MulticastCreateDeathOrb();
+}
+
+bool ADestinyFPSBase::ServerCreateDeathOrb_Validate()
+{
+    return true;
+}
+
+void ADestinyFPSBase::MulticastCreateDeathOrb_Implementation()
+{
+	CreateDeathOrb();
+}
+
+bool ADestinyFPSBase::MulticastCreateDeathOrb_Validate()
 {
     return true;
 }
@@ -1915,8 +2020,6 @@ void ADestinyFPSBase::InterObjAction()
 			InterObj->Destroy();
 		}
 
-		if(InterObj->ActorHasTag("NPC")) InterObj->ShowQuestUI();
-
 		if(InterObj->ActorHasTag("Carriable"))
 		{
 			if(!bIsCarrying) PlayerCarryingStart(InterObj);
@@ -1934,12 +2037,6 @@ void ADestinyFPSBase::InterObjAction()
 				InterObj->SetObjIsFill(true);
 			}
 
-		}
-
-		if(InterObj->ActorHasTag("DeathOrb"))
-		{
-			InterObj->GetDeadPlayer()->Revive();
-			InterObj->Destroy();
 		}
 
 	} else ServerInterObjAction();

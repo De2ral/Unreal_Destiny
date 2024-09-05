@@ -18,6 +18,8 @@ public:
     void UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo);
     void UpdateSkillCoolTime(float cur, float max);
     void UpdateGrenadeCoolTime(float cur, float max);
+    void UpdateMeleeCoolTime(float cur, float max);
+    void UpdateUltimateCoolTime(float cur, float max);
 
 protected:
     UPROPERTY(meta = (BindWidget))
@@ -28,4 +30,10 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     class UProgressBar* GrenadeCoolTimeHUD;
+
+    UPROPERTY(meta = (BindWidget))
+    class UProgressBar* MeleeCoolTimeHUD;
+
+    UPROPERTY(meta = (BindWidget))
+    class UProgressBar* UltimateCoolTimeHUD;
 };

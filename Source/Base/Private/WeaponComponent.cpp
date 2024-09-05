@@ -993,10 +993,16 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
     {
         CurrentSkeletalMeshComponent = NewObject<USkeletalMeshComponent>(Character);
         CurrentSkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
+        CurrentSkeletalMeshComponent->SetOnlyOwnerSee(true);
+        CurrentMultiSkeletalMeshComponent = NewObject<USkeletalMeshComponent>(Character);
+        CurrentMultiSkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
+        CurrentMultiSkeletalMeshComponent->SetOwnerNoSee(true);
 
         FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
         CurrentSkeletalMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPoint")));
         CurrentSkeletalMeshComponent->RegisterComponent();
+        CurrentMultiSkeletalMeshComponent->AttachToComponent(Character->GetTppMesh(), AttachmentRules, FName(TEXT("MultiGripSocket")));
+        CurrentMultiSkeletalMeshComponent->RegisterComponent();
 
         UE_LOG(LogTemp, Warning, TEXT("SkeletalMesh"));
 
@@ -1008,26 +1014,32 @@ void UWeaponComponent::AttachModelToCharacter(ADestinyFPSBase* TargetCharacter, 
         CurrentStaticMeshComponent = NewObject<UStaticMeshComponent>(Character);
         CurrentStaticMeshComponent_TPP = CurrentStaticMeshComponent;
         CurrentStaticMeshComponent->SetStaticMesh(StaticMesh);
+        CurrentStaticMeshComponent->SetOnlyOwnerSee(true);
+        CurrentMultiStaticMeshComponent = NewObject<UStaticMeshComponent>(Character);
+        CurrentMultiStaticMeshComponent->SetStaticMesh(StaticMesh);
+        CurrentMultiStaticMeshComponent->SetOwnerNoSee(true);
         FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
         if(CurrentWeapon.GunType == GunTypeList::PISTOL)
         {
             ChangeGunPose(int(GunTypeList::PISTOL));
             CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPointPistol")));
+            CurrentMultiStaticMeshComponent->AttachToComponent(Character->GetTppMesh(), AttachmentRules, FName(TEXT("MultiPistolGripSocket")));
         }
 
         else if(CurrentWeapon.GunType == GunTypeList::LAUNCHER)
         {
             ChangeGunPose(int(GunTypeList::LAUNCHER));
             CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPoint")));
+            CurrentMultiStaticMeshComponent->AttachToComponent(Character->GetTppMesh(), AttachmentRules, FName(TEXT("MultiGripSocket")));
         }
         else
         {
             ChangeGunPose(int(GunTypeList::RIFLE));
             CurrentStaticMeshComponent->AttachToComponent(Character->GetFppMesh(), AttachmentRules, FName(TEXT("GripPoint")));
+            CurrentMultiStaticMeshComponent->AttachToComponent(Character->GetTppMesh(), AttachmentRules, FName(TEXT("MultiGripSocket")));
         }
         CurrentStaticMeshComponent->RegisterComponent();
-
-        UE_LOG(LogTemp, Warning, TEXT("StaticMesh"));
+        CurrentMultiStaticMeshComponent->RegisterComponent();
 
         DefaultOffset =  CurrentStaticMeshComponent->GetRelativeLocation();
         DefaultRotation = CurrentStaticMeshComponent->GetRelativeRotation();
@@ -1120,9 +1132,15 @@ void UWeaponComponent::LoadWeaponByName(FName WeaponName)
 void UWeaponComponent::SetCurrentWeaponMeshVisibility(bool isVisible)
 {
     if(CurrentSkeletalMeshComponent)
+    {
         CurrentSkeletalMeshComponent->SetVisibility(isVisible);
+        CurrentMultiSkeletalMeshComponent->SetVisibility(isVisible);
+    }
     if(CurrentStaticMeshComponent)
+    {
         CurrentStaticMeshComponent->SetVisibility(isVisible);
+        CurrentMultiStaticMeshComponent->SetVisibility(isVisible);
+    }
 }
 
 void UWeaponComponent::RemoveCurrentWeaponModel()
@@ -1131,12 +1149,16 @@ void UWeaponComponent::RemoveCurrentWeaponModel()
     {
         CurrentStaticMeshComponent->DestroyComponent();
         CurrentStaticMeshComponent = nullptr;
+        CurrentMultiStaticMeshComponent->DestroyComponent();
+        CurrentMultiStaticMeshComponent = nullptr;
     }
 
     if (CurrentSkeletalMeshComponent)
     {
         CurrentSkeletalMeshComponent->DestroyComponent();
         CurrentSkeletalMeshComponent = nullptr;
+        CurrentMultiSkeletalMeshComponent->DestroyComponent();
+        CurrentMultiSkeletalMeshComponent = nullptr;
     }
 }
 
