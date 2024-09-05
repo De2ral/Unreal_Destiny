@@ -128,10 +128,10 @@ public:
 	float MaxInteractTime = 0.0f;
 
 	UPROPERTY(Replicated,EditDefaultsOnly, BlueprintReadOnly)
-	float HP = 100.0f;
+	float HP = 300.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float MaxHp = 100.0f;
+	float MaxHp = 300.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsInteractComplete = false;
