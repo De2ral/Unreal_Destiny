@@ -51,7 +51,19 @@ void UWeaponComponent::BeginPlay()
     
     AddMapping(PlayerCharacter);
 
-    //if(GetOwner()->HasAuthority())
+    APlayerController* PlayerController = Cast<APlayerController>(GetOwner()->GetInstigatorController());
+    if (PlayerController)
+    {
+        int32 PlayerIndex = PlayerController->GetLocalPlayer()->GetControllerId();
+        UE_LOG(LogTemp, Warning, TEXT("Player Index: %d"), PlayerIndex);
+    }
+    if (PlayerController)
+    {
+        int32 PlayerIndex = PlayerController->GetLocalPlayer()->GetControllerId();
+        UE_LOG(LogTemp, Warning, TEXT("Player Index: %d"), PlayerIndex);
+    }
+
+    if(PlayerCharacter->IsLocallyControlled())
     {
         if (AmmoWidgetClass)
 	    {
@@ -87,7 +99,7 @@ void UWeaponComponent::BeginPlay()
         SetSlot2Weapon(TEXT("Pistol1"));
         SetSlot3Weapon(TEXT("Launcher1"));
 
-        EquipWeapon1();
+        //EquipWeapon1();
     }
 	else
 	{
@@ -95,7 +107,7 @@ void UWeaponComponent::BeginPlay()
 	}
     FillAmmo();
 
-    ChangeCrosshair();
+    //ChangeCrosshair();
 }
 
 
@@ -587,12 +599,10 @@ void UWeaponComponent::StopAiming()
 
 void UWeaponComponent::EquipWeapon1()
 {
+    //ChangeCrosshair();
     if(GetOwner()->HasAuthority())
     {
-        
         ServerEquipWeapon1();
-        //ChangeCrosshair();
-        
     }
     else
     {
@@ -621,13 +631,10 @@ void UWeaponComponent::MulticastEquipWeapon1_Implementation()
 
 void UWeaponComponent::EquipWeapon2()
 {
+    //ChangeCrosshair();
     if(GetOwner()->HasAuthority())
-    {
-        
-        
-        ServerEquipWeapon2();
-        //ChangeCrosshair();
-        
+    {  
+        ServerEquipWeapon2(); 
     }
     else
     {
@@ -656,6 +663,7 @@ void UWeaponComponent::MulticastEquipWeapon2_Implementation()
 
 void UWeaponComponent::EquipWeapon3()
 {
+    //ChangeCrosshair();
     if(GetOwner()->HasAuthority())
     {
         ServerEquipWeapon3();
@@ -663,7 +671,7 @@ void UWeaponComponent::EquipWeapon3()
     else
     {
         ServerEquipWeapon3();
-        //ChangeCrosshair();
+        
     }
 }
 bool UWeaponComponent::ServerEquipWeapon3_Validate()
