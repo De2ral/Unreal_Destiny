@@ -18,14 +18,9 @@ public:
 
     void ImageMove(float NewX, UStaticMeshComponent* Object, bool IsRifle);
 
-    void UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo);
-
     void SetTextureBasedOnGunType(int GunType, bool isAiming);
 
 protected:
-    UPROPERTY(meta = (BindWidget))
-    class UTextBlock* AmmoText;
-
     UPROPERTY(meta = (BindWidget))
     class UImage* BaseCrossImage;
 

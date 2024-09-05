@@ -3,6 +3,7 @@
 #include "WeaponWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Net/UnrealNetwork.h"
 
 
 void UWeaponWidget::NativeConstruct()
@@ -13,15 +14,6 @@ void UWeaponWidget::NativeConstruct()
     ScopeCrossImage->SetVisibility(ESlateVisibility::Hidden);
     ScopeCrossImage2->SetVisibility(ESlateVisibility::Hidden);
 }
-
-void UWeaponWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
-{
-    if (AmmoText)
-    {
-        AmmoText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), CurrentAmmo, MaxAmmo)));
-    }
-}
-
 
 
 void UWeaponWidget::SetScopeSize(float NewSize)
@@ -83,6 +75,8 @@ void UWeaponWidget::ImageMove(float NewX, UStaticMeshComponent* Object, bool IsR
 
 void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
 {
+    UE_LOG(LogTemp, Warning, TEXT("SetTextureBasedOnGunType"));
+    UE_LOG(LogTemp, Warning, TEXT("GunType %d"),GunType);
     FString TexturePath;
 
     switch (GunType)
@@ -119,11 +113,17 @@ void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
         return;
     }
 
+    UE_LOG(LogTemp, Warning, TEXT("GunType %s"),*TexturePath);
     UTexture2D* LoadedTexture = LoadObject<UTexture2D>(nullptr, *TexturePath);
     if (LoadedTexture)
     {
-        UE_LOG(LogTemp, Warning, TEXT("cross success"));
-        BaseCrossImage->SetBrushFromTexture(LoadedTexture);
+        if(BaseCrossImage != nullptr)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("SetTextureBasedOnGunType success"));
+            BaseCrossImage->SetBrushFromTexture(LoadedTexture);
+        }
+        else
+            return;
     }
     else
     {

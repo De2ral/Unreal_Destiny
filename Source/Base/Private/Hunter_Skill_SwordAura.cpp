@@ -2,6 +2,12 @@
 
 #include "Hunter_Skill_SwordAura.h"
 #include "TimerManager.h"
+#include "DestinyFPSBase.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 AHunter_Skill_SwordAura::AHunter_Skill_SwordAura()
