@@ -36,11 +36,19 @@ void UHUDWidget::UpdateUltimateCoolTime(float cur, float max)
     }
 }
 
-void UHUDWidget::UpdateAmmo(int32 CurrentAmmo, int32 MaxAmmo)
+void UHUDWidget::UpdateCurAmmo(int32 CurAmmo)
 {
-    if (AmmoText)
+    if (CurAmmoText)
     {
-        AmmoText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), CurrentAmmo, MaxAmmo)));
+        CurAmmoText->SetText(FText::FromString(FString::Printf(TEXT("%d"), CurAmmo)));
+    }
+}
+
+void UHUDWidget::UpdateCurStoredAmmo(int32 StoredAmmo)
+{
+    if (CurStoredAmmoText)
+    {
+        CurStoredAmmoText->SetText(FText::FromString(FString::Printf(TEXT("%d"), StoredAmmo)));
     }
 }
 

@@ -1437,6 +1437,8 @@ void UWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &Out
     DOREPLIFETIME(UWeaponComponent, CurrentWeapon);    
     DOREPLIFETIME(UWeaponComponent, IsReloading);
     DOREPLIFETIME(UWeaponComponent, bIsFiring);
+    DOREPLIFETIME(UWeaponComponent, SubWeaponName1);
+    DOREPLIFETIME(UWeaponComponent, SubWeaponName2);
 }
 
 void UWeaponComponent::OnRep_CurrentWeapon()
