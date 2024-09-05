@@ -192,7 +192,7 @@ public:
     FName GetSlot3Weapon() {return Slot3Weapon;}
 
     int CurrentAmmo();
-    int StoredAmmo();
+    int StoredAmmo(FName SlotWeapon);
 
     void ChangeGunPose(int inbool);
 
