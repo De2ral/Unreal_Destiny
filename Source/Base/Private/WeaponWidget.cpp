@@ -75,7 +75,6 @@ void UWeaponWidget::ImageMove(float NewX, UStaticMeshComponent* Object, bool IsR
 
 void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
 {
-    return;
     UE_LOG(LogTemp, Warning, TEXT("SetTextureBasedOnGunType"));
     UE_LOG(LogTemp, Warning, TEXT("GunType %d"),GunType);
     FString TexturePath;
@@ -86,7 +85,7 @@ void UWeaponWidget::SetTextureBasedOnGunType(int GunType, bool isAiming)
         if(isAiming)
             TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Pistol_Aim.Pistol_Aim'");
         else
-            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Pitol_Idle.Pitol_Idle'");
+            TexturePath = TEXT("/Script/Engine.Texture2D'/Game/Weapon/assets/Crosshair/Pistol_Idle.Pistol_Idle'");
         break;
     case 1:
         if(isAiming)
